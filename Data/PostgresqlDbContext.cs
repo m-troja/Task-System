@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using Task_System.Model.Entity;
 
@@ -29,7 +30,7 @@ namespace Task_System.Data
             {
                 var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
 
-                optionsBuilder.UseNpgsql(connectionString);
+                optionsBuilder.UseNpgsql(connectionString).UseSnakeCaseNamingConvention();
             }
         }
 

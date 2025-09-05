@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Xml.Linq;
 using Task_System.Data;
+using Task_System.Exception.UserException;
 using Task_System.Model.Entity;
 using Task_System.Service;
 
@@ -20,7 +21,7 @@ namespace Task_System.Service.Impl
         public async Task Register(User user)
         {
             if (!await ValidateNewUserAsync(user)) {
-                throw new Exception("User validation failed");
+                return ;
             }
                 _db.Users.Add(user);
                 _db.SaveChanges();
@@ -29,17 +30,26 @@ namespace Task_System.Service.Impl
 
         private async Task<bool> ValidateNewUserAsync(User user)
         {
-            var existingUserByName = await _us.GetByNameAsync(user.Name);
-            var existingUserByEmail = await _us.GetByEmailAsync(user.Email);
-            if (existingUserByName != null)
+            try
             {
-                throw new Exception("Username already exists");
+                var existingUserByName = await _us.GetByNameAsync(user.Name);
+                throw new UserAlreadyExistsException($"Username '{user.Name}' is already taken.");
             }
-            if (existingUserByEmail != null)
+            catch (UserNotFoundException)
             {
-                throw new Exception("Email already exists");
             }
+
+            try
+            {
+                var existingUserByEmail = await _us.GetByEmailAsync(user.Email);
+                throw new UserAlreadyExistsException($"Email '{user.Email}' is already registered.");
+            }
+            catch (UserNotFoundException)
+            {
+            }
+
             return true;
         }
+
     }
 }
