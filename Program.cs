@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Task_System.Data;
-using Task_System.Model;
+using Task_System.Model.Entity;
+using Task_System.Service;
 using Task_System.Service.Impl;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,22 +11,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PostgresqlDbContext>();
 
 // Rejestracja serwisów
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRegisterService, RegisterService>();
 
 // Rejestracja kontrolerów
 builder.Services.AddControllers();
 
+
 var app = builder.Build();
 
 app.UseRouting();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();  // mapuje wszystkie kontrolery
-});
-
-
-app.Urls.Add("http://localhost:5000");
-
+app.MapControllers();  
 
 // Run HTTP server
 app.Run();

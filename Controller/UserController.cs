@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Task_System.Model;
+using Task_System.Model.Entity;
+using Task_System.Service;
 using Task_System.Service.Impl;
 
 namespace Task_System.Controller
@@ -9,8 +11,8 @@ namespace Task_System.Controller
     [Route("user")]
     public class UserController : ControllerBase
     {
-        private readonly UserService _userService;
-        public UserController(UserService userService)
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
         {
             _userService = userService;
         }
@@ -27,7 +29,7 @@ namespace Task_System.Controller
 
         [HttpGet("create")]
         public async Task<ActionResult<User>> CreateUser() {  
-            var user = new User(1, "Admin", "test@email.com", "password");
+            var user = new User("Admin", "test@email.com", "password");
 
             var userAsync = await _userService.CreateUserAsync(user);
             

@@ -1,4 +1,4 @@
-﻿namespace Task_System.Model
+﻿namespace Task_System.Model.Entity
 {
     public class Role
     {
@@ -6,7 +6,7 @@
         public string Name { get; set; } = null!;
         public ICollection<User> Users { get; set; } = new List<User>();
 
-        public Role() { }
+        protected Role() { }
 
         public Role(string name)
         {

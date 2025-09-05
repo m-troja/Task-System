@@ -12,7 +12,7 @@ namespace Task_System.Migrations
 {
     [DbContext(typeof(PostgresqlDbContext))]
     [Migration("20250903142021_init")]
-    partial class init
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

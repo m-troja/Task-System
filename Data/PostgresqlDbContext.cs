@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Task_System.Model;
 using System;
+using Task_System.Model.Entity;
 
 namespace Task_System.Data
 {
@@ -12,9 +12,7 @@ namespace Task_System.Data
             : base(options)
         {
         }
-        public PostgresqlDbContext()
-        {
-        }
+      
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             DotNetEnv.Env.Load("dev.env");
@@ -29,7 +27,6 @@ namespace Task_System.Data
 
             if (!optionsBuilder.IsConfigured)
             {
-
                 var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
 
                 optionsBuilder.UseNpgsql(connectionString);
