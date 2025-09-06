@@ -16,17 +16,6 @@ namespace Task_System.Service.Impl
             _db = db;
         }
 
-        public async Task<User> GetByNameAsync(string name)
-        {
-            User? user = await _db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Name == name);
-
-            if (user == null)
-            {
-                throw new UserNotFoundException("User by name '" + name + "' was not found");
-            }
-            return user;
-        }
-
         public async Task<User> GetByIdAsync(int id)
         {
             User? user = await _db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == id);
@@ -55,6 +44,5 @@ namespace Task_System.Service.Impl
             }
             return user;
         }
-
     }
 }

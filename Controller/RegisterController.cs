@@ -16,9 +16,9 @@ namespace Task_System.Controller
         [HttpPost]
         public async Task<ActionResult<Response>> RegisterUser(RegistrationRequest rr)
         {
-            var user = new User(rr.Name, rr.Email, rr.Password);
+            var user = new User(rr.FirstName, rr.LastName, rr.Email, rr.Password);
             await _rs.Register(user);
-            return await Task.FromResult(new Response(ResponseType.REGISTRATION_RESULT, "RegisterController is working!") );
+            return await Task.FromResult(new Response(ResponseType.REGISTRATION_OK, rr.Email) );
         }
 
         public RegisterController(IRegisterService rs)

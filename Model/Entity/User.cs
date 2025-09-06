@@ -3,18 +3,21 @@
     public class User
     {
         public int Id { get; set; }
-        public string Name { get; set; } = null!;
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;
         public ICollection<Role> Roles { get; set; } = new List<Role>();
-        public User(string name, string email, string password)
+
+        public User(string firstName, string lastName, string email, string password)
         {
-            Name = name;
+            FirstName = firstName;
+            LastName = lastName;
             Email = email;
             Password = password;
         }
 
-        public User(string name, string email, string password, ICollection<Role> roles) : this(name, email, password)
+        public User(string firstName, string lastName, string email, string password, ICollection<Role> roles) : this(firstName, lastName, email, password)
         {
             Roles = roles;
         }

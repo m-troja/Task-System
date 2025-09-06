@@ -11,11 +11,13 @@ namespace Task_System.Service.Impl
     {
         private readonly PostgresqlDbContext _db;
         private readonly IUserService _us;
+        private readonly IRoleService _rs;
 
-        public RegisterService(PostgresqlDbContext db, IUserService us)
+        public RegisterService(PostgresqlDbContext db, IUserService us, IRoleService rs)
         {
             _db = db;
             _us = us;
+            _rs = rs;
         }
 
         public async Task Register(User user)
@@ -23,6 +25,7 @@ namespace Task_System.Service.Impl
             if (!await ValidateNewUserAsync(user)) {
                 return ;
             }
+                user.Roles.Add(await _rs.GetRoleByName(Role.ROLE_USER));
                 _db.Users.Add(user);
                 _db.SaveChanges();
                 Console.WriteLine("User registered successfully: " + user);
@@ -30,15 +33,6 @@ namespace Task_System.Service.Impl
 
         private async Task<bool> ValidateNewUserAsync(User user)
         {
-            try
-            {
-                var existingUserByName = await _us.GetByNameAsync(user.Name);
-                throw new UserAlreadyExistsException($"Username '{user.Name}' is already taken.");
-            }
-            catch (UserNotFoundException)
-            {
-            }
-
             try
             {
                 var existingUserByEmail = await _us.GetByEmailAsync(user.Email);
@@ -50,6 +44,5 @@ namespace Task_System.Service.Impl
 
             return true;
         }
-
     }
 }

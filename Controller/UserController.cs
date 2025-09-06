@@ -29,12 +29,12 @@ namespace Task_System.Controller
 
         [HttpGet("create")]
         public async Task<ActionResult<User>> CreateUser() {  
-            var user = new User("Admin", "test@email.com", "password");
+            var user = new User("michal", "trojanowski", "michal@email.com", "password");
 
             var userAsync = await _userService.CreateUserAsync(user);
             
 
-            Console.WriteLine("Controller: " + userAsync.Name);
+            Console.WriteLine("Controller: " + userAsync.LastName);
 
             return Ok(userAsync);
         }

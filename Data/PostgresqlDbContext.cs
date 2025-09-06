@@ -41,6 +41,11 @@ namespace Task_System.Data
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users);
+          
+            modelBuilder.Entity<Role>().HasData(
+            new Role { Id = 1, Name = "ROLE_USER" },
+            new Role { Id = 2, Name = "ROLE_ADMIN" }
+           );
         }
     }
 }
