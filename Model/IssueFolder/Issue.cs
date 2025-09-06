@@ -1,25 +1,43 @@
 ﻿using Task_System.Model.Entity;
+using Task_System.Service;
 
 namespace Task_System.Model.IssueFolder
 {
-    public class Issue
+    public class Issue : IAutomaticDates
     {
         public int Id { get; set; }
-        public required string Title { get; set; }
+        public string Title { get; set; }
         public string? Description { get; set; }
-        public required User Author { get; set; }
-        public User? Assignee { get; set; }
-        public required DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public required IssueStatus Status { get; set; }
+        public int AuthorId { get; set; }      // FK
+        public int? AssigneeId { get; set; }   // FK
+        public DateTime CreatedAt { get; set; }   // UTC
+        public DateTime? UpdatedAt { get; set; }  // UTC
+        public DateTime? DueDate { get; set; }    // UTC
+        public IssueStatus Status { get; set; } = IssueStatus.New;
         public IssuePriority? Priority { get; set; }
-    
+
+        public User Author { get; set; }
+        public User? Assignee { get; set; }
+
         public Issue(string title, User author)
         {
             Title = title;
             Author = author;
-            CreatedAt = DateTime.Now;
-            Status = IssueStatus.New;
         }
+
+        public Issue(string title, string? description, IssuePriority? priority,  User author, User? assignee, DateTime? dueDate, 
+            int authorId, int? assigneeId)
+        {
+            Title = title;
+            Description = description;
+            Author = author;
+            Assignee = assignee;
+            DueDate = dueDate;
+            Priority = priority;
+            AuthorId = authorId;
+            AssigneeId = assigneeId;
+        }
+        public Issue() { }
+
     }
 }

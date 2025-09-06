@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using System;
 using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
+using Task_System.Service;
 
 namespace Task_System.Data
 {
@@ -10,6 +11,7 @@ namespace Task_System.Data
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<Issue> Issues { get; set; }
         public PostgresqlDbContext(DbContextOptions<PostgresqlDbContext> options)
             : base(options)
         {
@@ -23,7 +25,7 @@ namespace Task_System.Data
             var dbHost = Environment.GetEnvironmentVariable("TS_DB_HOST") ?? "localhost";
             var dbPort = Environment.GetEnvironmentVariable("TS_DB_PORT") ?? "5432";
             var dbUser = Environment.GetEnvironmentVariable("TS_DB_USER") ?? "postgres";
-            var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "secret";
+            var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "postgres";
            
             Console.WriteLine($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
 
@@ -48,20 +50,44 @@ namespace Task_System.Data
             modelBuilder.Entity<Issue>()
               .HasOne(i => i.Assignee)
               .WithMany(u => u.AssignedIssues)
-              .HasForeignKey("Assignee")
+              .HasForeignKey("AssigneeId")
               .OnDelete(DeleteBehavior.Restrict);
             ;
 
             modelBuilder.Entity<Issue>()
               .HasOne(i => i.Author)
               .WithMany(u => u.AuthoredIssues)
-              .HasForeignKey("Author")
+              .HasForeignKey("AuthorId")
               .OnDelete(DeleteBehavior.Restrict);
 
+            // Seed roles
             modelBuilder.Entity<Role>().HasData(
             new Role { Id = 1, Name = "ROLE_USER" },
             new Role { Id = 2, Name = "ROLE_ADMIN" }
            );
+        }
+
+        // Automatically set CreatedAt and UpdatedAt for entities implementing IAutomaticDates
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var nowUtc = DateTime.UtcNow;
+
+
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.Entity is IAutomaticDates &&
+                            (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+            foreach (var entry in entries)
+            {
+                var auditable = (IAutomaticDates)entry.Entity;
+
+                if (entry.State == EntityState.Added)
+                    auditable.CreatedAt = nowUtc;
+
+                auditable.UpdatedAt = nowUtc;
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
         }
     }
 }

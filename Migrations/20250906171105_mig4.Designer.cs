@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Task_System.Data;
@@ -11,9 +12,11 @@ using Task_System.Data;
 namespace Task_System.Migrations
 {
     [DbContext(typeof(PostgresqlDbContext))]
-    partial class PostgresqlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250906171105_mig4")]
+    partial class mig4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -182,15 +185,15 @@ namespace Task_System.Migrations
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
-                        .HasName("pk_issues");
+                        .HasName("pk_issue");
 
                     b.HasIndex("AssigneeId")
-                        .HasDatabaseName("ix_issues_assignee_id");
+                        .HasDatabaseName("ix_issue_assignee_id");
 
                     b.HasIndex("AuthorId")
-                        .HasDatabaseName("ix_issues_author_id");
+                        .HasDatabaseName("ix_issue_author_id");
 
-                    b.ToTable("issues", (string)null);
+                    b.ToTable("issue", (string)null);
                 });
 
             modelBuilder.Entity("RoleUser", b =>
@@ -224,14 +227,14 @@ namespace Task_System.Migrations
                         .WithMany("AssignedIssues")
                         .HasForeignKey("AssigneeId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_issues_users_assignee_id");
+                        .HasConstraintName("fk_issue_users_assignee_id");
 
                     b.HasOne("Task_System.Model.Entity.User", "Author")
                         .WithMany("AuthoredIssues")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("fk_issues_users_author_id");
+                        .HasConstraintName("fk_issue_users_author_id");
 
                     b.Navigation("Assignee");
 
