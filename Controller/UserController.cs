@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Task_System.Model;
+using Task_System.Model.DTO;
+using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
 using Task_System.Service;
 using Task_System.Service.Impl;
@@ -8,30 +10,43 @@ using Task_System.Service.Impl;
 namespace Task_System.Controller
 {
     [ApiController]
-    [Route("user")]
+    [Route("api/v1/user")]
     public class UserController : ControllerBase
     {
-        private readonly IUserService _userService;
-        public UserController(IUserService userService)
+        private readonly IUserService _us;
+        private readonly UserCnv _userCnv;
+
+        public UserController(IUserService us, UserCnv userCnv)
         {
-            _userService = userService;
+            _us = us;
+            _userCnv = userCnv;
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUserById(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
-            var user =  await _userService.GetByIdAsync(id);
+            var user =  await _us.GetByIdAsync(id);
             
             Console.WriteLine("Controller: " + user);
 
-            return Ok(user);
+            return Ok(_userCnv.ConvertUserToDto(user));
+        }
+
+        [HttpGet("by-email/{email}")]
+        public async Task<ActionResult<UserDto>> GetUserByEmail(string email)
+        {
+            var user = await _us.GetByEmailAsync(email);
+
+            Console.WriteLine("Controller: " + user);
+
+            return Ok(_userCnv.ConvertUserToDto(user)); ;
         }
 
         [HttpGet("create")]
         public async Task<ActionResult<User>> CreateUser() {  
             var user = new User("michal", "trojanowski", "michal@email.com", "password");
 
-            var userAsync = await _userService.CreateUserAsync(user);
+            var userAsync = await _us.CreateUserAsync(user);
             
 
             Console.WriteLine("Controller: " + userAsync.LastName);

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using System;
 using Task_System.Model.Entity;
+using Task_System.Model.IssueFolder;
 
 namespace Task_System.Data
 {
@@ -38,10 +39,25 @@ namespace Task_System.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // USER & ROLE
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users);
-          
+
+            // ISSUE - two relationships to USER (Assignee, Author)
+            modelBuilder.Entity<Issue>()
+              .HasOne(i => i.Assignee)
+              .WithMany(u => u.AssignedIssues)
+              .HasForeignKey("Assignee")
+              .OnDelete(DeleteBehavior.Restrict);
+            ;
+
+            modelBuilder.Entity<Issue>()
+              .HasOne(i => i.Author)
+              .WithMany(u => u.AuthoredIssues)
+              .HasForeignKey("Author")
+              .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Role>().HasData(
             new Role { Id = 1, Name = "ROLE_USER" },
             new Role { Id = 2, Name = "ROLE_ADMIN" }

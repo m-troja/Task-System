@@ -8,7 +8,7 @@ using Task_System.Service.Impl;
 namespace Task_System.Controller
 {
     [ApiController]
-    [Route("v1/register")]
+    [Route("api/v1/register")]
     public class RegisterController : ControllerBase
     {
         private readonly IRegisterService _rs;

@@ -1,6 +1,6 @@
 ﻿namespace Task_System.Model.Entity
 {
-    public record Team(int id, string name)
+    public record Team(int Id, string Name)
     {
         
     }

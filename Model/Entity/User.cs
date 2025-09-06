@@ -1,4 +1,6 @@
-﻿namespace Task_System.Model.Entity
+﻿using Task_System.Model.IssueFolder;
+
+namespace Task_System.Model.Entity
 {
     public class User
     {
@@ -8,6 +10,9 @@
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;
         public ICollection<Role> Roles { get; set; } = new List<Role>();
+        public ICollection<Team> Teams { get; set; } = new List<Team>();
+        public ICollection<Issue> AssignedIssues { get; set; } = new List<Issue>();
+        public ICollection<Issue> AuthoredIssues { get; set; } = new List<Issue>();
 
         public User(string firstName, string lastName, string email, string password)
         {
