@@ -1,11 +1,13 @@
 ﻿using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
+using Task_System.Model.DTO;
 
 namespace Task_System.Service
 {
     public interface IIssueService
     {
-        Task<Model.IssueFolder.Issue> GetByIdAsync(int id);
+        Task<Issue> GetIssueByIdAsync(int id);
+        Task<IssueDto> GetIssueDtoByIdAsync(int id);
         Task<IEnumerable<Issue>> GetAllAsync();
         Task<Issue> CreateIssueAsync(CreateIssueRequest cir);
         Task<Issue> UpdateIssueAsync(Issue issue);

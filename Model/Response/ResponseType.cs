@@ -3,6 +3,7 @@
     public enum ResponseType { 
         REGISTRATION_OK ,
         ISSUE_CREATED_OK,
+        COMMENT_CREATED_OK
     }
     
     

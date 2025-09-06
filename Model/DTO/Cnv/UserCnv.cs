@@ -14,5 +14,15 @@ namespace Task_System.Model.DTO.Cnv
                 user.Teams.Select(t => t.Name).ToList()
             );
         }
+
+        public List<UserDto> ConvertUsersToUsersDto(List<User> users)
+        {
+            List<UserDto> userDtos = new List<UserDto>();
+            foreach (var user in users)
+            {
+                userDtos.Add(ConvertUserToDto(user));
+            }
+            return userDtos;
+        }
     }
 }

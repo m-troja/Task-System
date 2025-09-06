@@ -8,11 +8,15 @@ using Task_System.Service.Impl;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PostgresqlDbContext>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IIssueService, IssueService>();
 builder.Services.AddScoped<IRegisterService, RegisterService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<UserCnv>();
+builder.Services.AddScoped<CommentCnv>();
+builder.Services.AddScoped<IssueCnv>();
 builder.Services.AddControllers().AddJsonOptions(option => { option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

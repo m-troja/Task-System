@@ -1,7 +1,11 @@
-﻿using Task_System.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Task_System.Data;
+using Task_System.Exception.IssueException;
+using Task_System.Model.DTO;
+using Task_System.Model.DTO.Cnv;
+using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
-using Task_System.Model.Entity;
 
 namespace Task_System.Service.Impl
 {
@@ -10,7 +14,10 @@ namespace Task_System.Service.Impl
 
         private readonly PostgresqlDbContext _db;
         private readonly IUserService _us;
-		public async Task<Issue> CreateIssueAsync(CreateIssueRequest cir)
+        private readonly CommentCnv _commentCnv;
+        private readonly IssueCnv _issueCnv;
+
+        public async Task<Issue> CreateIssueAsync(CreateIssueRequest cir)
 		{
 			var author = await _us.GetByIdAsync(cir.AuthorId);
 			User? assignee = cir.AssigneeId.HasValue ? await _us.GetByIdAsync(cir.AssigneeId.Value) : null;
@@ -49,20 +56,30 @@ namespace Task_System.Service.Impl
             throw new NotImplementedException();
         }
 
-        public Task<Issue> GetByIdAsync(int id)
+        public async Task<IssueDto> GetIssueDtoByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            Issue? issue = await _db.Issues.Where(i => i.Id == id).FirstOrDefaultAsync();
+            List<Comment> comments = await _db.Comments.Where(c => c.IssueId == id).ToListAsync();
+            List<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(comments);
+            var IssueDto = _issueCnv.ConvertIssueToIssueDto(issue, commentDtos);
+            return issue == null ? throw new IssueNotFoundException("Issue " + id + " was not found") : IssueDto;
         }
-
+        public async Task<Issue> GetIssueByIdAsync(int id)
+        {
+            Issue? issue = await _db.Issues.Where(i => i.Id == id).FirstOrDefaultAsync();
+            return issue == null ? throw new IssueNotFoundException("Issue " + id + " was not found") : issue;
+        }
         public Task<Issue> UpdateIssueAsync(Issue issue)
         {
             throw new NotImplementedException();
         }
 
-        public IssueService(PostgresqlDbContext db, IUserService us)
+        public IssueService(PostgresqlDbContext db, IUserService us, CommentCnv commentCnv, IssueCnv issueCnv)
         {
             _db = db;
             _us = us;
+            _commentCnv = commentCnv;
+            _issueCnv = issueCnv;
         }
     }
 }

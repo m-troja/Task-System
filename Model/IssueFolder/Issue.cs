@@ -15,7 +15,7 @@ namespace Task_System.Model.IssueFolder
         public DateTime? DueDate { get; set; }    // UTC
         public IssueStatus Status { get; set; } = IssueStatus.New;
         public IssuePriority? Priority { get; set; }
-
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public User Author { get; set; }
         public User? Assignee { get; set; }
 
