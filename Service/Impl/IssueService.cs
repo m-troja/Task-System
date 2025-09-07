@@ -52,18 +52,6 @@ namespace Task_System.Service.Impl
                 l.log($"Parsed due date UTC: {dueDateUtc}");
             }
 
-            var issue = new Issue
-            {
-                Title = cir.Title,
-                Description = cir.Description,
-                Priority = !string.IsNullOrEmpty(cir.Priority) ? Enum.Parse<IssuePriority>(cir.Priority) : null,
-                Author = author,
-                AuthorId = author.Id,
-                Assignee = assignee,
-                AssigneeId = assignee?.Id,
-                DueDate = dueDateUtc,
-                ProjectId = cir.ProjectId
-            };
 
             Project? project;
             try
@@ -76,27 +64,46 @@ namespace Task_System.Service.Impl
                 throw new IssueCreationException("Cannot create issue: " + e.Message);
             }
 
+            Issue issue;
+
             using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
 
+                int maxIdInsideProject = await _db.Issues
+                    .Where(i => i.ProjectId == cir.ProjectId)
+                    .MaxAsync(i => (int?)i.IdInsideProject) ?? 0;
+
+                int nextIdInsideProject = maxIdInsideProject + 1;
+
+                issue = new Issue
+                {
+                    Title = cir.Title,
+                    Description = cir.Description,
+                    Priority = !string.IsNullOrEmpty(cir.Priority) ? Enum.Parse<IssuePriority>(cir.Priority) : null,
+                    Author = author,
+                    AuthorId = author.Id,
+                    Assignee = assignee,
+                    AssigneeId = assignee?.Id,
+                    DueDate = dueDateUtc,
+                    ProjectId = cir.ProjectId,
+                    IdInsideProject = nextIdInsideProject
+                };
 
 
                 _db.Issues.Add(issue);
                 await _db.SaveChangesAsync();
 
-                l.log($"Issue with ID {issue.Id} created successfully");
+                l.log($"Issue of ID {issue.Id} created successfully");
                 
                 var key = new Key(project, issue);
                 issue.Key = key;
 
                 _db.Keys.Add(key);
-
                 await _db.SaveChangesAsync();
                 await transaction.CommitAsync();
-                l.log($"Keystring {issue.Key.KeyString} for {issue.Id}");
-
-                l.LogInformation("Key {KeyString} associated with issue {IssueId}", key.KeyString, issue.Id);
+                
+                l.log($"Keystring {issue.Key.KeyString} for id {issue.Id} and IdInsideProject {issue.IdInsideProject}");
             }
             catch (System.Exception )
             {
@@ -151,18 +158,20 @@ namespace Task_System.Service.Impl
                                       .Include(i => i.Key)      
                                       .Include(i => i.Project)  
                                       .Include(i => i.Comments)  
-                                      .FirstOrDefaultAsync(i => i.Id == id); return issue ?? throw new IssueNotFoundException("Issue " + id + " was not found");
+                                      .FirstOrDefaultAsync(i => i.Id == id); 
             l.log($"Fetched issue: {issue}");
+
+            return issue ?? throw new IssueNotFoundException("Issue " + id + " was not found");
         }
         public async Task<IssueDto> GetIssueDtoByKeyAsync(string keyString)
         {
             l.log($"Fetching issue DTO for key {keyString}");
-            int issueId = await GetIssueIdFromKey(keyString);
+            int issueId = GetIssueIdInsideProjectFromKey(keyString);
             Project? project = await GetProjectFromKey(keyString);
 
             Issue? issue = await _db.Issues
                 .Where(i => i.Id == issueId)
-                .Where(i => i.Project.ShortName == project.ShortName)
+                .Where(i => i.Project != null && i.Project.ShortName == project.ShortName)
                 .Include(i => i.Key)
                 .Include(i => i.Project)
                 .Include(i => i.Comments)
@@ -181,7 +190,7 @@ namespace Task_System.Service.Impl
             l.log($"Assigning issue {air.key} to user {air.assigneeId}");
             User assignee = await _us.GetByIdAsync(air.assigneeId);
             l.log($"Fetched assignee: {assignee}");
-            int issueId = await GetIssueIdFromKey(air.key);
+            int issueId = GetIssueIdInsideProjectFromKey(air.key);
             l.log($"Resolved issueId {issueId} from key {air.key}");
             Issue issue = await GetIssueByIdAsync(issueId);
             issue.Assignee = assignee;
@@ -196,7 +205,7 @@ namespace Task_System.Service.Impl
             return issueDto;
         }
 
-        public async Task<int> GetIssueIdFromKey(string key)
+        public int GetIssueIdInsideProjectFromKey(string key)
         {
             l.log($"Getting issueId from key {key}");
             int lastDash = key.LastIndexOf('-');
@@ -204,15 +213,8 @@ namespace Task_System.Service.Impl
             string numberPart = lastDash >= 0 ? key.Substring(lastDash + 1) : "";
             int number = int.TryParse(numberPart, out int n) ? n : 0;
             l.log($"shortName {shortName}, numberPart {numberPart}");
-            Issue? issue = await _db.Issues
-                .Where(i => i.Id == number)
-                .Where(i => i.Project.ShortName == shortName)
-                .Include(i => i.Key)
-                .Include(i => i.Project)
-                .FirstOrDefaultAsync();
-            if (issue == null) throw new IssueNotFoundException("Issue was not found");
-            l.log($"Found issue with ID {issue.Id} for key {key}");
-            return issue.Id;
+
+            return number;
         }
 
         public async Task<Project> GetProjectFromKey(string key)

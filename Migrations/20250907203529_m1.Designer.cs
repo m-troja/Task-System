@@ -12,8 +12,8 @@ using Task_System.Data;
 namespace Task_System.Migrations
 {
     [DbContext(typeof(PostgresqlDbContext))]
-    [Migration("20250907144424_m2")]
-    partial class m2
+    [Migration("20250907203529_m1")]
+    partial class m1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -204,6 +204,10 @@ namespace Task_System.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("due_date");
+
+                    b.Property<int>("IdInsideProject")
+                        .HasColumnType("integer")
+                        .HasColumnName("id_inside_project");
 
                     b.Property<int?>("Priority")
                         .HasColumnType("integer")

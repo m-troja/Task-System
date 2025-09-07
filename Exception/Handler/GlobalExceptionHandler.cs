@@ -31,6 +31,7 @@ namespace Task_System.Exception.Handler
                     UserNotFoundException => StatusCodes.Status404NotFound,
                     UserAlreadyExistsException => StatusCodes.Status409Conflict,
                     IssueCreationException => StatusCodes.Status400BadRequest,
+                    IssueNotFoundException => StatusCodes.Status400BadRequest,
                     ProjectNotFoundException => StatusCodes.Status404NotFound,
                     _ => StatusCodes.Status500InternalServerError
                 };
@@ -40,6 +41,7 @@ namespace Task_System.Exception.Handler
                         UserNotFoundException => Task_System.Exception.Error.ErrorType.USER_NOT_FOUND,
                         UserAlreadyExistsException => Task_System.Exception.Error.ErrorType.USER_ALREADY_REGISTERED,
                         IssueCreationException => Task_System.Exception.Error.ErrorType.ISSUE_CREATION_ERROR,
+                        IssueNotFoundException => Task_System.Exception.Error.ErrorType.ISSUE_NOT_FOUND,
                         ProjectNotFoundException => Task_System.Exception.Error.ErrorType.PROJECT_NOT_FOUND,
                         _ => Task_System.Exception.Error.ErrorType.SERVER_ERROR
                     },

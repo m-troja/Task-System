@@ -67,12 +67,17 @@ try
         app.UseSwaggerUI();
     }
 
-    app.UseMiddleware<GlobalExceptionHandler>();
-    app.UseRouting();
-    app.MapControllers();
+    if (args.Length == 0 || !args[0].Contains("ef"))
+    {
 
-    Log.Information("Task-System WebApplication started successfully.");
-    app.Run();
+        app.UseMiddleware<GlobalExceptionHandler>();
+        app.UseRouting();
+        app.MapControllers();
+
+        Log.Information("Task-System WebApplication started successfully.");
+        app.Run();
+    }
+
 }
 catch (Exception ex)
 {
