@@ -12,8 +12,8 @@ using Task_System.Data;
 namespace Task_System.Migrations
 {
     [DbContext(typeof(PostgresqlDbContext))]
-    [Migration("20250906175122_mig7")]
-    partial class mig7
+    [Migration("20250907125636_m1")]
+    partial class m1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -138,6 +138,44 @@ namespace Task_System.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("author_id");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("IssueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("issue_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_comments");
+
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_comments_author_id");
+
+                    b.HasIndex("IssueId")
+                        .HasDatabaseName("ix_comments_issue_id");
+
+                    b.ToTable("comments", (string)null);
+                });
+
             modelBuilder.Entity("Task_System.Model.IssueFolder.Issue", b =>
                 {
                     b.Property<int>("Id")
@@ -155,7 +193,7 @@ namespace Task_System.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("author_id");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
@@ -163,13 +201,21 @@ namespace Task_System.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<DateTimeOffset?>("DueDate")
+                    b.Property<DateTime?>("DueDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("due_date");
+
+                    b.Property<int>("KeyId")
+                        .HasColumnType("integer")
+                        .HasColumnName("key_id");
 
                     b.Property<int?>("Priority")
                         .HasColumnType("integer")
                         .HasColumnName("priority");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer")
+                        .HasColumnName("project_id");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer")
@@ -180,7 +226,7 @@ namespace Task_System.Migrations
                         .HasColumnType("text")
                         .HasColumnName("title");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
@@ -193,7 +239,73 @@ namespace Task_System.Migrations
                     b.HasIndex("AuthorId")
                         .HasDatabaseName("ix_issues_author_id");
 
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_issues_project_id");
+
                     b.ToTable("issues", (string)null);
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Key", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("IssueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("issue_id");
+
+                    b.Property<string>("KeyString")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key_string");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer")
+                        .HasColumnName("project_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_keys");
+
+                    b.HasIndex("IssueId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_keys_issue_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_keys_project_id");
+
+                    b.ToTable("keys", (string)null);
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Project", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ShortName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("short_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_projects");
+
+                    b.ToTable("projects", (string)null);
                 });
 
             modelBuilder.Entity("RoleUser", b =>
@@ -221,6 +333,27 @@ namespace Task_System.Migrations
                         .HasConstraintName("fk_team_users_user_id");
                 });
 
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Comment", b =>
+                {
+                    b.HasOne("Task_System.Model.Entity.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_users_author_id");
+
+                    b.HasOne("Task_System.Model.IssueFolder.Issue", "Issue")
+                        .WithMany("Comments")
+                        .HasForeignKey("IssueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_comments_issues_issue_id");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Issue");
+                });
+
             modelBuilder.Entity("Task_System.Model.IssueFolder.Issue", b =>
                 {
                     b.HasOne("Task_System.Model.Entity.User", "Assignee")
@@ -236,9 +369,39 @@ namespace Task_System.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_issues_users_author_id");
 
+                    b.HasOne("Task_System.Model.IssueFolder.Project", "Project")
+                        .WithMany("Issues")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired()
+                        .HasConstraintName("fk_issues_projects_project_id");
+
                     b.Navigation("Assignee");
 
                     b.Navigation("Author");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Key", b =>
+                {
+                    b.HasOne("Task_System.Model.IssueFolder.Issue", "Issue")
+                        .WithOne("Key")
+                        .HasForeignKey("Task_System.Model.IssueFolder.Key", "IssueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_keys_issues_issue_id");
+
+                    b.HasOne("Task_System.Model.IssueFolder.Project", "Project")
+                        .WithMany("Keys")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_keys_projects_project_id");
+
+                    b.Navigation("Issue");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Task_System.Model.Entity.User", b =>
@@ -248,6 +411,21 @@ namespace Task_System.Migrations
                     b.Navigation("AuthoredIssues");
 
                     b.Navigation("Teams");
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Issue", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Key")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Project", b =>
+                {
+                    b.Navigation("Issues");
+
+                    b.Navigation("Keys");
                 });
 #pragma warning restore 612, 618
         }

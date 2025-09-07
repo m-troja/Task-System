@@ -18,7 +18,9 @@ namespace Task_System.Model.IssueFolder
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public User Author { get; set; }
         public User? Assignee { get; set; }
-
+        public Project? Project { get; set; }
+        public Key Key { get; set; }
+        public int ProjectId { get; set; }
         public Issue(string title, User author)
         {
             Title = title;

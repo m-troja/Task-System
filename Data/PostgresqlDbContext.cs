@@ -13,6 +13,8 @@ public class PostgresqlDbContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<Issue> Issues { get; set; }
     public DbSet<Comment> Comments { get; set; }
+    public DbSet<Project> Projects { get; set; }
+    public DbSet<Key> Keys { get; set; }
     public PostgresqlDbContext(DbContextOptions<PostgresqlDbContext> options)
         : base(options)
     {
@@ -72,6 +74,26 @@ public class PostgresqlDbContext : DbContext
             .HasOne(c => c.Issue)
             .WithMany(i => i.Comments)
             .HasForeignKey("IssueId")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // PROJECT - relationship to ISSUE (Issues)
+        modelBuilder.Entity<Project>()
+            .HasMany(p => p.Issues)
+            .WithOne(i => i.Project)
+            .HasForeignKey(i => i.ProjectId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // KEY - one-to-one relationship with ISSUE and many-to-one with PROJECT
+        modelBuilder.Entity<Key>()
+            .HasOne(k => k.Issue)
+            .WithOne(i => i.Key)
+            .HasForeignKey<Key>(k => k.IssueId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Key>()
+            .HasOne(k => k.Project)
+            .WithMany(p => p.Keys)
+            .HasForeignKey(k => k.ProjectId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 

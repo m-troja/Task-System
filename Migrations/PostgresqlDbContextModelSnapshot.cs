@@ -202,9 +202,17 @@ namespace Task_System.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("due_date");
 
+                    b.Property<int>("KeyId")
+                        .HasColumnType("integer")
+                        .HasColumnName("key_id");
+
                     b.Property<int?>("Priority")
                         .HasColumnType("integer")
                         .HasColumnName("priority");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer")
+                        .HasColumnName("project_id");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer")
@@ -228,7 +236,73 @@ namespace Task_System.Migrations
                     b.HasIndex("AuthorId")
                         .HasDatabaseName("ix_issues_author_id");
 
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_issues_project_id");
+
                     b.ToTable("issues", (string)null);
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Key", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("IssueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("issue_id");
+
+                    b.Property<string>("KeyString")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key_string");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer")
+                        .HasColumnName("project_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_keys");
+
+                    b.HasIndex("IssueId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_keys_issue_id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("ix_keys_project_id");
+
+                    b.ToTable("keys", (string)null);
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Project", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ShortName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("short_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_projects");
+
+                    b.ToTable("projects", (string)null);
                 });
 
             modelBuilder.Entity("RoleUser", b =>
@@ -292,9 +366,39 @@ namespace Task_System.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_issues_users_author_id");
 
+                    b.HasOne("Task_System.Model.IssueFolder.Project", "Project")
+                        .WithMany("Issues")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired()
+                        .HasConstraintName("fk_issues_projects_project_id");
+
                     b.Navigation("Assignee");
 
                     b.Navigation("Author");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Key", b =>
+                {
+                    b.HasOne("Task_System.Model.IssueFolder.Issue", "Issue")
+                        .WithOne("Key")
+                        .HasForeignKey("Task_System.Model.IssueFolder.Key", "IssueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_keys_issues_issue_id");
+
+                    b.HasOne("Task_System.Model.IssueFolder.Project", "Project")
+                        .WithMany("Keys")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_keys_projects_project_id");
+
+                    b.Navigation("Issue");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Task_System.Model.Entity.User", b =>
@@ -309,6 +413,16 @@ namespace Task_System.Migrations
             modelBuilder.Entity("Task_System.Model.IssueFolder.Issue", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Key")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.Project", b =>
+                {
+                    b.Navigation("Issues");
+
+                    b.Navigation("Keys");
                 });
 #pragma warning restore 612, 618
         }
