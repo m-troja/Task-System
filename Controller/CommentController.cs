@@ -13,6 +13,7 @@ public class CommentController : ControllerBase
     private readonly ICommentService _cs;
 
     [HttpPost]
+    [Route("create")]   
     public async Task<ActionResult<Response>> CreateComment([FromBody] CreateCommentRequest cmr)
     {
         await _cs.CreateCommentAsync(cmr);

@@ -97,7 +97,7 @@ public class PostgresqlDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
     }
 
-    // Automatically set CreatedAt and UpdatedAt for entities implementing IAutomaticDates
+    // Automatically set CreatedAt for entities implementing IAutomaticDates
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var nowUtc = DateTime.UtcNow;
@@ -113,8 +113,6 @@ public class PostgresqlDbContext : DbContext
 
             if (entry.State == EntityState.Added)
                 auditable.CreatedAt = nowUtc;
-
-            auditable.UpdatedAt = nowUtc;
         }
 
         return await base.SaveChangesAsync(cancellationToken);

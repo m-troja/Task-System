@@ -11,7 +11,10 @@ namespace Task_System.Service
         Task<IssueDto> GetIssueDtoByKeyAsync(string keyString);
         Task<IEnumerable<Issue>> GetAllAsync();
         Task<Issue> CreateIssueAsync(CreateIssueRequest cir);
-        Task<Issue> UpdateIssueAsync(Issue issue);
         Task<bool> DeleteIssueAsync(int id);
+        Task<IssueDto> AssignIssueAsync(AssignIssueRequest uir);
+        Task<Issue> UpdateIssueAsync(Issue issue);
+        Task<Project> GetProjectFromKey(string key);
+        Task<int> GetIssueIdFromKey(string key);
     }
 }

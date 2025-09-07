@@ -22,7 +22,7 @@ namespace Task_System.Controller
             _userCnv = userCnv;
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("id/{id:int}")]
         public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
             var user =  await _us.GetByIdAsync(id);
@@ -32,7 +32,7 @@ namespace Task_System.Controller
             return Ok(_userCnv.ConvertUserToDto(user));
         }
 
-        [HttpGet("by-email/{email}")]
+        [HttpGet("email/{email}")]
         public async Task<ActionResult<UserDto>> GetUserByEmail(string email)
         {
             var user = await _us.GetByEmailAsync(email);
@@ -40,18 +40,6 @@ namespace Task_System.Controller
             Console.WriteLine("Controller: " + user);
 
             return Ok(_userCnv.ConvertUserToDto(user)); ;
-        }
-
-        [HttpGet("create")]
-        public async Task<ActionResult<User>> CreateUser() {  
-            var user = new User("michal", "trojanowski", "michal@email.com", "password");
-
-            var userAsync = await _us.CreateUserAsync(user);
-            
-
-            Console.WriteLine("Controller: " + userAsync.LastName);
-
-            return Ok(userAsync);
         }
     }
 }

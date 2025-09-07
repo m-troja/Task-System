@@ -22,6 +22,7 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPost]
+    [Route("create")]
     public async Task<ActionResult<ProjectDto>> CreateProject(CreateProjectRequest cpr)
     {
         var createdProject = await _ps.CreateProject(cpr);
