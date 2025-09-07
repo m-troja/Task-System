@@ -16,6 +16,7 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<UserCnv>();
 builder.Services.AddScoped<CommentCnv>();
 builder.Services.AddScoped<IssueCnv>();
+builder.Services.AddScoped<ProjectCnv>();
 builder.Services.AddControllers().AddJsonOptions(option => { option.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
 // Swagger

@@ -16,9 +16,11 @@ public class Key
         ProjectId = project.Id;
         IssueId = issue.Id;
         KeyString = $"{project.ShortName}-{issue.Id}"; // e.g., JAVA-123
+        Console.WriteLine($"Issue id {issue.Id}");
     }
 
     public Key()
     {
+
     }
 }

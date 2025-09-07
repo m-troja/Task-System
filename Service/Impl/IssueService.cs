@@ -35,6 +35,7 @@ namespace Task_System.Service.Impl
 			{
 				Title = cir.Title,
 				Description = cir.Description,
+                Priority = !string.IsNullOrEmpty(cir.Priority) ? Enum.Parse<IssuePriority>(cir.Priority) : null,
 				Author = author,
 				AuthorId = author.Id,
 				Assignee = assignee,
@@ -52,19 +53,21 @@ namespace Task_System.Service.Impl
             {
                 throw new IssueCreationException("Cannot create issue: " + e.Message);
             }
-
-            var Key = new Key
-            {
-                ProjectId = cir.ProjectId,
-                Issue = issue
-            };
-            issue.Key = Key;
+            
+            using var transaction = await _db.Database.BeginTransactionAsync();
 
             _db.Issues.Add(issue);
-            _db.Keys.Add(Key);
             await _db.SaveChangesAsync();
 
-			return issue;
+            var key = new Key(project, issue);
+            issue.Key = key;
+            _db.Keys.Add(key);
+
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+
+            return issue;
 		}
 
 		public Task<bool> DeleteIssueAsync(int id)
@@ -79,11 +82,9 @@ namespace Task_System.Service.Impl
 
         public async Task<IssueDto> GetIssueDtoByIdAsync(int id)
         {
-            Issue? issue = await _db.Issues.Where(i => i.Id == id).FirstOrDefaultAsync();
-            List<Comment> comments = await _db.Comments.Where(c => c.IssueId == id).ToListAsync();
-            List<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(comments);
-            var IssueDto = _issueCnv.ConvertIssueToIssueDto(issue, commentDtos);
-            return issue == null ? throw new IssueNotFoundException("Issue " + id + " was not found") : IssueDto;
+            Issue? issue = await GetIssueByIdAsync(id);
+            var IssueDto = _issueCnv.ConvertIssueToIssueDto(issue);
+            return IssueDto;
         }
         public async Task<Issue> GetIssueByIdAsync(int id)
         {

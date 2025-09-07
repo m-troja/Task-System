@@ -9,9 +9,9 @@ public class CommentCnv
         return new CommentDto(comment.Id, comment.IssueId, comment.Content, comment.AuthorId, comment.CreatedAt);
     }
 
-    public List<CommentDto> ConvertCommentListToCommentDtoList(List<Comment> comments)
+    public ICollection<CommentDto> ConvertCommentListToCommentDtoList(ICollection<Comment> comments)
     {
-        List<CommentDto> commentDtos = new List<CommentDto>();
+        ICollection<CommentDto> commentDtos = new List<CommentDto>();
         foreach (var comment in comments)
         {
             commentDtos.Add(ConvertCommentToCommentDto(comment));

@@ -1,13 +1,17 @@
-﻿using Task_System.Model.IssueFolder;
+﻿using System.Runtime.InteropServices;
+using Task_System.Model.IssueFolder;
 
 namespace Task_System.Model.DTO.Cnv;
 
 public class IssueCnv
 {
-    public IssueDto ConvertIssueToIssueDto(Issue Issue, List<CommentDto> commentDtos)
+    private readonly CommentCnv _commentCnv;
+    public IssueDto ConvertIssueToIssueDto(Issue Issue)
     {
+        ICollection<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(Issue.Comments);
+
         var issueDto = new IssueDto(
-                Issue.Id,
+                Issue.Key.KeyString,
                 Issue.Title,
                 Issue.Description ?? "null",
                 Issue.Status,
@@ -23,13 +27,18 @@ public class IssueCnv
         return issueDto;
     }
 
-    public List<IssueDto> ConvertIssueListToIssueDtoList(List<Issue> issues, List<CommentDto> commentDtos)
+    public List<IssueDto> ConvertIssueListToIssueDtoList(List<Issue> issues)
     {
         var issueDtos = new List<IssueDto>();
         foreach (var issue in issues)
         {
-            issueDtos.Add(ConvertIssueToIssueDto(issue, commentDtos));
+            issueDtos.Add(ConvertIssueToIssueDto(issue));
         }
         return issueDtos;
+    }
+
+    public IssueCnv(CommentCnv commentCnv)
+    {
+        _commentCnv = commentCnv;
     }
 }
