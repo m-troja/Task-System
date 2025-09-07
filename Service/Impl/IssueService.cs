@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Task_System.Data;
 using Task_System.Exception.IssueException;
+using Task_System.Exception.ProjectException;
 using Task_System.Model.DTO;
 using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
@@ -16,6 +17,7 @@ namespace Task_System.Service.Impl
         private readonly IUserService _us;
         private readonly CommentCnv _commentCnv;
         private readonly IssueCnv _issueCnv;
+        private readonly IProjectService _projectService;
 
         public async Task<Issue> CreateIssueAsync(CreateIssueRequest cir)
 		{
@@ -37,11 +39,30 @@ namespace Task_System.Service.Impl
 				AuthorId = author.Id,
 				Assignee = assignee,
 				AssigneeId = assignee?.Id,
-				DueDate = dueDateUtc
-			};
+				DueDate = dueDateUtc,
+                ProjectId = cir.ProjectId
+            };
 
-			_db.Issues.Add(issue);
-			await _db.SaveChangesAsync();
+            Project? project = null;
+            try
+            {
+                project = await _projectService.GetProjectById(cir.ProjectId);
+            }
+            catch (ProjectNotFoundException e )
+            {
+                throw new IssueCreationException("Cannot create issue: " + e.Message);
+            }
+
+            var Key = new Key
+            {
+                ProjectId = cir.ProjectId,
+                Issue = issue
+            };
+            issue.Key = Key;
+
+            _db.Issues.Add(issue);
+            _db.Keys.Add(Key);
+            await _db.SaveChangesAsync();
 
 			return issue;
 		}
@@ -74,12 +95,13 @@ namespace Task_System.Service.Impl
             throw new NotImplementedException();
         }
 
-        public IssueService(PostgresqlDbContext db, IUserService us, CommentCnv commentCnv, IssueCnv issueCnv)
+        public IssueService(PostgresqlDbContext db, IUserService us, CommentCnv commentCnv, IssueCnv issueCnv, IProjectService projectService)
         {
             _db = db;
             _us = us;
             _commentCnv = commentCnv;
             _issueCnv = issueCnv;
+            _projectService = projectService;
         }
     }
 }

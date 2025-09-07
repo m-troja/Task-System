@@ -1,6 +1,8 @@
-﻿namespace Task_System.Model.Response
+﻿using Task_System.Model.IssueFolder;
+
+namespace Task_System.Model.Response
 {
-    public record IssueCreatedResponse(ResponseType responseType, int id)
+    public record IssueCreatedResponse(ResponseType responseType, string key)
     {
     }
 }

@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Task_System.Exception.IssueException;
+using Task_System.Model.DTO;
+using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
 using Task_System.Model.Response;
-using Task_System.Model.IssueFolder;
 using Task_System.Service;
-using Task_System.Model.DTO;
 
 namespace Task_System.Controller;
 
@@ -17,8 +18,18 @@ public class IssueController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<IssueCreatedResponse>> CreateIssue(CreateIssueRequest cir)
     {
-        var issue = await _is.CreateIssueAsync(cir);
-        var response = new IssueCreatedResponse(ResponseType.ISSUE_CREATED_OK, issue.Id);
+        Issue issue;
+        try 
+        {
+            issue = await _is.CreateIssueAsync(cir);
+        }
+        catch (IssueCreationException)
+        {
+
+            throw;
+        }
+
+        var response = new IssueCreatedResponse(ResponseType.ISSUE_CREATED_OK, issue.Key.KeyString);
         return Ok(response);
     }
 

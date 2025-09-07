@@ -1,4 +1,7 @@
 ﻿using System.Text.Json;
+using Task_System.Exception.IssueException;
+using Task_System.Exception.ProjectException;
+using Task_System.Exception.UserException;
 
 namespace Task_System.Exception.Handler
 {
@@ -25,15 +28,19 @@ namespace Task_System.Exception.Handler
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = ex switch
                 {
-                    Task_System.Exception.UserException.UserNotFoundException => StatusCodes.Status404NotFound,
-                    Task_System.Exception.UserException.UserAlreadyExistsException => StatusCodes.Status409Conflict,
+                    UserNotFoundException => StatusCodes.Status404NotFound,
+                    UserAlreadyExistsException => StatusCodes.Status409Conflict,
+                    IssueCreationException => StatusCodes.Status400BadRequest,
+                    ProjectNotFoundException => StatusCodes.Status404NotFound,
                     _ => StatusCodes.Status500InternalServerError
                 };
                 var errorResponse = new Task_System.Exception.Error.ErrorResponse(
                     ex switch
                     {
-                        Task_System.Exception.UserException.UserNotFoundException => Task_System.Exception.Error.ErrorType.USER_NOT_FOUND,
-                        Task_System.Exception.UserException.UserAlreadyExistsException => Task_System.Exception.Error.ErrorType.USER_ALREADY_REGISTERED,
+                        UserNotFoundException => Task_System.Exception.Error.ErrorType.USER_NOT_FOUND,
+                        UserAlreadyExistsException => Task_System.Exception.Error.ErrorType.USER_ALREADY_REGISTERED,
+                        IssueCreationException => Task_System.Exception.Error.ErrorType.ISSUE_CREATION_ERROR,
+                        ProjectNotFoundException => Task_System.Exception.Error.ErrorType.PROJECT_NOT_FOUND,
                         _ => Task_System.Exception.Error.ErrorType.SERVER_ERROR
                     },
                     ex.Message

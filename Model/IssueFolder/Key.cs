@@ -3,10 +3,10 @@
 public class Key
 {
     public int Id { get; set; }
-    public string KeyString { get; set; }
-    public Project Project { get; set; }
-    public Issue Issue { get; set; }
-    public int ProjectId { get; set; }
+    public string KeyString { get; set; } = null!;
+    public Project Project { get; set; } = null!;
+    public Issue Issue { get; set; } = null!;
+    public int ProjectId { get; set; }  
     public int IssueId { get; set; }
 
     public Key(Project project, Issue issue)

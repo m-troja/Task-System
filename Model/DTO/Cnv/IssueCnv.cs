@@ -4,19 +4,20 @@ namespace Task_System.Model.DTO.Cnv;
 
 public class IssueCnv
 {
-    public IssueDto ConvertIssueToIssueDto(Issue issue, List<CommentDto> commentDtos)
+    public IssueDto ConvertIssueToIssueDto(Issue Issue, List<CommentDto> commentDtos)
     {
         var issueDto = new IssueDto(
-                issue.Id,
-                issue.Title,
-                issue.Description ?? "null",
-                issue.Status,
-                issue.AuthorId,
-                issue.AssigneeId ?? 0,
-                issue.CreatedAt,
-                issue.DueDate,
-                issue.UpdatedAt,
-                commentDtos
+                Issue.Id,
+                Issue.Title,
+                Issue.Description ?? "null",
+                Issue.Status,
+                Issue.AuthorId,
+                Issue.AssigneeId ?? 0,
+                Issue.CreatedAt,
+                Issue.DueDate,
+                Issue.UpdatedAt,
+                commentDtos,
+                Issue.ProjectId
             );
         
         return issueDto;
