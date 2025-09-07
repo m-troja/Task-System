@@ -8,6 +8,7 @@ namespace Task_System.Service
     {
         Task<Issue> GetIssueByIdAsync(int id);
         Task<IssueDto> GetIssueDtoByIdAsync(int id);
+        Task<IssueDto> GetIssueDtoByKeyAsync(string keyString);
         Task<IEnumerable<Issue>> GetAllAsync();
         Task<Issue> CreateIssueAsync(CreateIssueRequest cir);
         Task<Issue> UpdateIssueAsync(Issue issue);

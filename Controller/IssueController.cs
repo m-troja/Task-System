@@ -33,7 +33,15 @@ public class IssueController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("key/{key}")]
+    public async Task<ActionResult<IssueDto>> GetIssueByKey(string key)
+    {
+        var IssueDto = await _is.GetIssueDtoByKeyAsync(key);
+
+        return Ok(IssueDto);
+
+    }
+    [HttpGet("id/{id}")]
     public async Task<ActionResult<IssueDto>> GetIssueById(int id)
     {
         var IssueDto = await _is.GetIssueDtoByIdAsync(id);
