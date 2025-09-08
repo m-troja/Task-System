@@ -15,6 +15,7 @@ public class PostgresqlDbContext : DbContext
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Project> Projects { get; set; }
     public DbSet<Key> Keys { get; set; }
+    public DbSet<Activity> Activities { get; set; }
     public PostgresqlDbContext(DbContextOptions<PostgresqlDbContext> options)
         : base(options)
     {
@@ -44,19 +45,19 @@ public class PostgresqlDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // USER & ROLE
+        //  USER - ROLE many-to-many relationship
         modelBuilder.Entity<User>()
             .HasMany(u => u.Roles)
             .WithMany(r => r.Users);
 
-        // ISSUE - two relationships to USER (Assignee, Author)
+        // ISSUE - relationship to USER (Assignee)
         modelBuilder.Entity<Issue>()
           .HasOne(i => i.Assignee)
           .WithMany(u => u.AssignedIssues)
           .HasForeignKey("AssigneeId")
           .OnDelete(DeleteBehavior.Restrict);
         ;
-
+        // ISSUE - relationship to USER (Author)
         modelBuilder.Entity<Issue>()
           .HasOne(i => i.Author)
           .WithMany(u => u.AuthoredIssues)
@@ -83,17 +84,25 @@ public class PostgresqlDbContext : DbContext
             .HasForeignKey(i => i.ProjectId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // KEY - one-to-one relationship with ISSUE and many-to-one with PROJECT
+        // KEY - one-to-one relationship with ISSUE 
         modelBuilder.Entity<Key>()
             .HasOne(k => k.Issue)
             .WithOne(i => i.Key)
             .HasForeignKey<Key>(k => k.IssueId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // KEY - many-to-one relationship with PROJECT
         modelBuilder.Entity<Key>()
             .HasOne(k => k.Project)
             .WithMany(p => p.Keys)
             .HasForeignKey(k => k.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // ACTIVITY - relationship to ISSUE (Issue)
+        modelBuilder.Entity<Activity>()
+            .HasOne(a => a.Issue)
+            .WithMany(i => i.Activities)
+            .HasForeignKey(a => a.IssueId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 

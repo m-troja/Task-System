@@ -38,6 +38,7 @@ try
     // -------------------
     builder.Services.AddDbContext<PostgresqlDbContext>();
     builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<IActivityService, ActivityService>();
     builder.Services.AddScoped<ICommentService, CommentService>();
     builder.Services.AddScoped<IIssueService, IssueService>();
     builder.Services.AddScoped<IRegisterService, RegisterService>();

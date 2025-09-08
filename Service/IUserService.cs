@@ -7,6 +7,5 @@ namespace Task_System.Service
         Task<User> GetByIdAsync(int id);
         Task<User> GetByEmailAsync(string email);
         Task<User> CreateUserAsync(User user);
-
     }
 }

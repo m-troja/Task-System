@@ -17,33 +17,30 @@ namespace Task_System.Service.Impl
     public class IssueService : IIssueService
     {
         private readonly PostgresqlDbContext _db;
-        private readonly IUserService _us;
+        private readonly IUserService _userService;
         private readonly CommentCnv _commentCnv;
         private readonly IssueCnv _issueCnv;
         private readonly IProjectService _projectService;
         private readonly ILogger<IssueService> l;
+        private IActivityService _activityService;
 
-        public IssueService(PostgresqlDbContext db,
-                            IUserService us,
-                            CommentCnv commentCnv,
-                            IssueCnv issueCnv,
-                            IProjectService projectService,
-                            ILogger<IssueService> logger)
+        public IssueService(PostgresqlDbContext db, IUserService userService, CommentCnv commentCnv, IssueCnv issueCnv, IProjectService projectService, ILogger<IssueService> l, IActivityService activityService)
         {
             _db = db;
-            _us = us;
+            _userService = userService;
             _commentCnv = commentCnv;
             _issueCnv = issueCnv;
             _projectService = projectService;
-            l = logger;
+            this.l = l;
+            _activityService = activityService;
         }
 
         public async Task<Issue> CreateIssueAsync(CreateIssueRequest cir)
         {
             l.log($"Starting issue creation for authorId: {cir.AssigneeId}, projectId: {cir.ProjectId}");
 
-            var author = await _us.GetByIdAsync(cir.AuthorId);
-            User? assignee = cir.AssigneeId.HasValue ? await _us.GetByIdAsync(cir.AssigneeId.Value) : null;
+            var author = await _userService.GetByIdAsync(cir.AuthorId);
+            User? assignee = cir.AssigneeId.HasValue ? await _userService.GetByIdAsync(cir.AssigneeId.Value) : null;
 
             DateTime? dueDateUtc = null;
             if (!string.IsNullOrEmpty(cir.DueDate))
@@ -188,13 +185,18 @@ namespace Task_System.Service.Impl
         public async Task<IssueDto> AssignIssueAsync(AssignIssueRequest air)
         {
             l.log($"Assigning issue {air.key} to user {air.assigneeId}");
-            User assignee = await _us.GetByIdAsync(air.assigneeId);
-            l.log($"Fetched assignee: {assignee}");
+            User newAssignee = await _userService.GetByIdAsync(air.assigneeId);
+            l.log($"Fetched new assignee: {newAssignee}");
             int issueId = GetIssueIdInsideProjectFromKey(air.key);
             l.log($"Resolved issueId {issueId} from key {air.key}");
             Issue issue = await GetIssueByIdAsync(issueId);
-            issue.Assignee = assignee;
-            issue.AssigneeId = assignee.Id;
+            User? oldAssignee = null;
+            if (issue.AssigneeId.HasValue)
+            {
+                oldAssignee = await _userService.GetByIdAsync(issue.AssigneeId.Value);
+            }
+            issue.Assignee = newAssignee;
+            issue.AssigneeId = newAssignee.Id;
             l.log($"Set assignee {issue.Assignee} for issue {issue.Id}");
 
             Issue updatedIssue = await UpdateIssueAsync(issue);
@@ -202,6 +204,8 @@ namespace Task_System.Service.Impl
 
             IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(updatedIssue);
             l.log($"Converted updated issue to DTO: {issueDto}");
+
+            await _activityService.NewAssignIssueActivity(oldAssignee, issue);
             return issueDto;
         }
 

@@ -3,7 +3,7 @@ using Task_System.Service;
 
 namespace Task_System.Model.IssueFolder
 {
-    public class Issue : IAutomaticDates
+    public class Issue : Activityable, IAutomaticDates
     {
         public int Id { get; set; }
         public int IdInsideProject { get; set; } = 0!;
@@ -12,25 +12,18 @@ namespace Task_System.Model.IssueFolder
         public string? Description { get; set; }
         public int AuthorId { get; set; }      // FK
         public int? AssigneeId { get; set; }   // FK
-        public DateTime CreatedAt { get; set; }   // UTC
         public DateTime? UpdatedAt { get; set; }  // UTC
         public DateTime? DueDate { get; set; }    // UTC
         public IssueStatus Status { get; set; } = IssueStatus.New;
         public IssuePriority? Priority { get; set; }
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-        public User Author { get; set; } = null!;
         public User? Assignee { get; set; }
         public Project? Project { get; set; }
         public Key Key { get; set; } = null!;
-
-        public Issue(string title, User author)
-        {
-            Title = title;
-            Author = author;
-        }
+        public ICollection<Activity> Activities { get; set; } = new List<Activity>();
 
         public Issue(string title, string? description, IssuePriority? priority,  User author, User? assignee, DateTime? dueDate, 
-            int authorId, int? assigneeId, int projectId, int idInsideProject )
+            int authorId, int? assigneeId, int projectId, int idInsideProject) : base(author)
         {
             Title = title;
             Description = description;
@@ -43,7 +36,7 @@ namespace Task_System.Model.IssueFolder
             ProjectId = projectId;
             IdInsideProject = idInsideProject;
         }
-        public Issue() { }
+        public Issue() : base(null!) { }
 
     }
 }
