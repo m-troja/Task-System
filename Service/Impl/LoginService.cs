@@ -15,10 +15,16 @@ public class LoginService : ILoginService
 
     public async Task<User> LoginAsync(LoginRequest lr)
     {
-        string email = lr.email.ToLower();
+        l.log($"Attempting login for {lr.email.ToLower()} with pw {lr.password}");
+        User user = await ValidateCredentials(lr);
+        l.log($"Validated creds for {user.ToString}");
+        return user;
 
-        l.log($"Attempting login for {email} with pw {lr.password}");
-       
+    }
+
+    private async Task<User> ValidateCredentials(LoginRequest lr)
+    {
+        string email = lr.email.ToLower();
         if (!new EmailAddressAttribute().IsValid(email))
         {
             l.log("Login failed: invalid email format");
@@ -34,13 +40,13 @@ public class LoginService : ILoginService
             l.log("Login failed: email or password too long");
             throw new InvalidEmailOrPasswordException("email or password too long - max 250 chars");
         }
+
         User user = await _userService.GetByEmailAsync(email);
         byte[] UsersSalt = user.Salt;
         string HashedPw = _passwordService.HashPassword(lr.password, UsersSalt);
         l.log($"Hashed pw: {HashedPw}");
         l.log($"User's salt: {user.Salt}");
-
-        l.log($"Found user {user.Email}");
+        l.log($"Found user {user.ToString}");
 
         if (user.Password == HashedPw)
         {
@@ -54,7 +60,7 @@ public class LoginService : ILoginService
         }
     }
 
-    public LoginService(IUserService userService, ILogger<LoginService> l, PasswordService passwordService)
+    public LoginService(IUserService userService, ILogger<LoginService> l, PasswordService passwordService, JwtGenerator jwtGenerator)
     {
         _userService = userService;
         this.l = l;

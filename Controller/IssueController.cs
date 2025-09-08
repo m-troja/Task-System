@@ -6,6 +6,7 @@ using Task_System.Model.Request;
 using Task_System.Model.Response;
 using Task_System.Service;
 using Task_System.Config;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Task_System.Controller;
 
@@ -37,6 +38,7 @@ public class IssueController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize]
     [HttpGet("key/{key}")]
     public async Task<ActionResult<IssueDto>> GetIssueByKey(string key)
     {

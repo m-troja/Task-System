@@ -9,7 +9,8 @@ namespace Task_System.Model.Entity
         public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;
-        public byte[] Salt { get; set; }   
+        public byte[] Salt { get; set; } = null!;
+        public string RefreshToken { get; set; } = null!;
         public ICollection<Role> Roles { get; set; } = new List<Role>();
         public ICollection<Team> Teams { get; set; } = new List<Team>();
         public ICollection<Issue> AssignedIssues { get; set; } = new List<Issue>();
@@ -28,8 +29,13 @@ namespace Task_System.Model.Entity
             Roles = roles;
         }
 
-        protected User()
+        public User()
         {
+        }
+
+        public override string? ToString()
+        {
+            return "User(Id=" + Id + ", FirstName=" + FirstName + ", LastName=" + LastName + ", Email=" + Email + ")";
         }
     }
 }

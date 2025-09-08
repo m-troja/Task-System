@@ -1,11 +1,15 @@
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
+using System.Text.Json.Serialization;
 using Task_System.Data;
 using Task_System.Exception.Handler;
 using Task_System.Model.DTO.Cnv;
+using Task_System.Security;
 using Task_System.Service;
 using Task_System.Service.Impl;
-using Task_System.Security;
 // -------------------
 // Configure Serilog
 // -------------------
@@ -27,6 +31,41 @@ try
     Log.Information("Starting Task-System WebApplication...");
 
     var builder = WebApplication.CreateBuilder(args);
+
+    // -------------------
+    //       JWT
+    // -------------------
+
+    // Register JwtGenerator as singleton with DI
+    var jwtSecret = builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT secret not configured."); ;
+
+    builder.Services.AddSingleton<JwtGenerator>(sp =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+        var logger = sp.GetRequiredService<ILogger<JwtGenerator>>();
+        return new JwtGenerator(jwtSecret, logger);
+    });
+    // Add authentication
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        var key = Encoding.ASCII.GetBytes(jwtSecret);
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = false, // optional: set if you have Issuer
+            ValidateAudience = false, // optional: set if you have Audience
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(5) // optional: exact expiration
+        };
+    });
+
+    builder.Services.AddAuthorization();
 
     // -------------------
     // Replace default logging with Serilog
@@ -75,6 +114,8 @@ try
 
         app.UseMiddleware<GlobalExceptionHandler>();
         app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.MapControllers();
 
         Log.Information("Task-System WebApplication started successfully.");
