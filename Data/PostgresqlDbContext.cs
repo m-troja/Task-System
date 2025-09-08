@@ -1,14 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
+using Task_System.Controller;
 using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
 using Task_System.Service;
+using Task_System.Config;
 
 namespace Task_System.Data;
 
 public class PostgresqlDbContext : DbContext
 {
+    private readonly ILogger<IssueController> l;
+
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Issue> Issues { get; set; }
@@ -16,23 +20,25 @@ public class PostgresqlDbContext : DbContext
     public DbSet<Project> Projects { get; set; }
     public DbSet<Key> Keys { get; set; }
     public DbSet<Activity> Activities { get; set; }
-    public PostgresqlDbContext(DbContextOptions<PostgresqlDbContext> options)
+    public PostgresqlDbContext(DbContextOptions<PostgresqlDbContext> options, ILogger<IssueController> l)
         : base(options)
     {
+        this.l = l;
     }
   
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         DotNetEnv.Env.Load("dev.env");
-
         var dbName = Environment.GetEnvironmentVariable("TS_DB_NAME") ?? "testdb";
         var dbHost = Environment.GetEnvironmentVariable("TS_DB_HOST") ?? "localhost";
         var dbPort = Environment.GetEnvironmentVariable("TS_DB_PORT") ?? "5432";
         var dbUser = Environment.GetEnvironmentVariable("TS_DB_USER") ?? "postgres";
         var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "postgres";
-       
-        Console.WriteLine($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
 
+        l.log($"DB_NAME: {dbName}, DB_HOST: {dbHost}, DB_PORT: {dbPort}, DB_USER: {dbUser}");
+        
+        Console.WriteLine($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
+        l.log($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
         if (!optionsBuilder.IsConfigured)
         {
             var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";

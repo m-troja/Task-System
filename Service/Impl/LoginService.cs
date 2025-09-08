@@ -17,7 +17,6 @@ public class LoginService : ILoginService
     {
         l.log($"Attempting login for {lr.email.ToLower()} with pw {lr.password}");
         User user = await ValidateCredentials(lr);
-        l.log($"Validated creds for {user.ToString}");
         return user;
 
     }

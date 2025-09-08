@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
@@ -100,6 +99,7 @@ try
     // -------------------
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+    builder.WebHost.UseUrls("http://localhost:8080");
 
     var app = builder.Build();
 
