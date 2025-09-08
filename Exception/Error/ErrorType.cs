@@ -9,6 +9,7 @@
         PROJECT_NOT_FOUND,
         ISSUE_NOT_FOUND,
         LOGIN_ERROR,
-        REGISTRATION_ERROR
+        REGISTRATION_ERROR,
+        INVALID_PROJECT_DATA
     }
 }

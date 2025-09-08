@@ -31,7 +31,7 @@ public class ProjectService : IProjectService
         string shortNameTrimmed = cpr.shortName.Trim().ToUpper();
         if (shortNameTrimmed.Length == 0 || string.IsNullOrWhiteSpace(cpr.description)) throw new InvalidProjectData("Project short name cannot be empty or whitespace only");
         if (shortNameTrimmed.Length > 6) throw new InvalidProjectData("Project short name cannot be longer than 6 characters");
-        if (!Regex.IsMatch(cpr.description, @"^[a-zA-Z\s]+$")) throw new InvalidProjectData("Project description can contain only letters and spaces");
+        if (!Regex.IsMatch(cpr.shortName, @"^[a-zA-Z\s]+$")) throw new InvalidProjectData("Project shortName can contain only letters and spaces");
        
         Project newProject = new Project(cpr.shortName, cpr.description);
 

@@ -37,6 +37,7 @@ namespace Task_System.Exception.Handler
                     IssueCreationException => StatusCodes.Status400BadRequest,
                     IssueNotFoundException => StatusCodes.Status400BadRequest,
                     ProjectNotFoundException => StatusCodes.Status404NotFound,
+                    InvalidProjectData => StatusCodes.Status400BadRequest,
                     _ => StatusCodes.Status500InternalServerError
                 };
                 var errorResponse = new Task_System.Exception.Error.ErrorResponse(
@@ -49,6 +50,7 @@ namespace Task_System.Exception.Handler
                         IssueCreationException => Task_System.Exception.Error.ErrorType.ISSUE_CREATION_ERROR,
                         IssueNotFoundException => Task_System.Exception.Error.ErrorType.ISSUE_NOT_FOUND,
                         ProjectNotFoundException => Task_System.Exception.Error.ErrorType.PROJECT_NOT_FOUND,
+                        InvalidProjectData => Task_System.Exception.Error.ErrorType.INVALID_PROJECT_DATA,
                         _ => Task_System.Exception.Error.ErrorType.SERVER_ERROR
                     },
                     ex.Message
