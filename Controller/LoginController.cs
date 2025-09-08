@@ -2,6 +2,7 @@
 using Task_System.Config;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
+using Task_System.Model.Response;
 using Task_System.Service;
 using Task_System.Service.Impl;
 
@@ -15,7 +16,7 @@ public class LoginController : ControllerBase
     private readonly ILoginService _loginService;
 
     [HttpPost]
-    public async Task<IActionResult> Login([FromBody] LoginRequest lr)
+    public async Task<ActionResult<Response>> Login([FromBody] LoginRequest lr)
     {
         l.log($"Received login request for {lr.email} with pw {lr.password}");
         
@@ -23,7 +24,7 @@ public class LoginController : ControllerBase
 
         l.log($"User {user} logged in successfully");
 
-        return Ok("Login successful");
+        return Ok(new Response(ResponseType.LOGIN_OK, lr.email));
     }
 
     public LoginController(ILogger<LoginService> l, ILoginService loginService)

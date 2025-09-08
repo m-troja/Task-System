@@ -1,7 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
 using Task_System.Data;
+using Task_System.Exception.LoginException;
 using Task_System.Exception.ProjectException;
+using Task_System.Exception.Registration;
 using Task_System.Exception.UserException;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
@@ -21,6 +24,10 @@ namespace Task_System.Service.Impl
         public async Task Register(RegistrationRequest rr)
         {
             string email = rr.Email.ToLower();
+
+            if (!new EmailAddressAttribute().IsValid(rr.Email))
+                throw new RegisterEmailException("Invalid email address");
+
             byte[] salt = _passwordService.GenerateSalt();
             string password = _passwordService.HashPassword(rr.Password, salt);
             

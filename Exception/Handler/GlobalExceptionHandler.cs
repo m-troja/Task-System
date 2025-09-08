@@ -2,6 +2,7 @@
 using Task_System.Exception.IssueException;
 using Task_System.Exception.LoginException;
 using Task_System.Exception.ProjectException;
+using Task_System.Exception.Registration;
 using Task_System.Exception.UserException;
 
 namespace Task_System.Exception.Handler
@@ -31,6 +32,7 @@ namespace Task_System.Exception.Handler
                 {
                     UserNotFoundException => StatusCodes.Status404NotFound,
                     InvalidEmailOrPasswordException => StatusCodes.Status401Unauthorized,
+                    RegisterEmailException => StatusCodes.Status400BadRequest,
                     UserAlreadyExistsException => StatusCodes.Status409Conflict,
                     IssueCreationException => StatusCodes.Status400BadRequest,
                     IssueNotFoundException => StatusCodes.Status400BadRequest,
@@ -42,6 +44,7 @@ namespace Task_System.Exception.Handler
                     {
                         UserNotFoundException => Task_System.Exception.Error.ErrorType.USER_NOT_FOUND,
                         InvalidEmailOrPasswordException => Task_System.Exception.Error.ErrorType.LOGIN_ERROR,
+                        RegisterEmailException => Task_System.Exception.Error.ErrorType.REGISTRATION_ERROR,
                         UserAlreadyExistsException => Task_System.Exception.Error.ErrorType.USER_ALREADY_REGISTERED,
                         IssueCreationException => Task_System.Exception.Error.ErrorType.ISSUE_CREATION_ERROR,
                         IssueNotFoundException => Task_System.Exception.Error.ErrorType.ISSUE_NOT_FOUND,

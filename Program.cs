@@ -44,6 +44,7 @@ try
     builder.Services.AddScoped<IRegisterService, RegisterService>();
     builder.Services.AddScoped<IRoleService, RoleService>();
     builder.Services.AddScoped<IProjectService, ProjectService>();
+    builder.Services.AddScoped<ILoginService, LoginService>();
     builder.Services.AddScoped<UserCnv>();
     builder.Services.AddScoped<CommentCnv>();
     builder.Services.AddScoped<IssueCnv>();
