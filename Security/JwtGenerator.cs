@@ -50,7 +50,7 @@ public class JwtGenerator
             rng.GetBytes(randomNumber);
             var RefreshToken = new RefreshToken(Convert.ToBase64String(randomNumber), DateTime.UtcNow.AddDays(7));
             l.log($"Refresh token: {RefreshToken.ToString}");
-            return RefreshToken; // refresh token 7 dni
+            return RefreshToken; 
             
         }
     }

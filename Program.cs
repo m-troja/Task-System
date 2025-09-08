@@ -56,12 +56,12 @@ try
         var key = Encoding.ASCII.GetBytes(jwtSecret);
         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
         {
-            ValidateIssuer = false, // optional: set if you have Issuer
-            ValidateAudience = false, // optional: set if you have Audience
+            ValidateIssuer = false, 
+            ValidateAudience = false, 
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(5) // optional: exact expiration
+            ClockSkew = TimeSpan.FromMinutes(5) 
         };
     });
 
