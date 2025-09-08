@@ -7,6 +7,7 @@
         SERVER_ERROR,
         ISSUE_CREATION_ERROR,
         PROJECT_NOT_FOUND,
-        ISSUE_NOT_FOUND
+        ISSUE_NOT_FOUND,
+        LOGIN_ERROR
     }
 }

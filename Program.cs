@@ -5,7 +5,7 @@ using Task_System.Exception.Handler;
 using Task_System.Model.DTO.Cnv;
 using Task_System.Service;
 using Task_System.Service.Impl;
-
+using Task_System.Security;
 // -------------------
 // Configure Serilog
 // -------------------
@@ -48,6 +48,7 @@ try
     builder.Services.AddScoped<CommentCnv>();
     builder.Services.AddScoped<IssueCnv>();
     builder.Services.AddScoped<ProjectCnv>();
+    builder.Services.AddScoped<PasswordService>();
     builder.Services.AddControllers()
            .AddJsonOptions(opt =>
            {

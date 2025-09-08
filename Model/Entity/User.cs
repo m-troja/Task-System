@@ -9,6 +9,7 @@ namespace Task_System.Model.Entity
         public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;
+        public byte[] Salt { get; set; }   
         public ICollection<Role> Roles { get; set; } = new List<Role>();
         public ICollection<Team> Teams { get; set; } = new List<Team>();
         public ICollection<Issue> AssignedIssues { get; set; } = new List<Issue>();
