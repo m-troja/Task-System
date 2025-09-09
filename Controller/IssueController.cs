@@ -65,6 +65,14 @@ public class IssueController : ControllerBase
         return Ok(issueDto);
     }
 
+    [HttpPut("rename")]
+    public async Task<ActionResult<IssueDto>> RenameIssue([FromBody] RenameIssueRequest rir)
+    {
+        l.log($"Received rename issue request: {rir.id}, {rir.newTitle}");
+        IssueDto issueDto = await _is.RenameIssueAsync(rir);
+        return Ok(issueDto);
+    }
+
     public IssueController(IIssueService @is, ILogger<IssueController> l)
     {
         _is = @is;

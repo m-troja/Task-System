@@ -16,5 +16,6 @@ namespace Task_System.Service
         Task<Issue> UpdateIssueAsync(Issue issue);
         Task<Project> GetProjectFromKey(string key);
         int GetIssueIdInsideProjectFromKey(string key);
+        Task<IssueDto> RenameIssueAsync(RenameIssueRequest rir);
     }
 }

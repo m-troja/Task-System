@@ -242,5 +242,18 @@ namespace Task_System.Service.Impl
             await _db.SaveChangesAsync();
             return issue;
         }
+
+        public async Task<IssueDto> RenameIssueAsync(RenameIssueRequest rir)
+        {
+            l.log($"Renaming issue {rir.id} to new title: {rir.newTitle}");
+            Issue issue = await GetIssueByIdAsync(rir.id);
+            issue.Title = rir.newTitle;
+            Issue updatedIssue = await UpdateIssueAsync(issue);
+            l.log($"Renamed issue {updatedIssue.Id} successfully");
+            _db.Issues.Update(updatedIssue);
+            await _db.SaveChangesAsync();
+            IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(updatedIssue);
+            return issueDto;
+        }
     }
 }
