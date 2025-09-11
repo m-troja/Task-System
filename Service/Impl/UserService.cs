@@ -19,6 +19,8 @@ public class UserService : IUserService
        l = logger;
     }
 
+
+
     public async Task<User> GetByIdAsync(int id)
     {
         l.log($"Fetching user by id {id}");

@@ -35,13 +35,13 @@ namespace Task_System.Service.Impl
             user.Salt = salt;
             user.Password = password;
             user.Roles.Add(await _rs.GetRoleByName(Role.ROLE_USER));
-
+            user.RefreshToken = null;
             if (!await ValidateNewUserAsync(user)) {
                 return ;
             }
 
             _db.Users.Add(user);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
             Console.WriteLine("User registered successfully: " + user);
         }
 

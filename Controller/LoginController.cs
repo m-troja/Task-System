@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Task_System.Config;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
@@ -6,11 +7,12 @@ using Task_System.Model.Response;
 using Task_System.Security;
 using Task_System.Service;
 using Task_System.Service.Impl;
+using Microsoft.AspNetCore.Http;
 
 namespace Task_System.Controller;
 
 [ApiController]
-[Route("api/v1/login")]
+[Route("api/v1")]
 public class LoginController : ControllerBase
 {
     private readonly ILogger<LoginService> l;
@@ -18,7 +20,9 @@ public class LoginController : ControllerBase
     private readonly JwtGenerator _jwtGenerator;
     private readonly IUserService _userService;
 
-    [HttpPost]
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [SwaggerResponse(StatusCodes.Status200OK, "LOGIN_OK", typeof(LoginResponse))]
     public async Task<ActionResult<Response>> Login([FromBody] LoginRequest lr)
     {
         l.log($"Received login request for {lr.email} with pw {lr.password}");
