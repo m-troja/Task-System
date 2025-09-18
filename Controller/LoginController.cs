@@ -17,8 +17,8 @@ public class LoginController : ControllerBase
 {
     private readonly ILogger<LoginService> l;
     private readonly ILoginService _loginService;
-    private readonly JwtGenerator _jwtGenerator;
     private readonly IUserService _userService;
+    private readonly IAuthService _authService;
 
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
@@ -26,17 +26,12 @@ public class LoginController : ControllerBase
     public async Task<ActionResult<Response>> Login([FromBody] LoginRequest lr)
     {
         l.log($"Received login request for {lr.email} with pw {lr.password}");
-        
         User user = await _loginService.LoginAsync(lr);
         l.log($"User {user} logged in successfully");
 
-        string AccessToken = _jwtGenerator.GenerateAccessToken(user.Id);
-        RefreshToken refreshToken = _jwtGenerator.GenerateRefreshToken();
-        l.log($"Generated access token for user {user.Id}: {AccessToken}");
-        l.log($"Refresh token: {refreshToken.Token}, {refreshToken.Expires}");
+        string AccessToken = _authService.GetAccessTokenByUserId(user.Id);
+        RefreshToken refreshToken = await _authService.GenerateRefreshToken(user.Id);
 
-        user.RefreshToken = refreshToken.Token;
-        await _userService.UpdateUserAsync(user);
         Response.Cookies.Append("refreshToken", refreshToken.Token, new CookieOptions
         {
             HttpOnly = true,      // Not accessible via JavaScript
@@ -48,11 +43,11 @@ public class LoginController : ControllerBase
         return Ok(new LoginResponse(ResponseType.LOGIN_OK, AccessToken));
     }
 
-    public LoginController(ILogger<LoginService> l, ILoginService loginService, JwtGenerator jwtGenerator, IUserService userService)
+    public LoginController(ILogger<LoginService> l, ILoginService loginService, IUserService userService, IAuthService authService)
     {
         this.l = l;
         _loginService = loginService;
-        _jwtGenerator = jwtGenerator;
         _userService = userService;
+        _authService = authService;
     }
 }

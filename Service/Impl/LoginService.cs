@@ -45,11 +45,11 @@ public class LoginService : ILoginService
         string HashedPw = _passwordService.HashPassword(lr.password, UsersSalt);
         l.log($"Hashed pw: {HashedPw}");
         l.log($"User's salt: {user.Salt}");
-        l.log($"Found user {user.ToString}");
+        l.log($"Found user {user.Email}");
 
         if (user.Password == HashedPw)
         {
-            l.log($"Login successful for {user}");
+            l.log($"Login successful for {user.Email}");
             return user;
         }
         else

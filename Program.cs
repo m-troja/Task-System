@@ -60,7 +60,7 @@ try
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(5) 
+            ClockSkew = TimeSpan.FromMinutes(1) 
         };
     });
 
@@ -83,6 +83,7 @@ try
     builder.Services.AddScoped<IRoleService, RoleService>();
     builder.Services.AddScoped<IProjectService, ProjectService>();
     builder.Services.AddScoped<ILoginService, LoginService>();
+    builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<UserCnv>();
     builder.Services.AddScoped<CommentCnv>();
     builder.Services.AddScoped<IssueCnv>();
