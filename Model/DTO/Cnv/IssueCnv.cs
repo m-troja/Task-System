@@ -11,10 +11,12 @@ public class IssueCnv
         ICollection<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(Issue.Comments);
 
         var issueDto = new IssueDto(
+            Issue.Id,
                 Issue.Key.KeyString,
                 Issue.Title,
-                Issue.Description ?? "null",
+                Issue.Description ?? "No description",
                 Issue.Status,
+                Issue.Priority ?? IssuePriority.NORMAL,
                 Issue.AuthorId,
                 Issue.AssigneeId ?? 0,
                 Issue.CreatedAt,

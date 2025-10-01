@@ -186,12 +186,10 @@ namespace Task_System.Service.Impl
 
         public async Task<IssueDto> AssignIssueAsync(AssignIssueRequest air)
         {
-            l.log($"Assigning issue {air.key} to user {air.assigneeId}");
-            User newAssignee = await _userService.GetByIdAsync(air.assigneeId);
+            l.log($"Assigning issue {air.IssueId} to user {air.AssigneeId}");
+            User newAssignee = await _userService.GetByIdAsync(air.AssigneeId);
             l.log($"Fetched new assignee: {newAssignee}");
-            int issueId = GetIssueIdInsideProjectFromKey(air.key);
-            l.log($"Resolved issueId {issueId} from key {air.key}");
-            Issue issue = await GetIssueByIdAsync(issueId);
+            Issue issue = await GetIssueByIdAsync(air.IssueId);
             User? oldAssignee = null;
             if (issue.AssigneeId.HasValue)
             {
@@ -222,7 +220,7 @@ namespace Task_System.Service.Impl
 
             return number;
         }
-
+        
         public async Task<Project> GetProjectFromKey(string key)
         {
             l.log($"Getting project from key {key}");
@@ -331,6 +329,18 @@ namespace Task_System.Service.Impl
             l.log($"Fetched {issues.Count} issues for projectId {projectId}");
             var issuesDto = _issueCnv.ConvertIssueListToIssueDtoList(issues);
             return issuesDto;
+        }
+
+        public async Task<int> GetIssueIdFromKey(string key)
+        {
+            int IssueIdInProject = GetIssueIdInsideProjectFromKey(key);
+            if (IssueIdInProject == 0) throw new IssueNotFoundException("Issue was not found");
+            Project project = await GetProjectFromKey(key);
+            Issue issue = await _db.Issues
+                .Where( i => i.ProjectId == project.Id && i.IdInsideProject == IssueIdInProject)
+                .FirstOrDefaultAsync();
+            if (issue == null) throw new IssueNotFoundException("Issue was not found");
+            return issue.Id;
         }
     }
 }

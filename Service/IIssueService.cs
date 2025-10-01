@@ -22,6 +22,7 @@ namespace Task_System.Service
         Task<IssueDto> AssignTeamAsync(AssignTeamRequest req);
         Task<IEnumerable<IssueDto>> GetAllIssuesByUserId(int userId);
         Task<IEnumerable<IssueDto>> GetAllIssuesByProjectId(int projectId);
+        Task<int> GetIssueIdFromKey(string key);
 
     }
 }
