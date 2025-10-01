@@ -29,6 +29,13 @@ public class ProjectController : ControllerBase
         return Ok(createdProject);
     }
 
+    [HttpGet("all")]
+    public async Task<ActionResult<List<ProjectDto>>> GetAllProjects()
+    {
+        var projects = await _ps.GetAllProjectsAsync();
+        return Ok(projects);
+    }
+
     public ProjectController(IProjectService ps, ProjectCnv projectCnv)
     {
         _ps = ps;

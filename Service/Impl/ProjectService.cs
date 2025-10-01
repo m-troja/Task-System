@@ -4,11 +4,13 @@ using Task_System.Data;
 using Task_System.Exception.ProjectException;
 using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
+using Task_System.Config;
 namespace Task_System.Service.Impl;
 
 public class ProjectService : IProjectService
 {
     private readonly PostgresqlDbContext _db ;
+    private readonly ILogger<ProjectService> l;
     public async Task<Project> GetProjectById(int id)
     {
         Project? project = await _db.Projects.Where(p => p.Id == id).FirstOrDefaultAsync();
@@ -41,8 +43,17 @@ public class ProjectService : IProjectService
         return newProject;
     }
 
-    public ProjectService(PostgresqlDbContext db)
+    public async Task<IEnumerable<Project>> GetAllProjectsAsync()
+    {
+        l.log("Getting all projects from the db");
+        List<Project> projects = await _db.Projects.ToListAsync();
+        l.log($"Found {projects.Count} projects in the db");
+        return projects;
+    }
+
+    public ProjectService(PostgresqlDbContext db, ILogger<ProjectService> l)
     {
         _db = db;
+        this.l = l;
     }
 }
