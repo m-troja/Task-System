@@ -2,11 +2,13 @@
 {
     public enum IssueStatus
     {
-        New,
-        Triage,
-        ToDo,
-        InProgress,
-        Done,
-        Canceled
+        NEW,
+        TRIAGE,
+        TODO,
+        IN_PROGRESS,
+        WAITING_FOR_TEAM,
+        CODE_REVIEW,
+        DONE,
+        CANCELED
     }
 }
