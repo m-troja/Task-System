@@ -14,14 +14,15 @@ namespace Task_System.Model.IssueFolder
         public int? AssigneeId { get; set; }   // FK
         public DateTime? UpdatedAt { get; set; }  // UTC
         public DateTime? DueDate { get; set; }    // UTC
-        public IssueStatus Status { get; set; } = IssueStatus.New;
+        public IssueStatus Status { get; set; } = IssueStatus.NEW;
         public IssuePriority? Priority { get; set; }
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public User? Assignee { get; set; }
         public Project? Project { get; set; }
         public Key Key { get; set; } = null!;
         public ICollection<Activity> Activities { get; set; } = new List<Activity>();
-
+        public Team? Team { get; set; } = null!;
+        public int? TeamId { get; set; } = null!;
         public Issue(string title, string? description, IssuePriority? priority,  User author, User? assignee, DateTime? dueDate, 
             int authorId, int? assigneeId, int projectId, int idInsideProject) : base(author)
         {

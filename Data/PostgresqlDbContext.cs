@@ -20,6 +20,7 @@ public class PostgresqlDbContext : DbContext
     public DbSet<Project> Projects { get; set; }
     public DbSet<Key> Keys { get; set; }
     public DbSet<Activity> Activities { get; set; }
+    public DbSet<Team> Teams { get; set; }
     public PostgresqlDbContext(DbContextOptions<PostgresqlDbContext> options, ILogger<IssueController> l)
         : base(options)
     {
@@ -110,6 +111,13 @@ public class PostgresqlDbContext : DbContext
             .WithMany(i => i.Activities)
             .HasForeignKey(a => a.IssueId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // ISSUE - relationship to TEAM (Team)
+        modelBuilder.Entity<Issue>()
+            .HasOne( i => i.Team)
+            .WithMany(t => t.Issues)
+            .HasForeignKey(i => i.TeamId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 
     // Automatically set CreatedAt for entities implementing IAutomaticDates

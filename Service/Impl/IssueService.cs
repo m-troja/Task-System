@@ -22,9 +22,10 @@ namespace Task_System.Service.Impl
         private readonly IssueCnv _issueCnv;
         private readonly IProjectService _projectService;
         private readonly ILogger<IssueService> l;
+        private readonly ITeamService _teamService;
         private IActivityService _activityService;
 
-        public IssueService(PostgresqlDbContext db, IUserService userService, CommentCnv commentCnv, IssueCnv issueCnv, IProjectService projectService, ILogger<IssueService> l, IActivityService activityService)
+        public IssueService(PostgresqlDbContext db, IUserService userService, CommentCnv commentCnv, IssueCnv issueCnv, IProjectService projectService, ILogger<IssueService> l, ITeamService teamService, IActivityService activityService)
         {
             _db = db;
             _userService = userService;
@@ -32,6 +33,7 @@ namespace Task_System.Service.Impl
             _issueCnv = issueCnv;
             _projectService = projectService;
             this.l = l;
+            _teamService = teamService;
             _activityService = activityService;
         }
 
@@ -254,6 +256,67 @@ namespace Task_System.Service.Impl
             await _db.SaveChangesAsync();
             IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(updatedIssue);
             return issueDto;
+        }
+
+        public async Task<IssueDto> ChangeIssueStatusAsync(ChangeIssueStatusRequest req)
+        {
+            l.log($"Changing status of issue {req.IssueId} to {req.NewStatus}");
+
+            if (req.NewStatus == null) throw new ArgumentException("NewStatus cannot be null");
+            if (req.IssueId <= 0) throw new ArgumentException("IssueId must be positive");
+            if (!Enum.TryParse<IssueStatus>(req.NewStatus, true, out var newStatus)  || !Enum.IsDefined(typeof(IssueStatus), newStatus))
+            {
+                throw new ArgumentException($"Invalid issue status: {req.NewStatus}");
+            }
+
+            Issue issue = await GetIssueByIdAsync(req.IssueId);
+            issue.Status = Enum.Parse<IssueStatus>(req.NewStatus);
+
+            var UpdatedIssue = await UpdateIssueAsync(issue);
+            IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(UpdatedIssue);
+            return issueDto;
+        }
+
+        public async Task<IssueDto> ChangeIssuePriorityAsync(ChangeIssuePriorityRequest req)
+        {
+            l.log($"Changing priority of issue {req.IssueId} to {req.NewPriority}");
+            if (req.NewPriority == null) throw new ArgumentException("NewPriority cannot be null");
+            if (req.IssueId <= 0) throw new ArgumentException("IssueId must be positive");
+            if (!Enum.TryParse<IssuePriority>(req.NewPriority, true, out var newPriority) || !Enum.IsDefined(typeof(IssuePriority), newPriority))
+            {
+                throw new ArgumentException($"Invalid issue priority: {req.NewPriority}");
+            }
+            Issue issue = await GetIssueByIdAsync(req.IssueId);
+            issue.Priority = Enum.Parse<IssuePriority>(req.NewPriority);
+            var UpdatedIssue = await UpdateIssueAsync(issue);
+            IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(UpdatedIssue);
+            return issueDto;
+        }
+
+        public async Task<IssueDto> AssignTeamAsync(AssignTeamRequest req)
+        {
+            l.log("Assigning team {req.TeamId} to issue {req.IssueId}");
+            Team team = await _teamService.GetTeamByIdAsync(req.TeamId);
+            Issue issue = await GetIssueByIdAsync(req.IssueId);
+            issue.Team = team;
+            var UpdatedIssue = await UpdateIssueAsync(issue);
+            IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(UpdatedIssue);
+            l.log($"Assigned team {team.Name} to issue {issue.Id} successfully");
+            return issueDto;
+        }
+
+        public async Task<IEnumerable<IssueDto>> GetAllIssuesByUserId(int userId)
+        {
+            l.log($"Getting all issues for userId {userId}");
+            User user = await _userService.GetByIdAsync(userId);
+            List<Issue> issues = await _db.Issues.Where(i => i.AssigneeId == userId || i.AuthorId == userId)
+                .Include(i => i.Key)
+                .Include(i => i.Project)
+                .Include(i => i.Comments)
+                .ToListAsync();
+            l.log($"Fetched {issues.Count} issues for userId {userId}");
+            var issuesDto = _issueCnv.ConvertIssueListToIssueDtoList(issues);
+            return issuesDto;
         }
     }
 }

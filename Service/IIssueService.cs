@@ -17,5 +17,10 @@ namespace Task_System.Service
         Task<Project> GetProjectFromKey(string key);
         int GetIssueIdInsideProjectFromKey(string key);
         Task<IssueDto> RenameIssueAsync(RenameIssueRequest rir);
+        Task<IssueDto> ChangeIssueStatusAsync(ChangeIssueStatusRequest req);
+        Task<IssueDto> ChangeIssuePriorityAsync(ChangeIssuePriorityRequest req);
+        Task<IssueDto> AssignTeamAsync(AssignTeamRequest req);
+        Task<IEnumerable<IssueDto>> GetAllIssuesByUserId(int userId);
+
     }
 }

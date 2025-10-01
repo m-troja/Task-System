@@ -84,6 +84,7 @@ try
     builder.Services.AddScoped<IProjectService, ProjectService>();
     builder.Services.AddScoped<ILoginService, LoginService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<ITeamService, TeamService>();
     builder.Services.AddScoped<UserCnv>();
     builder.Services.AddScoped<CommentCnv>();
     builder.Services.AddScoped<IssueCnv>();
