@@ -97,7 +97,7 @@ public class IssueController : ControllerBase
         return Ok(issueDto);
     }
 
-    [HttpGet("user/{id}")]
+    [HttpGet("user/{userId:int}")]
     public async Task<ActionResult<List<IssueDto>>> GetAllIssuesByUserId(int userId)
     {
         l.log($"Received get all issues by user id request: {userId}");
@@ -105,6 +105,13 @@ public class IssueController : ControllerBase
         return Ok(issuesDto);
     }
 
+    [HttpGet("project/{projectId:int}")]
+    public async Task<ActionResult<List<IssueDto>>> GetAllIssuesByProjectId(int projectId)
+    {
+        l.log($"Received get all issues by project id request: {projectId}");
+        var issuesDto = await _is.GetAllIssuesByProjectId(projectId);
+        return Ok(issuesDto);
+    }
 
     public IssueController(IIssueService @is, ILogger<IssueController> l)
     {

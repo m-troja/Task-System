@@ -58,4 +58,12 @@ public class UserService : IUserService
         _db.Users.Update(user);
         await _db.SaveChangesAsync();
     }
+
+    public async Task<List<User>> GetAllUsersAsync()
+    {
+        l.log("Fetching all uses from db");
+        List<User> users = await _db.Users.Include(u => u.Roles).ToListAsync();
+        l.log($"Fetched {users.Count} users");
+        return users;
+    }
 }

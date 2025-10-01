@@ -7,6 +7,7 @@ namespace Task_System.Model.DTO.Cnv
         public UserDto ConvertUserToDto(User user)
         {
             return new UserDto(
+                user.Id,
                 user.FirstName, 
                 user.LastName, 
                 user.Email, 

@@ -318,5 +318,19 @@ namespace Task_System.Service.Impl
             var issuesDto = _issueCnv.ConvertIssueListToIssueDtoList(issues);
             return issuesDto;
         }
+
+        public async Task<IEnumerable<IssueDto>> GetAllIssuesByProjectId(int projectId)
+        {
+            l.log($"Getting all issues for projectId {projectId}");
+            Project project = await _projectService.GetProjectById(projectId);
+            List<Issue> issues = await _db.Issues.Where(i => i.ProjectId == projectId )
+                .Include(i => i.Key)
+                .Include(i => i.Project)
+                .Include(i => i.Comments)
+                .ToListAsync();
+            l.log($"Fetched {issues.Count} issues for projectId {projectId}");
+            var issuesDto = _issueCnv.ConvertIssueListToIssueDtoList(issues);
+            return issuesDto;
+        }
     }
 }
