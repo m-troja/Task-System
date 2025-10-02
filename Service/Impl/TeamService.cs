@@ -1,15 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Task_System.Config;
 using Task_System.Data;
+using Task_System.Model.DTO;
+using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
+using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
 
 namespace Task_System.Service.Impl;
 
 public class TeamService : ITeamService
 {
-private readonly PostgresqlDbContext _db;
-private readonly ILogger<TeamService> l;
+    private readonly PostgresqlDbContext _db;
+    private readonly ILogger<TeamService> l;
+    private readonly IssueCnv _issueCnv;
+    private readonly UserCnv _userCnv;
+    public TeamService()
+    {
+    }
 
     public async Task<List<Team>> GetAllTeamsAsync()
     {
@@ -71,15 +79,33 @@ private readonly ILogger<TeamService> l;
         Team team = await _db.Teams.FirstOrDefaultAsync(t => t.Name == name);
         if (team == null)
         {
-            l.log($"Team with name {name} not found");
-            throw new KeyNotFoundException($"Team with name {name} not found");
+            l.log($"Team with name {name} was not found");
+            throw new KeyNotFoundException($"Team with name {name} was not found");
         }
         return team;
     }
 
-    public TeamService(PostgresqlDbContext db, ILogger<TeamService> l)
+    public async Task<List<IssueDto>> GetIssuesByTeamId(int teamId)
+    {
+        var Team = await GetTeamByIdAsync(teamId);
+        List<Issue> issues = Team.Issues.ToList();
+        l.log($"Found {issues.Count} issues in team with id {teamId}");
+        return _issueCnv.ConvertIssueListToIssueDtoList(issues);
+    }
+
+    public async Task<List<UserDto>> GetUsersByTeamId(int teamId)
+    {
+        var Team = await GetTeamByIdAsync(teamId);
+        List<User> users = Team.Users.ToList();
+        l.log($"Found {users.Count} users in team with id {teamId}");
+        return _userCnv.ConvertUsersToUsersDto(users);
+    }
+
+    public TeamService(PostgresqlDbContext db, ILogger<TeamService> logger, IssueCnv issueCnv)
     {
         _db = db;
-        this.l = l;
+        l = logger;
+        _issueCnv = issueCnv;
     }
+
 }

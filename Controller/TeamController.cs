@@ -54,5 +54,21 @@ namespace Task_System.Controller
             var Team = await _ts.AddTeamAsync(req);
             return Ok(_teamCnv.ConvertTeamToTeamDto(Team));
         }
+
+        [HttpGet("issues/{teamId:int}")]
+        public async Task<ActionResult<List<IssueDto>>> GetIssuesByTeamId(int teamId)
+        {
+            l.log($"Fetching issues by teamId {teamId}");
+            var issues = await _ts.GetIssuesByTeamId(teamId);
+            return Ok(issues);
+        }
+
+        [HttpGet("users/{teamId:int}")]
+        public async Task<ActionResult<List<UserDto>>> GetUsersByTeamId(int teamId)
+        {
+            l.log($"Fetching users by teamId {teamId}");
+            var issues = await _ts.GetIssuesByTeamId(teamId);
+            return Ok(issues);
+        }
     }
 }

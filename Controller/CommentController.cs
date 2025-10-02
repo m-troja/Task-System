@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sprache;
+using Task_System.Model.DTO;
 using Task_System.Model.Request;
 using Task_System.Model.Response;
 using Task_System.Service;
@@ -14,11 +15,10 @@ public class CommentController : ControllerBase
 
     [HttpPost]
     [Route("create")]   
-    public async Task<ActionResult<Response>> CreateComment([FromBody] CreateCommentRequest cmr)
+    public async Task<ActionResult<CommentDto>> CreateComment([FromBody] CreateCommentRequest cmr)
     {
         await _cs.CreateCommentAsync(cmr);
-        Response response = new Response(ResponseType.COMMENT_CREATED_OK, cmr.Content);
-        return Ok(response);
+        return Ok();
     }
 
     public CommentController(ICommentService cs)
