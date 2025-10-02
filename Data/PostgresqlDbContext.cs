@@ -118,6 +118,28 @@ public class PostgresqlDbContext : DbContext
             .WithMany(t => t.Issues)
             .HasForeignKey(i => i.TeamId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Team - relationship to User
+        modelBuilder.Entity<Team>()
+        .HasMany(t => t.Users)
+        .WithMany(u => u.Teams)
+        .UsingEntity<Dictionary<string, object>>(
+        "TeamUser",
+        j => j.HasOne<User>()
+              .WithMany()
+              .HasForeignKey("UserId")
+              .OnDelete(DeleteBehavior.Cascade),
+        j => j.HasOne<Team>()
+              .WithMany()
+              .HasForeignKey("TeamId")
+              .OnDelete(DeleteBehavior.Cascade),
+        j =>
+        {
+            j.HasKey("TeamId", "UserId"); 
+            j.ToTable("TeamUsers");      
+        }
+    );
+
     }
 
     // Automatically set CreatedAt for entities implementing IAutomaticDates
