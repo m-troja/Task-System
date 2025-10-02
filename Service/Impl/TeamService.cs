@@ -15,9 +15,6 @@ public class TeamService : ITeamService
     private readonly ILogger<TeamService> l;
     private readonly IssueCnv _issueCnv;
     private readonly UserCnv _userCnv;
-    public TeamService()
-    {
-    }
 
     public async Task<List<Team>> GetAllTeamsAsync()
     {
@@ -101,11 +98,11 @@ public class TeamService : ITeamService
         return _userCnv.ConvertUsersToUsersDto(users);
     }
 
-    public TeamService(PostgresqlDbContext db, ILogger<TeamService> logger, IssueCnv issueCnv)
+    public TeamService(PostgresqlDbContext db, ILogger<TeamService> l, IssueCnv issueCnv, UserCnv userCnv)
     {
         _db = db;
-        l = logger;
+        this.l = l;
         _issueCnv = issueCnv;
+        _userCnv = userCnv;
     }
-
 }

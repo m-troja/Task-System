@@ -32,15 +32,7 @@ public class LoginController : ControllerBase
         string AccessToken = _authService.GetAccessTokenByUserId(user.Id);
         RefreshToken refreshToken = await _authService.GenerateRefreshToken(user.Id);
 
-        Response.Cookies.Append("refreshToken", refreshToken.Token, new CookieOptions
-        {
-            HttpOnly = true,      // Not accessible via JavaScript
-            Secure = true,        // Only sent over HTTPS
-            SameSite = SameSiteMode.Strict, // Prevent CSRF
-            Expires = refreshToken.Expires  // Set cookie expiration
-        });
-
-        return Ok(new LoginResponse(ResponseType.LOGIN_OK, AccessToken));
+        return Ok(new { AccessToken, refreshToken });
     }
 
     public LoginController(ILogger<LoginService> l, ILoginService loginService, IUserService userService, IAuthService authService)
