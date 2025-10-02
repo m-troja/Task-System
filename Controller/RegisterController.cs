@@ -4,7 +4,7 @@ using Task_System.Model.Request;
 using Task_System.Model.Response;
 using Task_System.Service;
 using Task_System.Service.Impl;
-
+using Task_System.Config;
 namespace Task_System.Controller
 {
     [ApiController]
@@ -12,17 +12,20 @@ namespace Task_System.Controller
     public class RegisterController : ControllerBase
     {
         private readonly IRegisterService _rs;
+        private readonly ILogger<RegisterController> l;
 
         [HttpPost]
         public async Task<ActionResult<Response>> RegisterUser(RegistrationRequest rr)
         {
+            l.log($"Received registration request: {rr}");
             await _rs.Register(rr);
             return await Task.FromResult(new Response(ResponseType.REGISTRATION_OK, rr.Email) );
         }
 
-        public RegisterController(IRegisterService rs)
+        public RegisterController(IRegisterService rs, ILogger<RegisterController> l)
         {
             _rs = rs;
+            this.l = l;
         }
     }
 }

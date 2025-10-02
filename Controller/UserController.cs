@@ -37,9 +37,8 @@ namespace Task_System.Controller
         [HttpGet("email/{email}")]
         public async Task<ActionResult<UserDto>> GetUserByEmail(string email)
         {
+            l.log($"Fetching user by email: {email}");
             var user = await _us.GetByEmailAsync(email);
-
-            Console.WriteLine("Controller: " + user);
 
             return Ok(_userCnv.ConvertUserToDto(user)); ;
         }
@@ -47,8 +46,8 @@ namespace Task_System.Controller
         [HttpGet("all")]
         public async Task<ActionResult<List<UserDto>>> GetAllUsers()
         {
+            l.log("Fetching all users");
             var users = await _us.GetAllUsersAsync();
-            Console.WriteLine("Controller: " + users);
             return Ok(_userCnv.ConvertUsersToUsersDto(users));
         }
     }
