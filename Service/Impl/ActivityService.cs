@@ -1,7 +1,7 @@
 ﻿using Task_System.Data;
 using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
-using Task_System.Config;
+using Task_System.Log;
 namespace Task_System.Service.Impl;
 
 public class ActivityService : IActivityService

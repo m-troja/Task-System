@@ -1,5 +1,5 @@
 ﻿using Task_System.Model.Entity;
-using Task_System.Config;
+using Task_System.Log;
 namespace Task_System.Model.DTO.Cnv;
 
 public class TeamCnv

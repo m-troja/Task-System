@@ -4,7 +4,7 @@ using Task_System.Data;
 using Task_System.Exception.ProjectException;
 using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
-using Task_System.Config;
+using Task_System.Log;
 namespace Task_System.Service.Impl;
 
 public class ProjectService : IProjectService

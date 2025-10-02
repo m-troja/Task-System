@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
@@ -9,6 +10,7 @@ using Task_System.Model.DTO.Cnv;
 using Task_System.Security;
 using Task_System.Service;
 using Task_System.Service.Impl;
+
 // -------------------
 // Configure Serilog
 // -------------------
@@ -32,19 +34,21 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     // -------------------
-    //       JWT
+    // JWT Config
     // -------------------
+    var jwtSecret = builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT secret not configured.");
+    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT issuer not configured.");
+    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT audience not configured.");
 
-    // Register JwtGenerator as singleton with DI
-    var jwtSecret = builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT secret not configured."); ;
-
+    // Register JwtGenerator
     builder.Services.AddSingleton<JwtGenerator>(sp =>
     {
         var config = sp.GetRequiredService<IConfiguration>();
         var logger = sp.GetRequiredService<ILogger<JwtGenerator>>();
-        return new JwtGenerator(jwtSecret, logger);
+        return new JwtGenerator(config, logger);
     });
-    // Add authentication
+
+    // Authentication
     builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -52,15 +56,20 @@ try
     })
     .AddJwtBearer(options =>
     {
-        var key = Encoding.ASCII.GetBytes(jwtSecret);
-        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        var key = Encoding.UTF8.GetBytes(jwtSecret); // zmiana na UTF8
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false, 
-            ValidateAudience = false, 
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromMinutes(1) 
+            ClockSkew = TimeSpan.FromMinutes(1),
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
 
@@ -91,6 +100,7 @@ try
     builder.Services.AddScoped<IssueCnv>();
     builder.Services.AddScoped<ProjectCnv>();
     builder.Services.AddScoped<PasswordService>();
+
     builder.Services.AddControllers()
            .AddJsonOptions(opt =>
            {
@@ -114,7 +124,6 @@ try
 
     if (args.Length == 0 || !args[0].Contains("ef"))
     {
-
         app.UseMiddleware<GlobalExceptionHandler>();
         app.UseRouting();
         app.UseAuthentication();
@@ -124,7 +133,6 @@ try
         Log.Information("Task-System WebApplication started successfully.");
         app.Run();
     }
-
 }
 catch (Exception ex)
 {

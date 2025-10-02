@@ -5,7 +5,7 @@ using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
 using Task_System.Model.Response;
 using Task_System.Service;
-using Task_System.Config;
+using Task_System.Log;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Task_System.Controller;
@@ -18,6 +18,7 @@ public class IssueController : ControllerBase
     private readonly IIssueService _is;
     private readonly ILogger<IssueController> l;
 
+    [Authorize]
     [HttpPost]
     [Route("create")]
     public async Task<ActionResult<IssueCreatedResponse>> CreateIssue(CreateIssueRequest req)

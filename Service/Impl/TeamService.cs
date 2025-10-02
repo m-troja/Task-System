@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Task_System.Config;
+using Task_System.Log;
 using Task_System.Data;
 using Task_System.Model.DTO;
 using Task_System.Model.DTO.Cnv;

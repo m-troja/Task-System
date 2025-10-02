@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Task_System.Config;
+using Task_System.Log;
 using Task_System.Model;
 using Task_System.Model.DTO;
 using Task_System.Model.DTO.Cnv;

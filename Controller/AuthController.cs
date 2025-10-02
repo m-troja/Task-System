@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using Task_System.Config;
+using Task_System.Log;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
 using Task_System.Model.Response;

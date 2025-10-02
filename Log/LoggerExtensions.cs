@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Runtime.CompilerServices;
 
-namespace Task_System.Config;
+namespace Task_System.Log;
 
 public static class LoggerExtensions
 {

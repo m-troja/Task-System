@@ -2,7 +2,7 @@
 using Task_System.Exception.LoginException;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
-using Task_System.Config;
+using Task_System.Log;
 using Task_System.Security;
 
 namespace Task_System.Service.Impl;
