@@ -11,6 +11,10 @@ using Task_System.Security;
 using Task_System.Service;
 using Task_System.Service.Impl;
 
+// Load env variables
+DotNetEnv.Env.Load("dev.env");
+var _LogDir = Environment.GetEnvironmentVariable("TS_LOG_DIR") ?? "/home/michal";
+
 // -------------------
 // Configure Serilog
 // -------------------
@@ -21,7 +25,7 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-    .WriteTo.File(@"C:\tmp\log\Task-System.log",
+    .WriteTo.File(_LogDir,
                   rollingInterval: RollingInterval.Day,
                   retainedFileCountLimit: 7,
                   outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
