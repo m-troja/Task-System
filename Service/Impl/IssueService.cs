@@ -205,6 +205,11 @@ namespace Task_System.Service.Impl
             IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(updatedIssue);
             l.log($"Converted updated issue to DTO: {issueDto}");
 
+            if ( oldAssignee == null)
+            {
+                l.log("Old assignee was null, creating dummy user for activity log");
+                oldAssignee = new User { FirstName = "Dummy Firstname", LastName = "Dummy Lastname" };
+            }
             await _activityService.NewAssignIssueActivity(oldAssignee, issue);
             return issueDto;
         }
@@ -228,8 +233,7 @@ namespace Task_System.Service.Impl
             string shortName = lastDash >= 0 ? key.Substring(0, lastDash) : key; // if no dash, take whole string
             Project? project = await _db.Projects
                 .Where(p => p.ShortName == shortName)
-                .FirstOrDefaultAsync();
-            if (project == null) throw new ProjectNotFoundException("Project was not found");
+                .FirstOrDefaultAsync() ?? throw new ProjectNotFoundException("Project was not found");
             l.log($"Found project with ID {project.Id} for key {key}");
             return project;
         }
@@ -337,10 +341,25 @@ namespace Task_System.Service.Impl
             if (IssueIdInProject == 0) throw new IssueNotFoundException("Issue was not found");
             Project project = await GetProjectFromKey(key);
             Issue issue = await _db.Issues
-                .Where( i => i.ProjectId == project.Id && i.IdInsideProject == IssueIdInProject)
-                .FirstOrDefaultAsync();
+                .Where(i => i.ProjectId == project.Id && i.IdInsideProject == IssueIdInProject)
+                .FirstOrDefaultAsync() ?? throw new ArgumentNullException("Issue was not found") ;
             if (issue == null) throw new IssueNotFoundException("Issue was not found");
             return issue.Id;
         }
+
+        public async Task<IssueDto> UpdateDueDateAsync(UpdateDueDateRequest req)
+        {
+            if (req is null) throw new ArgumentNullException(nameof(req));
+            if (req.IssueId <= 0)  throw new ArgumentException("IssueId must be positive.", nameof(req.IssueId));
+            if (!req.DueDate.HasValue) throw new ArgumentException("DueDate cannot be null.", nameof(req.DueDate));
+
+            DateTime dueDateUtc = DateTime.SpecifyKind(req.DueDate.Value, DateTimeKind.Utc);
+            Issue issue = await GetIssueByIdAsync(req.IssueId);
+            issue.DueDate = dueDateUtc;
+            l.log($"Set due date {issue.DueDate} for issue {issue.Id}");
+            Issue updatedIssue = await UpdateIssueAsync(issue);
+            return _issueCnv.ConvertIssueToIssueDto(updatedIssue);
+        }
+
     }
 }

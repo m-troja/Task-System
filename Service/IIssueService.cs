@@ -20,6 +20,7 @@ namespace Task_System.Service
         Task<IssueDto> ChangeIssueStatusAsync(ChangeIssueStatusRequest req);
         Task<IssueDto> ChangeIssuePriorityAsync(ChangeIssuePriorityRequest req);
         Task<IssueDto> AssignTeamAsync(AssignTeamRequest req);
+        Task<IssueDto> UpdateDueDateAsync(UpdateDueDateRequest req);
         Task<IEnumerable<IssueDto>> GetAllIssuesByUserId(int userId);
         Task<IEnumerable<IssueDto>> GetAllIssuesByProjectId(int projectId);
         Task<int> GetIssueIdFromKey(string key);

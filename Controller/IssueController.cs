@@ -82,19 +82,27 @@ public class IssueController : ControllerBase
         return Ok(issueDto);
     }
 
-    [HttpPut("change-status")]
+    [HttpPut("update-status")]
     public async Task<ActionResult<IssueDto>> ChangeIssueStatus([FromBody] ChangeIssueStatusRequest req)
     {
-        l.log($"Received change issue status request: {req.IssueId}, {req.NewStatus}");
+        l.log($"Received update issue status request: {req.IssueId}, {req.NewStatus}");
         IssueDto issueDto = await _is.ChangeIssueStatusAsync(req);
         return Ok(issueDto);
     }
 
-    [HttpPut("change-priority")]
-    public async Task<ActionResult<IssueDto>> ChangeIssuePriority([FromBody] ChangeIssuePriorityRequest req)
+    [HttpPut("update-priority")]
+    public async Task<ActionResult<IssueDto>> UpdateIssuePriority([FromBody] ChangeIssuePriorityRequest req)
     {
-        l.log($"Received change issue priority request: {req.IssueId}, {req.NewPriority}");
+        l.log($"Received update issue priority request: {req.IssueId}, {req.NewPriority}");
         IssueDto issueDto = await _is.ChangeIssuePriorityAsync(req);
+        return Ok(issueDto);
+    }
+
+    [HttpPut("update-due-date")]
+    public async Task<ActionResult<IssueDto>> UpdateDueDate([FromBody] UpdateDueDateRequest req)
+    {
+        l.log($"Received update due date request: {req.IssueId}, {req.DueDate}");
+        IssueDto issueDto = await _is.UpdateDueDateAsync(req);
         return Ok(issueDto);
     }
 

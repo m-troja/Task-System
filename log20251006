@@ -1,0 +1,51 @@
+[2025-10-06 22:29:16 INF] Starting Task-System WebApplication...
+[2025-10-06 22:29:17 INF] Task-System WebApplication started successfully.
+[2025-10-06 22:29:17 WRN] Overriding address(es) 'http://localhost:8080'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+[2025-10-06 22:29:17 INF] Now listening on: http://0.0.0.0:8080
+[2025-10-06 22:29:17 INF] Application started. Press Ctrl+C to shut down.
+[2025-10-06 22:29:17 INF] Hosting environment: Development
+[2025-10-06 22:29:17 INF] Content root path: C:\Development_cs\Task-System
+[2025-10-06 22:31:28 DBG] [LoginService.Login] Received login request for test1@Test.com with pw strong_password
+[2025-10-06 22:31:28 DBG] [LoginService.LoginAsync] Attempting login for test1@test.com with pw strong_password
+[2025-10-06 22:31:28 DBG] [IssueController.OnConfiguring] DB_NAME: task-system, DB_HOST: localhost, DB_PORT: 5432, DB_USER: task_user
+[2025-10-06 22:31:28 DBG] [IssueController.OnConfiguring] Connecting to PostgreSQL at localhost:5432, Database: task-system, User: task_user
+[2025-10-06 22:31:29 DBG] [LoginService.ValidateCredentials] Hashed pw: Pvwq9fy7NqGPqLRVjBoLvMf3jqVg4ARImW+n/1Q39Zs=
+[2025-10-06 22:31:29 DBG] [LoginService.ValidateCredentials] User's salt: System.Byte[]
+[2025-10-06 22:31:29 DBG] [LoginService.ValidateCredentials] Found user test1@test.com
+[2025-10-06 22:31:29 DBG] [LoginService.ValidateCredentials] Login successful for test1@test.com
+[2025-10-06 22:31:29 DBG] [LoginService.Login] User User(Id=11, FirstName=Tester, LastName=Testowski, Email=test1@test.com) logged in successfully
+[2025-10-06 22:31:29 DBG] [JwtGenerator.GenerateAccessToken] Generating access token for userId 11
+[2025-10-06 22:31:29 DBG] [JwtGenerator.GenerateAccessToken] Access token: {"alg":"HS256","typ":"JWT"}.{"nameid":"11","nbf":1759782689,"exp":1759782989,"iat":1759782689,"iss":"Task-System","aud":"Task-System-Users"}
+[2025-10-06 22:31:29 DBG] [ActivityService.GetAccessTokenByUserId] Generated access token for user 11: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMSIsIm5iZiI6MTc1OTc4MjY4OSwiZXhwIjoxNzU5NzgyOTg5LCJpYXQiOjE3NTk3ODI2ODksImlzcyI6IlRhc2stU3lzdGVtIiwiYXVkIjoiVGFzay1TeXN0ZW0tVXNlcnMifQ.60mxNHNptxL4pw1Uhgy9gr-T8qMeoxUlkekfR5TwmUw
+[2025-10-06 22:31:29 DBG] [UserService.GetByIdAsync] Fetching user by id 11
+[2025-10-06 22:31:29 DBG] [UserService.GetByIdAsync] User fetched: User(Id=11, FirstName=Tester, LastName=Testowski, Email=test1@test.com)
+[2025-10-06 22:31:29 DBG] [JwtGenerator.GenerateRefreshToken] Refresh token: wYO6vkymEFsb8rNqXjc3H6yqnB7/JU0zQpYVQu+a3Qc=, expires: 10/13/2025 20:31:29
+[2025-10-06 22:31:29 DBG] [ActivityService.GenerateRefreshToken] Generated refresh token for userId 11: wYO6vkymEFsb8rNqXjc3H6yqnB7/JU0zQpYVQu+a3Qc=, expires: 10/13/2025 20:31:29
+[2025-10-06 22:33:44 DBG] [IssueController.UpdateDueDate] Received update due date request: 1, 10/15/2025 00:00:00
+[2025-10-06 22:33:44 DBG] [IssueService.GetIssueByIdAsync] Fetching issue entity for issueId 1
+[2025-10-06 22:33:44 DBG] [IssueController.OnConfiguring] DB_NAME: task-system, DB_HOST: localhost, DB_PORT: 5432, DB_USER: task_user
+[2025-10-06 22:33:44 DBG] [IssueController.OnConfiguring] Connecting to PostgreSQL at localhost:5432, Database: task-system, User: task_user
+[2025-10-06 22:33:44 DBG] [IssueService.GetIssueByIdAsync] Fetched issue: Task_System.Model.IssueFolder.Issue
+[2025-10-06 22:33:44 DBG] [IssueService.UpdateDueDateAsync] Set due date 10/15/2025 00:00:00 for issue 1
+[2025-10-06 22:33:44 DBG] [IssueService.UpdateIssueAsync] Updating issue 1
+[2025-10-06 22:33:52 DBG] [IssueController.UpdateDueDate] Received update due date request: 1, 10/16/2025 00:00:00
+[2025-10-06 22:33:52 DBG] [IssueService.GetIssueByIdAsync] Fetching issue entity for issueId 1
+[2025-10-06 22:33:52 DBG] [IssueController.OnConfiguring] DB_NAME: task-system, DB_HOST: localhost, DB_PORT: 5432, DB_USER: task_user
+[2025-10-06 22:33:52 DBG] [IssueController.OnConfiguring] Connecting to PostgreSQL at localhost:5432, Database: task-system, User: task_user
+[2025-10-06 22:33:52 DBG] [IssueService.GetIssueByIdAsync] Fetched issue: Task_System.Model.IssueFolder.Issue
+[2025-10-06 22:33:52 DBG] [IssueService.UpdateDueDateAsync] Set due date 10/16/2025 00:00:00 for issue 1
+[2025-10-06 22:33:52 DBG] [IssueService.UpdateIssueAsync] Updating issue 1
+[2025-10-06 22:34:09 DBG] [IssueController.UpdateDueDate] Received update due date request: 1, 10/16/2025 03:00:00
+[2025-10-06 22:34:09 DBG] [IssueService.GetIssueByIdAsync] Fetching issue entity for issueId 1
+[2025-10-06 22:34:09 DBG] [IssueController.OnConfiguring] DB_NAME: task-system, DB_HOST: localhost, DB_PORT: 5432, DB_USER: task_user
+[2025-10-06 22:34:09 DBG] [IssueController.OnConfiguring] Connecting to PostgreSQL at localhost:5432, Database: task-system, User: task_user
+[2025-10-06 22:34:09 DBG] [IssueService.GetIssueByIdAsync] Fetched issue: Task_System.Model.IssueFolder.Issue
+[2025-10-06 22:34:09 DBG] [IssueService.UpdateDueDateAsync] Set due date 10/16/2025 03:00:00 for issue 1
+[2025-10-06 22:34:09 DBG] [IssueService.UpdateIssueAsync] Updating issue 1
+[2025-10-06 22:34:20 DBG] [IssueController.UpdateDueDate] Received update due date request: 1, 10/16/2025 03:00:00
+[2025-10-06 22:34:20 DBG] [IssueService.GetIssueByIdAsync] Fetching issue entity for issueId 1
+[2025-10-06 22:34:20 DBG] [IssueController.OnConfiguring] DB_NAME: task-system, DB_HOST: localhost, DB_PORT: 5432, DB_USER: task_user
+[2025-10-06 22:34:20 DBG] [IssueController.OnConfiguring] Connecting to PostgreSQL at localhost:5432, Database: task-system, User: task_user
+[2025-10-06 22:34:20 DBG] [IssueService.GetIssueByIdAsync] Fetched issue: Task_System.Model.IssueFolder.Issue
+[2025-10-06 22:34:20 DBG] [IssueService.UpdateDueDateAsync] Set due date 10/16/2025 03:00:00 for issue 1
+[2025-10-06 22:34:20 DBG] [IssueService.UpdateIssueAsync] Updating issue 1
