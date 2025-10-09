@@ -5,3 +5,7 @@ bin
 obj
 publish
 appsettings.Development.json
+/Properties/PublishProfiles
+/log20251009
+*.user
+/Log
