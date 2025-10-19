@@ -17,6 +17,12 @@ public class TestController : ControllerBase
     private readonly IUserService _us;
     private readonly UserCnv _userCnv;
 
+    [HttpGet("deploy")]
+    public async Task<ActionResult<String>> TestDeploy()
+    {
+         l.LogInformation("Deploy endpoint hit");
+        return Ok("Test successful"); 
+    }
 
     [HttpGet("profile")]
     public async Task<ActionResult<UserDto>> GetProfileByAccessToken()
