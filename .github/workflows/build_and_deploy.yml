@@ -32,9 +32,12 @@ jobs:
       - name: Upload build via rsync
         run: |
           VERSION=${{ steps.gitversion.outputs.fullSemVer }}
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p '${{ secrets.WORK_DIR }}/$VERSION'"
-          unlink -f latest
-          ln -s $VERSION latest
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          mkdir -p '${{ secrets.WORK_DIR }}/$VERSION';
+          if [ -L '${{ secrets.WORK_DIR }}/latest' ]; then
+            unlink '${{ secrets.WORK_DIR }}/latest';
+          fi
+          ln -s '$VERSION' '${{ secrets.WORK_DIR }}/latest' "
           rsync -avz /home/runner/work/Task-System/Task-System/bin/Release/net9.0/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/$VERSION/
       
       - name: Cleanup
