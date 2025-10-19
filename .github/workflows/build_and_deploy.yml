@@ -33,7 +33,7 @@ jobs:
         run: |
           VERSION=${{ steps.gitversion.outputs.fullSemVer }}
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p '${{ secrets.WORK_DIR }}/$VERSION'"
-          unlink latest
+          unlink -f latest
           ln -s $VERSION latest
           rsync -avz /home/runner/work/Task-System/Task-System/bin/Release/net9.0/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/$VERSION/
       
