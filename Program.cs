@@ -117,9 +117,10 @@ try
     // -------------------
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    builder.WebHost.UseUrls($"http://localhost:{_HttpPort}");
 
+    // App HttpPort
     var app = builder.Build();
+    builder.WebHost.UseUrls($"http://0.0.0.0:{_HttpPort}");
 
     if (app.Environment.IsDevelopment())
     {
