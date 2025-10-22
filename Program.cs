@@ -14,6 +14,7 @@ using Task_System.Service.Impl;
 // Load env variables
 DotNetEnv.Env.Load("dev.env");
 var _LogDir = Environment.GetEnvironmentVariable("TS_LOG_DIR") ?? "/home/michal";
+var _HttpPort = Environment.GetEnvironmentVariable("TS_HTTP_PORT") ?? "6901";
 
 // -------------------
 // Configure Serilog
@@ -116,7 +117,7 @@ try
     // -------------------
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    builder.WebHost.UseUrls("http://localhost:8080");
+    builder.WebHost.UseUrls($"http://localhost:{_HttpPort}");
 
     var app = builder.Build();
 
