@@ -118,8 +118,23 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
+    // ALLOW CORS
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll",
+            policy => policy
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+    });
+
+
     // App HttpPort
     var app = builder.Build();
+
+    // CORS
+    app.UseCors("AllowAll");
+
     builder.WebHost.UseUrls($"http://0.0.0.0:{_HttpPort}");
 
     if (app.Environment.IsDevelopment())
