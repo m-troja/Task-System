@@ -66,35 +66,12 @@ namespace Task_System.Migrations
                     email = table.Column<string>(type: "text", nullable: false),
                     password = table.Column<string>(type: "text", nullable: false),
                     salt = table.Column<byte[]>(type: "bytea", nullable: false),
-                    refresh_token = table.Column<string>(type: "text", nullable: true)
+                    refresh_token = table.Column<string>(type: "text", nullable: true),
+                    disabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_users", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TeamUsers",
-                columns: table => new
-                {
-                    team_id = table.Column<int>(type: "integer", nullable: false),
-                    user_id = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_team_users", x => new { x.team_id, x.user_id });
-                    table.ForeignKey(
-                        name: "fk_team_users_teams_team_id",
-                        column: x => x.team_id,
-                        principalTable: "teams",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_team_users_users_user_id",
-                        column: x => x.user_id,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -164,6 +141,30 @@ namespace Task_System.Migrations
                     table.ForeignKey(
                         name: "fk_role_user_users_users_id",
                         column: x => x.users_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "team_user",
+                columns: table => new
+                {
+                    team_id = table.Column<int>(type: "integer", nullable: false),
+                    user_id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_team_user", x => new { x.team_id, x.user_id });
+                    table.ForeignKey(
+                        name: "fk_team_user_teams_team_id",
+                        column: x => x.team_id,
+                        principalTable: "teams",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_team_user_users_user_id",
+                        column: x => x.user_id,
                         principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -250,8 +251,8 @@ namespace Task_System.Migrations
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false),
-                    from_id = table.Column<int>(type: "integer", nullable: false),
-                    to_id = table.Column<int>(type: "integer", nullable: false)
+                    old_value = table.Column<string>(type: "text", nullable: false),
+                    new_value = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -272,11 +273,6 @@ namespace Task_System.Migrations
                     { 1, "ROLE_USER" },
                     { 2, "ROLE_ADMIN" }
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_team_users_user_id",
-                table: "TeamUsers",
-                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_activities_issue_id",
@@ -328,14 +324,16 @@ namespace Task_System.Migrations
                 name: "ix_role_user_users_id",
                 table: "role_user",
                 column: "users_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_team_user_user_id",
+                table: "team_user",
+                column: "user_id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "TeamUsers");
-
             migrationBuilder.DropTable(
                 name: "activity_property_updated");
 
@@ -347,6 +345,9 @@ namespace Task_System.Migrations
 
             migrationBuilder.DropTable(
                 name: "role_user");
+
+            migrationBuilder.DropTable(
+                name: "team_user");
 
             migrationBuilder.DropTable(
                 name: "activities");

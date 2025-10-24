@@ -24,6 +24,7 @@ namespace Task_System.Service.Impl
         private readonly ILogger<IssueService> l;
         private readonly ITeamService _teamService;
         private IActivityService _activityService;
+        private int SystemUserId = -1;
 
         public IssueService(PostgresqlDbContext db, IUserService userService, CommentCnv commentCnv, IssueCnv issueCnv, IProjectService projectService, ILogger<IssueService> l, ITeamService teamService, IActivityService activityService)
         {
@@ -41,8 +42,10 @@ namespace Task_System.Service.Impl
         {
             l.log($"Starting issue creation for authorId: {cir.AssigneeId}, projectId: {cir.ProjectId}");
 
-            var author = await _userService.GetByIdAsync(cir.AuthorId);
-            User? assignee = cir.AssigneeId.HasValue ? await _userService.GetByIdAsync(cir.AssigneeId.Value) : null;
+            User author = await _userService.GetByIdAsync(cir.AuthorId);
+            int AuthorIdToSet = cir.AuthorId != 0 ? cir.AuthorId : SystemUserId;
+            var authorToSet = author != null ? author : await _userService.GetByIdAsync(SystemUserId);
+            User ? assignee = cir.AssigneeId.HasValue ? await _userService.GetByIdAsync(cir.AssigneeId.Value) : null;
 
             DateTime? dueDateUtc = null;
             if (!string.IsNullOrEmpty(cir.DueDate))
@@ -80,8 +83,8 @@ namespace Task_System.Service.Impl
                     Title = cir.Title,
                     Description = cir.Description,
                     Priority = !string.IsNullOrEmpty(cir.Priority) ? Enum.Parse<IssuePriority>(cir.Priority) : null,
-                    Author = author,
-                    AuthorId = author.Id,
+                    Author = authorToSet,
+                    AuthorId = AuthorIdToSet,
                     Assignee = assignee,
                     AssigneeId = assignee?.Id,
                     DueDate = dueDateUtc,
@@ -103,6 +106,8 @@ namespace Task_System.Service.Impl
                 await transaction.CommitAsync();
                 
                 l.log($"Keystring {issue.Key.KeyString} for id {issue.Id} and IdInsideProject {issue.IdInsideProject}");
+
+                var activity = await _activityService.CreateActivityPropertyCreatedAsync(ActivityType.CREATED_ISSUE, issue.Id);
             }
             catch (System.Exception )
             {
@@ -191,12 +196,12 @@ namespace Task_System.Service.Impl
             l.log($"Fetched new assignee: {newAssignee}");
             Issue issue = await GetIssueByIdAsync(air.IssueId);
             User? oldAssignee = null;
-            if (issue.AssigneeId.HasValue) {
+            if (issue.AssigneeId.HasValue && issue.AssigneeId != 0) {
                 oldAssignee = await _userService.GetByIdAsync(issue.AssigneeId.Value);  }
             else  {
-                l.log("Old assignee was null, creating dummy user for activity log");
-                oldAssignee = new User { Id = 0, FirstName = "System User"};
-            }
+                l.log("Old assignee was null or 0, assigning to system user for activity log");
+                oldAssignee = await _userService.GetByIdAsync(SystemUserId);
+            };
             issue.Assignee = newAssignee;
             issue.AssigneeId = newAssignee.Id;
             l.log($"Set assignee {issue.Assignee} for issue {issue.Id}");
@@ -207,7 +212,7 @@ namespace Task_System.Service.Impl
             IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(updatedIssue);
             l.log($"Converted updated issue to DTO: {issueDto}");
 
-            var activity = await _activityService.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_ASSIGNEE, oldAssignee.Id, newAssignee.Id, issue.Id);
+            var activity = await _activityService.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_ASSIGNEE, (oldAssignee.Id).ToString(), (newAssignee.Id).ToString(), issue.Id);
             return issueDto;
         }
 
@@ -269,26 +274,37 @@ namespace Task_System.Service.Impl
             }
 
             Issue issue = await GetIssueByIdAsync(req.IssueId);
+            IssueStatus oldStatus = issue.Status;
             issue.Status = Enum.Parse<IssueStatus>(req.NewStatus);
 
             var UpdatedIssue = await UpdateIssueAsync(issue);
             IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(UpdatedIssue);
+            
+            var activity = await _activityService.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_STATUS, ((int)oldStatus).ToString(), ((int)issue.Status).ToString(), issue.Id);
+
             return issueDto;
         }
 
         public async Task<IssueDto> ChangeIssuePriorityAsync(ChangeIssuePriorityRequest req)
         {
             l.log($"Changing priority of issue {req.IssueId} to {req.NewPriority}");
-            if (req.NewPriority == null) throw new ArgumentException("NewPriority cannot be null");
-            if (req.IssueId <= 0) throw new ArgumentException("IssueId must be positive");
+            if (req.NewPriority == null) throw new ArgumentException("NewPriority cannot be empty");
+            if (req.IssueId <= 0) throw new ArgumentException("IssueId must be greater than 0");
             if (!Enum.TryParse<IssuePriority>(req.NewPriority, true, out var newPriority) || !Enum.IsDefined(typeof(IssuePriority), newPriority))
             {
                 throw new ArgumentException($"Invalid issue priority: {req.NewPriority}");
             }
             Issue issue = await GetIssueByIdAsync(req.IssueId);
+            IssuePriority? oldPriority = issue.Priority;
             issue.Priority = Enum.Parse<IssuePriority>(req.NewPriority);
             var UpdatedIssue = await UpdateIssueAsync(issue);
             IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(UpdatedIssue);
+            var activity = await _activityService.CreateActivityPropertyUpdatedAsync(
+                ActivityType.UPDATED_PRIORITY, 
+                oldPriority.HasValue ? ((int)oldPriority.Value).ToString() : "-1", 
+                ((int)issue.Priority).ToString(), 
+                issue.Id);
+
             return issueDto;
         }
 

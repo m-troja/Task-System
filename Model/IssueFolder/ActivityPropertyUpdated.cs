@@ -4,14 +4,16 @@ namespace Task_System.Model.IssueFolder;
 
 public class ActivityPropertyUpdated : Activity
 {
-    public int FromId { get; set; }
-    public int ToId { get; set; }
+    public string OldValue { get; set; } = string.Empty;
+    public string NewValue { get; set; } = string.Empty;
 
-    public ActivityPropertyUpdated(int fromId, int toId, int IssueId, ActivityType Type) : base(Type, IssueId)
+    public ActivityPropertyUpdated(string FromStringProperty, string ToStringProperty, int IssueId, ActivityType Type) : base(Type, IssueId)
     {
-        this.FromId = fromId;
-        this.ToId = toId;
+        this.OldValue = FromStringProperty;
+        this.NewValue = ToStringProperty;
         this.Type = Type;
         this.IssueId = IssueId;
     }
+
+    public ActivityPropertyUpdated() { }
 }

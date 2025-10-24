@@ -133,6 +133,10 @@ namespace Task_System.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Disabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("disabled");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text")
@@ -345,7 +349,7 @@ namespace Task_System.Migrations
                     b.ToTable("projects", (string)null);
                 });
 
-            modelBuilder.Entity("TeamUser", b =>
+            modelBuilder.Entity("team_user", b =>
                 {
                     b.Property<int>("TeamId")
                         .HasColumnType("integer")
@@ -356,25 +360,27 @@ namespace Task_System.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("TeamId", "UserId")
-                        .HasName("pk_team_users");
+                        .HasName("pk_team_user");
 
                     b.HasIndex("UserId")
-                        .HasDatabaseName("ix_team_users_user_id");
+                        .HasDatabaseName("ix_team_user_user_id");
 
-                    b.ToTable("TeamUsers", (string)null);
+                    b.ToTable("team_user", (string)null);
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.ActivityPropertyUpdated", b =>
                 {
                     b.HasBaseType("Task_System.Model.Entity.Activity");
 
-                    b.Property<int>("FromId")
-                        .HasColumnType("integer")
-                        .HasColumnName("from_id");
+                    b.Property<string>("NewValue")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("new_value");
 
-                    b.Property<int>("ToId")
-                        .HasColumnType("integer")
-                        .HasColumnName("to_id");
+                    b.Property<string>("OldValue")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("old_value");
 
                     b.ToTable("activity_property_updated", (string)null);
                 });
@@ -487,21 +493,21 @@ namespace Task_System.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("TeamUser", b =>
+            modelBuilder.Entity("team_user", b =>
                 {
                     b.HasOne("Task_System.Model.Entity.Team", null)
                         .WithMany()
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_team_users_teams_team_id");
+                        .HasConstraintName("fk_team_user_teams_team_id");
 
                     b.HasOne("Task_System.Model.Entity.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_team_users_users_user_id");
+                        .HasConstraintName("fk_team_user_users_user_id");
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.ActivityPropertyUpdated", b =>

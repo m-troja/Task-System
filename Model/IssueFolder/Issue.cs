@@ -3,13 +3,14 @@ using Task_System.Service;
 
 namespace Task_System.Model.IssueFolder
 {
-    public class Issue : Activityable, IAutomaticDates
+    public class Issue :  IAutomaticDates
     {
         public int Id { get; set; }
         public int IdInsideProject { get; set; } = 0!;
         public int ProjectId { get; set; } = 0!;
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
+        public User Author { get;  set; } = null!;
         public int AuthorId { get; set; }      // FK
         public int? AssigneeId { get; set; }   // FK
         public DateTime? UpdatedAt { get; set; }  // UTC
@@ -23,8 +24,10 @@ namespace Task_System.Model.IssueFolder
         public ICollection<Activity> Activities { get; set; } = new List<Activity>();
         public Team? Team { get; set; } = null!;
         public int? TeamId { get; set; } = null!;
+        public DateTime CreatedAt { get ; set ; }
+
         public Issue(string title, string? description, IssuePriority? priority,  User author, User? assignee, DateTime? dueDate, 
-            int authorId, int? assigneeId, int projectId, int idInsideProject) : base(author)
+            int authorId, int? assigneeId, int projectId, int idInsideProject, User Author)
         {
             Title = title;
             Description = description;
@@ -37,7 +40,7 @@ namespace Task_System.Model.IssueFolder
             ProjectId = projectId;
             IdInsideProject = idInsideProject;
         }
-        public Issue() : base(null!) { }
+        public Issue()  { }
 
     }
 }

@@ -5,5 +5,7 @@ namespace Task_System.Service;
 
 public interface IActivityService
 {
-    public Task<ActivityPropertyUpdated> CreateActivityPropertyUpdatedAsync(ActivityType Type, int fromId, int toId, int issueId);
+    public Task<ActivityPropertyUpdated> CreateActivityPropertyUpdatedAsync(ActivityType Type, string OldValue, string NewValue, int issueId);
+    public Task<ActivityPropertyCreated> CreateActivityPropertyCreatedAsync(ActivityType Type, int issueId);
+
 }

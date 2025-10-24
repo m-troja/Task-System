@@ -27,7 +27,7 @@ public class PostgresqlDbContext : DbContext
     {
         this.l = l;
     }
-  
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         DotNetEnv.Env.Load("dev.env");
@@ -36,6 +36,11 @@ public class PostgresqlDbContext : DbContext
         var dbPort = Environment.GetEnvironmentVariable("TS_DB_PORT") ?? "5432";
         var dbUser = Environment.GetEnvironmentVariable("TS_DB_USER") ?? "postgres";
         var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "postgres";
+
+        l.log($"DB_NAME: {dbName}, DB_HOST: {dbHost}, DB_PORT: {dbPort}, DB_USER: {dbUser}");
+
+        Console.WriteLine($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
+        l.log($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
         if (!optionsBuilder.IsConfigured)
         {
             var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
@@ -66,6 +71,12 @@ public class PostgresqlDbContext : DbContext
           .WithMany(u => u.AuthoredIssues)
           .HasForeignKey("AuthorId")
           .OnDelete(DeleteBehavior.Restrict);
+
+        // Seed roles
+        modelBuilder.Entity<Role>().HasData(
+        new Role { Id = 1, Name = "ROLE_USER" },
+        new Role { Id = 2, Name = "ROLE_ADMIN" }
+       );
 
         // COMMENT - relationships to USER (Author) and ISSUE (Issue)
         modelBuilder.Entity<Comment>()
@@ -103,12 +114,12 @@ public class PostgresqlDbContext : DbContext
                     .OnDelete(DeleteBehavior.Cascade);
 
         // ACTIVITY - Table per type mapping
-        modelBuilder.Entity<Activity>().ToTable("activities"); 
-        modelBuilder.Entity<ActivityPropertyUpdated>().HasBaseType<Activity>().ToTable("activity_property_updated"); 
+        modelBuilder.Entity<Activity>().ToTable("activities");
+        modelBuilder.Entity<ActivityPropertyUpdated>().ToTable("activity_property_updated");
 
         // ISSUE - relationship to TEAM (Team)
         modelBuilder.Entity<Issue>()
-            .HasOne( i => i.Team)
+            .HasOne(i => i.Team)
             .WithMany(t => t.Issues)
             .HasForeignKey(i => i.TeamId)
             .OnDelete(DeleteBehavior.SetNull);
@@ -118,7 +129,7 @@ public class PostgresqlDbContext : DbContext
         .HasMany(t => t.Users)
         .WithMany(u => u.Teams)
         .UsingEntity<Dictionary<string, object>>(
-        "TeamUser",
+        "team_user",
         j => j.HasOne<User>()
               .WithMany()
               .HasForeignKey("UserId")
@@ -129,20 +140,11 @@ public class PostgresqlDbContext : DbContext
               .OnDelete(DeleteBehavior.Cascade),
         j =>
         {
-            j.HasKey("TeamId", "UserId"); 
-            j.ToTable("TeamUsers");      
+            j.HasKey("TeamId", "UserId");
+            j.ToTable("team_user");
         }
     );
-        // Seed Roles
-        modelBuilder.Entity<Role>().HasData(
-        new Role { Id = 1, Name = "ROLE_USER" },
-        new Role { Id = 2, Name = "ROLE_ADMIN" }
-        );
 
-        // Seed System User
-        modelBuilder.Entity<User>().HasData(
-            new User { Id = 0, FirstName = "System", LastName = "User", Email = "System@user.com", Password = "password", Disabled =  true}
-       );
     }
 
     // Automatically set CreatedAt for entities implementing IAutomaticDates
