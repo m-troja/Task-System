@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Task_System.Log;
 using Task_System.Model;
@@ -11,6 +12,7 @@ using Task_System.Service.Impl;
 
 namespace Task_System.Controller
 {
+    [Authorize]
     [ApiController]
     [Route("api/v1/team")]
     public class TeamController : ControllerBase

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Sprache;
 using Task_System.Model.DTO;
 using Task_System.Model.Request;
@@ -7,6 +8,7 @@ using Task_System.Service;
 
 namespace Task_System.Controller;
 
+[Authorize]
 [ApiController]
 [Route("api/v1/comment")]
 public class CommentController : ControllerBase

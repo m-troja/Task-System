@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Task_System.Model.DTO;
 using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Request;
@@ -6,6 +7,7 @@ using Task_System.Service;
 
 namespace Task_System.Controller;
 
+[Authorize]
 [ApiController]
 [Route("api/v1/project")]
 public class ProjectController : ControllerBase

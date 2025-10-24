@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Task_System.Controller;
 
+[Authorize]
 [ApiController]
 [Route("api/v1/issue")]
-
 public class IssueController : ControllerBase
 {
     private readonly IIssueService _is;
@@ -39,7 +39,6 @@ public class IssueController : ControllerBase
         return Ok(response);
     }
 
-    [Authorize]
     [HttpGet("key/{key}")]
     public async Task<ActionResult<IssueDto>> GetIssueByKey(string key)
     {

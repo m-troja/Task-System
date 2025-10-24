@@ -5,27 +5,26 @@ using Task_System.Model.Response;
 using Task_System.Service;
 using Task_System.Service.Impl;
 using Task_System.Log;
-namespace Task_System.Controller
+namespace Task_System.Controller;
+
+[ApiController]
+[Route("api/v1/register")]
+public class RegisterController : ControllerBase
 {
-    [ApiController]
-    [Route("api/v1/register")]
-    public class RegisterController : ControllerBase
+    private readonly IRegisterService _rs;
+    private readonly ILogger<RegisterController> l;
+
+    [HttpPost]
+    public async Task<ActionResult<Response>> RegisterUser(RegistrationRequest rr)
     {
-        private readonly IRegisterService _rs;
-        private readonly ILogger<RegisterController> l;
+        l.log($"Received registration request: {rr}");
+        await _rs.Register(rr);
+        return await Task.FromResult(new Response(ResponseType.REGISTRATION_OK, rr.Email) );
+    }
 
-        [HttpPost]
-        public async Task<ActionResult<Response>> RegisterUser(RegistrationRequest rr)
-        {
-            l.log($"Received registration request: {rr}");
-            await _rs.Register(rr);
-            return await Task.FromResult(new Response(ResponseType.REGISTRATION_OK, rr.Email) );
-        }
-
-        public RegisterController(IRegisterService rs, ILogger<RegisterController> l)
-        {
-            _rs = rs;
-            this.l = l;
-        }
+    public RegisterController(IRegisterService rs, ILogger<RegisterController> l)
+    {
+        _rs = rs;
+        this.l = l;
     }
 }
