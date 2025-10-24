@@ -13,7 +13,7 @@ namespace Task_System.Model.IssueFolder
         public User Author { get;  set; } = null!;
         public int AuthorId { get; set; }      // FK
         public int? AssigneeId { get; set; }   // FK
-        public DateTime? UpdatedAt { get; set; }  // UTC
+        public DateTime? UpdatedAt { get; set; }  = DateTime.UtcNow;
         public DateTime? DueDate { get; set; }    // UTC
         public IssueStatus Status { get; set; } = IssueStatus.NEW;
         public IssuePriority? Priority { get; set; }
