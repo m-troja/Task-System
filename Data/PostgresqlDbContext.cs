@@ -67,12 +67,6 @@ public class PostgresqlDbContext : DbContext
           .HasForeignKey("AuthorId")
           .OnDelete(DeleteBehavior.Restrict);
 
-        // Seed roles
-        modelBuilder.Entity<Role>().HasData(
-        new Role { Id = 1, Name = "ROLE_USER" },
-        new Role { Id = 2, Name = "ROLE_ADMIN" }
-       );
-
         // COMMENT - relationships to USER (Author) and ISSUE (Issue)
         modelBuilder.Entity<Comment>()
             .HasOne(c => c.Issue)
@@ -139,7 +133,16 @@ public class PostgresqlDbContext : DbContext
             j.ToTable("TeamUsers");      
         }
     );
+        // Seed Roles
+        modelBuilder.Entity<Role>().HasData(
+        new Role { Id = 1, Name = "ROLE_USER" },
+        new Role { Id = 2, Name = "ROLE_ADMIN" }
+        );
 
+        // Seed System User
+        modelBuilder.Entity<User>().HasData(
+            new User { Id = 0, FirstName = "System", LastName = "User", Email = "System@user.com", Password = "password", Disabled =  true}
+       );
     }
 
     // Automatically set CreatedAt for entities implementing IAutomaticDates

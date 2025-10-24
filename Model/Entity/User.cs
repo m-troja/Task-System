@@ -11,6 +11,7 @@ namespace Task_System.Model.Entity
         public string Password { get; set; } = null!;
         public byte[] Salt { get; set; } = null!;
         public string? RefreshToken { get; set; } = null!;
+        public Boolean Disabled { get; set; } = false;
         public ICollection<Role> Roles { get; set; } = new List<Role>();
         public ICollection<Team> Teams { get; set; } = new List<Team>();
         public ICollection<Issue> AssignedIssues { get; set; } = new List<Issue>();
