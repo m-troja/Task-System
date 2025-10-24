@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
+using System.Text;
 using Task_System.Controller;
+using Task_System.Log;
 using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
 using Task_System.Service;
-using Task_System.Log;
 
 namespace Task_System.Data;
 
@@ -71,12 +72,6 @@ public class PostgresqlDbContext : DbContext
           .WithMany(u => u.AuthoredIssues)
           .HasForeignKey("AuthorId")
           .OnDelete(DeleteBehavior.Restrict);
-
-        // Seed roles
-        modelBuilder.Entity<Role>().HasData(
-        new Role { Id = 1, Name = "ROLE_USER" },
-        new Role { Id = 2, Name = "ROLE_ADMIN" }
-       );
 
         // COMMENT - relationships to USER (Author) and ISSUE (Issue)
         modelBuilder.Entity<Comment>()
@@ -145,7 +140,17 @@ public class PostgresqlDbContext : DbContext
         }
     );
 
+        // Seed roles
+        modelBuilder.Entity<Role>().HasData(
+        new Role { Id = 1, Name = "ROLE_USER" },
+        new Role { Id = 2, Name = "ROLE_ADMIN" }
+       );
+
+        // Seed System user
+        modelBuilder.Entity<User>().HasData(
+            new User { Id= -1, FirstName = "System User", LastName = "System User", Email = "system.user@tasksystem.com", Password = "Password", Salt = Encoding.UTF8.GetBytes("W W=èÔUÌ-§ÂNï^ÎX"), Disabled = true });
     }
+
 
     // Automatically set CreatedAt for entities implementing IAutomaticDates
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
