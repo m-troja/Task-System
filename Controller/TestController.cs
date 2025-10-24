@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using Task_System.Log;
 using Task_System.Model.DTO;
@@ -17,11 +18,22 @@ public class TestController : ControllerBase
     private readonly IUserService _us;
     private readonly UserCnv _userCnv;
 
-    [HttpGet("deploy")]
-    public async Task<ActionResult<String>> TestDeploy()
+    [HttpGet("env")]
+    public ActionResult<String> TestDeploy()
     {
-         l.LogInformation("Deploy endpoint hit");
-        return Ok("Test successful"); 
+        //Env vars check
+        string env = "";
+        foreach (System.Collections.DictionaryEntry envVar in Environment.GetEnvironmentVariables())
+        {
+            string key = envVar.Key.ToString() ?? "";
+            if (key.StartsWith("TS_"))
+            {
+                env = env + envVar.Key + " = " + envVar.Value + "\n";
+                l.log($"EnvVar: {envVar.Key} = {envVar.Value}");
+            }
+
+        }
+        return Ok(env); 
     }
 
     [HttpGet("profile")]
