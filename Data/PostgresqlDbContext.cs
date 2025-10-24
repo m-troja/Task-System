@@ -20,6 +20,7 @@ public class PostgresqlDbContext : DbContext
     public DbSet<Project> Projects { get; set; }
     public DbSet<Key> Keys { get; set; }
     public DbSet<Activity> Activities { get; set; }
+    public DbSet<ActivityPropertyUpdated> ActivitiesPropertyUpdated { get; set; }
     public DbSet<Team> Teams { get; set; }
     public PostgresqlDbContext(DbContextOptions<PostgresqlDbContext> options, ILogger<IssueController> l)
         : base(options)
@@ -35,11 +36,6 @@ public class PostgresqlDbContext : DbContext
         var dbPort = Environment.GetEnvironmentVariable("TS_DB_PORT") ?? "5432";
         var dbUser = Environment.GetEnvironmentVariable("TS_DB_USER") ?? "postgres";
         var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "postgres";
-
-        l.log($"DB_NAME: {dbName}, DB_HOST: {dbHost}, DB_PORT: {dbPort}, DB_USER: {dbUser}");
-        
-        Console.WriteLine($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
-        l.log($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
         if (!optionsBuilder.IsConfigured)
         {
             var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
@@ -106,11 +102,15 @@ public class PostgresqlDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         // ACTIVITY - relationship to ISSUE (Issue)
-        modelBuilder.Entity<Activity>()
-            .HasOne(a => a.Issue)
-            .WithMany(i => i.Activities)
-            .HasForeignKey(a => a.IssueId)
-            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Issue>()
+                    .HasMany(i => i.Activities)
+                    .WithOne(a => a.Issue)
+                    .HasForeignKey(a => a.IssueId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+        // ACTIVITY - Table per type mapping
+        modelBuilder.Entity<Activity>().ToTable("activities"); 
+        modelBuilder.Entity<ActivityPropertyUpdated>().HasBaseType<Activity>().ToTable("activity_property_updated"); 
 
         // ISSUE - relationship to TEAM (Team)
         modelBuilder.Entity<Issue>()

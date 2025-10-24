@@ -8,45 +8,16 @@ public class ActivityService : IActivityService
 {
     private readonly PostgresqlDbContext _db;
     private readonly ILogger<ActivityService> l;
-    public async Task NewAssignIssueActivity(User oldAssignee, Issue issue)
+
+    public async Task<ActivityPropertyUpdated> CreateActivityPropertyUpdatedAsync(ActivityType Type, int fromId, int toId, int issueId)
     {
-        l.log($"Logging new assign issue activity for {issue}, old assignee {oldAssignee}");
-
-        string text = issue.Assignee == null 
-            ? $"Issue unassigned from {oldAssignee.FirstName} {oldAssignee.LastName}" 
-            : $"Issue assigned from {oldAssignee.FirstName} {oldAssignee.LastName} to {issue.Assignee.FirstName} {issue.Assignee.LastName}";
-        User author = issue.Assignee == null ? oldAssignee : issue.Assignee;
-
-        // No new assignee, no activity to log
-        var activity = new Activity(
-          ActivityType.TICKET_ASSIGNED,
-          text,
-          author,
-          issue
-        );
-        await _db.Activities.AddAsync(activity);
+        l.log($"Creating ActivityPropertyUpdated: Type={Type}, fromId={fromId}, toId={toId}, issueId={issueId}");
+        var activity = new ActivityPropertyUpdated(fromId, toId, issueId, Type);
+        _db.Activities.Add(activity);
         await _db.SaveChangesAsync();
+        return activity;
     }
 
-    public Task NewCreateIssueActivity(Issue issue)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task NewSetDueDateActivity(Issue issue)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task NewSetPriorityActivity(Issue issue)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task NewSetStatusActivity(Issue issue)
-    {
-        throw new NotImplementedException();
-    }
 
     public ActivityService(PostgresqlDbContext db, ILogger<ActivityService> l)
     {

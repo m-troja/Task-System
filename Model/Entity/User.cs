@@ -29,6 +29,7 @@ namespace Task_System.Model.Entity
             Roles = roles;
         }
 
+        public User(int id, string firstName) { }
         public User()
         {
         }

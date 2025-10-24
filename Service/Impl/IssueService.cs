@@ -191,9 +191,11 @@ namespace Task_System.Service.Impl
             l.log($"Fetched new assignee: {newAssignee}");
             Issue issue = await GetIssueByIdAsync(air.IssueId);
             User? oldAssignee = null;
-            if (issue.AssigneeId.HasValue)
-            {
-                oldAssignee = await _userService.GetByIdAsync(issue.AssigneeId.Value);
+            if (issue.AssigneeId.HasValue) {
+                oldAssignee = await _userService.GetByIdAsync(issue.AssigneeId.Value);  }
+            else  {
+                l.log("Old assignee was null, creating dummy user for activity log");
+                oldAssignee = new User { Id = 0, FirstName = "System User"};
             }
             issue.Assignee = newAssignee;
             issue.AssigneeId = newAssignee.Id;
@@ -205,12 +207,7 @@ namespace Task_System.Service.Impl
             IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(updatedIssue);
             l.log($"Converted updated issue to DTO: {issueDto}");
 
-            if ( oldAssignee == null)
-            {
-                l.log("Old assignee was null, creating dummy user for activity log");
-                oldAssignee = new User { FirstName = "Dummy Firstname", LastName = "Dummy Lastname" };
-            }
-            await _activityService.NewAssignIssueActivity(oldAssignee, issue);
+            var activity = await _activityService.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_ASSIGNEE, oldAssignee.Id, newAssignee.Id, issue.Id);
             return issueDto;
         }
 

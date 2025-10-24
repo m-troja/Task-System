@@ -2,21 +2,20 @@
 
 namespace Task_System.Model.Entity;
 
-public class Activity : Activityable
+public abstract class Activity
 {
     public int Id { get; set; }
-    public ActivityType ActivityType { get; set; }
-    public string Text { get; set; } = null!;
-    public int IssueId { get; set; } // FK
+    public ActivityType Type { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public Issue Issue { get; set; } = null!;
+    public int IssueId { get; set; }
 
-    public Activity(ActivityType activityType, string text, User author, Issue issue) : base(author)
+
+    protected Activity(ActivityType type, int IssueId)
     {
-        ActivityType = activityType;
-        Text = text;
-        Issue = issue;
-        IssueId = issue.Id;
+        this.IssueId = IssueId;
+        this.Type = type;
     }
 
-    public Activity() : base(null!) { }
+    protected Activity() { }
 }

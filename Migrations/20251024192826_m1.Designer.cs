@@ -12,8 +12,8 @@ using Task_System.Data;
 namespace Task_System.Migrations
 {
     [DbContext(typeof(PostgresqlDbContext))]
-    [Migration("20250908080307_m3")]
-    partial class m3
+    [Migration("20251024192826_m1")]
+    partial class m1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,37 +53,26 @@ namespace Task_System.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ActivityType")
-                        .HasColumnType("integer")
-                        .HasColumnName("activity_type");
-
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("integer")
-                        .HasColumnName("author_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
                     b.Property<int>("IssueId")
                         .HasColumnType("integer")
                         .HasColumnName("issue_id");
 
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("text");
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("timestamp");
 
-                    b.HasKey("Id")
-                        .HasName("pk_activities");
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
 
-                    b.HasIndex("AuthorId")
-                        .HasDatabaseName("ix_activities_author_id");
+                    b.HasKey("Id");
 
                     b.HasIndex("IssueId")
                         .HasDatabaseName("ix_activities_issue_id");
 
                     b.ToTable("activities", (string)null);
+
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("Task_System.Model.Entity.Role", b =>
@@ -132,17 +121,10 @@ namespace Task_System.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
-
                     b.HasKey("Id")
-                        .HasName("pk_team");
+                        .HasName("pk_teams");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_team_user_id");
-
-                    b.ToTable("team", (string)null);
+                    b.ToTable("teams", (string)null);
                 });
 
             modelBuilder.Entity("Task_System.Model.Entity.User", b =>
@@ -173,6 +155,15 @@ namespace Task_System.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("password");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text")
+                        .HasColumnName("refresh_token");
+
+                    b.Property<byte[]>("Salt")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("salt");
 
                     b.HasKey("Id")
                         .HasName("pk_users");
@@ -263,6 +254,10 @@ namespace Task_System.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("status");
 
+                    b.Property<int?>("TeamId")
+                        .HasColumnType("integer")
+                        .HasColumnName("team_id");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text")
@@ -283,6 +278,9 @@ namespace Task_System.Migrations
 
                     b.HasIndex("ProjectId")
                         .HasDatabaseName("ix_issues_project_id");
+
+                    b.HasIndex("TeamId")
+                        .HasDatabaseName("ix_issues_team_id");
 
                     b.ToTable("issues", (string)null);
                 });
@@ -350,6 +348,40 @@ namespace Task_System.Migrations
                     b.ToTable("projects", (string)null);
                 });
 
+            modelBuilder.Entity("TeamUser", b =>
+                {
+                    b.Property<int>("TeamId")
+                        .HasColumnType("integer")
+                        .HasColumnName("team_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("TeamId", "UserId")
+                        .HasName("pk_team_users");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_team_users_user_id");
+
+                    b.ToTable("TeamUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.ActivityPropertyUpdated", b =>
+                {
+                    b.HasBaseType("Task_System.Model.Entity.Activity");
+
+                    b.Property<int>("FromId")
+                        .HasColumnType("integer")
+                        .HasColumnName("from_id");
+
+                    b.Property<int>("ToId")
+                        .HasColumnType("integer")
+                        .HasColumnName("to_id");
+
+                    b.ToTable("activity_property_updated", (string)null);
+                });
+
             modelBuilder.Entity("RoleUser", b =>
                 {
                     b.HasOne("Task_System.Model.Entity.Role", null)
@@ -369,13 +401,6 @@ namespace Task_System.Migrations
 
             modelBuilder.Entity("Task_System.Model.Entity.Activity", b =>
                 {
-                    b.HasOne("Task_System.Model.Entity.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_activities_users_author_id");
-
                     b.HasOne("Task_System.Model.IssueFolder.Issue", "Issue")
                         .WithMany("Activities")
                         .HasForeignKey("IssueId")
@@ -383,17 +408,7 @@ namespace Task_System.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_activities_issues_issue_id");
 
-                    b.Navigation("Author");
-
                     b.Navigation("Issue");
-                });
-
-            modelBuilder.Entity("Task_System.Model.Entity.Team", b =>
-                {
-                    b.HasOne("Task_System.Model.Entity.User", null)
-                        .WithMany("Teams")
-                        .HasForeignKey("UserId")
-                        .HasConstraintName("fk_team_users_user_id");
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.Comment", b =>
@@ -439,11 +454,19 @@ namespace Task_System.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_issues_projects_project_id");
 
+                    b.HasOne("Task_System.Model.Entity.Team", "Team")
+                        .WithMany("Issues")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_issues_teams_team_id");
+
                     b.Navigation("Assignee");
 
                     b.Navigation("Author");
 
                     b.Navigation("Project");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.Key", b =>
@@ -467,13 +490,43 @@ namespace Task_System.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("TeamUser", b =>
+                {
+                    b.HasOne("Task_System.Model.Entity.Team", null)
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_team_users_teams_team_id");
+
+                    b.HasOne("Task_System.Model.Entity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_team_users_users_user_id");
+                });
+
+            modelBuilder.Entity("Task_System.Model.IssueFolder.ActivityPropertyUpdated", b =>
+                {
+                    b.HasOne("Task_System.Model.Entity.Activity", null)
+                        .WithOne()
+                        .HasForeignKey("Task_System.Model.IssueFolder.ActivityPropertyUpdated", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_activity_property_updated_activities_id");
+                });
+
+            modelBuilder.Entity("Task_System.Model.Entity.Team", b =>
+                {
+                    b.Navigation("Issues");
+                });
+
             modelBuilder.Entity("Task_System.Model.Entity.User", b =>
                 {
                     b.Navigation("AssignedIssues");
 
                     b.Navigation("AuthoredIssues");
-
-                    b.Navigation("Teams");
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.Issue", b =>
