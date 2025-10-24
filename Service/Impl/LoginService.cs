@@ -4,6 +4,8 @@ using Task_System.Model.Entity;
 using Task_System.Model.Request;
 using Task_System.Log;
 using Task_System.Security;
+using System.Threading.Tasks;
+using Task_System.Exception.UserException;
 
 namespace Task_System.Service.Impl;
 
@@ -16,6 +18,8 @@ public class LoginService : ILoginService
     public async Task<User> LoginAsync(LoginRequest lr)
     {
         l.log($"Attempting login for {lr.email.ToLower()} with pw {lr.password}");
+
+        if (await IsUserDisabledAsync(lr.email)) { throw new UserDisabledException("User account is disabled"); }
         User user = await ValidateCredentials(lr);
         return user;
 
@@ -59,6 +63,16 @@ public class LoginService : ILoginService
         }
     }
 
+    private async Task<bool> IsUserDisabledAsync(string email)
+    {
+        User user = await _userService.GetByEmailAsync(email);
+        if (user.Disabled)
+        {
+            l.log($"User {email} is disabled");
+            return true;
+        }
+        return false;
+    }
     public LoginService(IUserService userService, ILogger<LoginService> l, PasswordService passwordService, JwtGenerator jwtGenerator)
     {
         _userService = userService;

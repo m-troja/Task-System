@@ -10,6 +10,7 @@
         ISSUE_NOT_FOUND,
         LOGIN_ERROR,
         REGISTRATION_ERROR,
-        INVALID_PROJECT_DATA
+        INVALID_PROJECT_DATA,
+        USER_DISABLED
     }
 }

@@ -31,6 +31,7 @@ namespace Task_System.Exception.Handler
                 context.Response.StatusCode = ex switch
                 {
                     UserNotFoundException => StatusCodes.Status404NotFound,
+                    UserDisabledException => StatusCodes.Status403Forbidden,
                     InvalidEmailOrPasswordException => StatusCodes.Status401Unauthorized,
                     RegisterEmailException => StatusCodes.Status400BadRequest,
                     UserAlreadyExistsException => StatusCodes.Status409Conflict,
@@ -44,6 +45,7 @@ namespace Task_System.Exception.Handler
                     ex switch
                     {
                         UserNotFoundException => Task_System.Exception.Error.ErrorType.USER_NOT_FOUND,
+                        UserDisabledException => Task_System.Exception.Error.ErrorType.USER_DISABLED,
                         InvalidEmailOrPasswordException => Task_System.Exception.Error.ErrorType.LOGIN_ERROR,
                         RegisterEmailException => Task_System.Exception.Error.ErrorType.REGISTRATION_ERROR,
                         UserAlreadyExistsException => Task_System.Exception.Error.ErrorType.USER_ALREADY_REGISTERED,
