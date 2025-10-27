@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Task_System.Controller;
 
-[Authorize]
 [ApiController]
 [Route("api/v1/issue")]
 public class IssueController : ControllerBase
@@ -46,6 +45,15 @@ public class IssueController : ControllerBase
         var IssueDto = await _is.GetIssueDtoByKeyAsync(key);
 
         return Ok(IssueDto);
+
+    }
+
+    [HttpGet("all")]
+    public async Task<ActionResult<List<IssueDto>>> GetAllIssues()
+    {
+        l.log($"Received get all issues request");
+        var issues = await _is.GetAllIssues();
+        return Ok(issues);
 
     }
     [HttpGet("id/{id}")]

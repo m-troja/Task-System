@@ -374,5 +374,17 @@ namespace Task_System.Service.Impl
             return _issueCnv.ConvertIssueToIssueDto(updatedIssue);
         }
 
+        public async Task<IEnumerable<IssueDto>> GetAllIssues()
+        {
+            List<Issue> issues = await _db.Issues
+                .Include(i => i.Key)
+                .Include(i => i.Project)
+                .Include(i => i.Comments)
+                .ToListAsync();
+            List<IssueDto> issueDtos = _issueCnv.ConvertIssueListToIssueDtoList(issues).ToList();
+            l.log($"Fetched total {issueDtos.Count} issues from database");
+            return issueDtos;
+        }
+
     }
 }
