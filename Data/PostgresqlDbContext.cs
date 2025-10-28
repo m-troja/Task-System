@@ -12,8 +12,6 @@ namespace Task_System.Data;
 
 public class PostgresqlDbContext : DbContext
 {
-    private readonly ILogger<IssueController> l;
-
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Issue> Issues { get; set; }
@@ -23,28 +21,22 @@ public class PostgresqlDbContext : DbContext
     public DbSet<Activity> Activities { get; set; }
     public DbSet<ActivityPropertyUpdated> ActivitiesPropertyUpdated { get; set; }
     public DbSet<Team> Teams { get; set; }
-    public PostgresqlDbContext(DbContextOptions<PostgresqlDbContext> options, ILogger<IssueController> l)
+    public PostgresqlDbContext(DbContextOptions<PostgresqlDbContext> options)
         : base(options)
     {
-        this.l = l;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        DotNetEnv.Env.Load("dev.env");
         var dbName = Environment.GetEnvironmentVariable("TS_DB_NAME") ?? "testdb";
         var dbHost = Environment.GetEnvironmentVariable("TS_DB_HOST") ?? "localhost";
         var dbPort = Environment.GetEnvironmentVariable("TS_DB_PORT") ?? "5432";
         var dbUser = Environment.GetEnvironmentVariable("TS_DB_USER") ?? "postgres";
         var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "postgres";
 
-        l.log($"DB_NAME: {dbName}, DB_HOST: {dbHost}, DB_PORT: {dbPort}, DB_USER: {dbUser}");
-
-        Console.WriteLine($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
-        l.log($"Connecting to PostgreSQL at {dbHost}:{dbPort}, Database: {dbName}, User: {dbUser}");
         if (!optionsBuilder.IsConfigured)
         {
-            var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
+            var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};SearchPath=public";
 
             optionsBuilder.UseNpgsql(connectionString).UseSnakeCaseNamingConvention();
         }
@@ -52,7 +44,7 @@ public class PostgresqlDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        modelBuilder.HasDefaultSchema("public");
 
         //  USER - ROLE many-to-many relationship
         modelBuilder.Entity<User>()

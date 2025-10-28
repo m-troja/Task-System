@@ -9,7 +9,7 @@ public class TeamCnv
     private readonly UserCnv _userCnv;
     public TeamDto ConvertTeamToTeamDto(Team team)
     {
-        l.log($"Converting Team entity to TeamDto: {team}");
+        l.LogDebug($"Converting Team entity to TeamDto: {team}");
         var NewTeamDto =  new TeamDto
        (
            team.Id,
@@ -17,7 +17,7 @@ public class TeamCnv
            team.Issues?.Select(i => _issueCnv.ConvertIssueToIssueDto(i)).ToList() ?? new List<IssueDto>(),
            team.Users?.Select( u => _userCnv.ConvertUserToDto(u)).ToList() ?? new List<UserDto>()
         );
-        l.log($"Converted TeamDto: {NewTeamDto}");
+        l.LogDebug($"Converted TeamDto: {NewTeamDto}");
         return NewTeamDto;
     }
 

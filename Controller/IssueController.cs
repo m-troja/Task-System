@@ -22,7 +22,7 @@ public class IssueController : ControllerBase
     [Route("create")]
     public async Task<ActionResult<IssueCreatedResponse>> CreateIssue(CreateIssueRequest req)
     {
-        l.log($"Received create issue request: {req}");
+        l.LogDebug($"Received create issue request: {req}");
         Issue issue;
         try 
         {
@@ -41,7 +41,7 @@ public class IssueController : ControllerBase
     [HttpGet("key/{key}")]
     public async Task<ActionResult<IssueDto>> GetIssueByKey(string key)
     {
-        l.log($"Received get issue by key request: {key}");
+        l.LogDebug($"Received get issue by key request: {key}");
         var IssueDto = await _is.GetIssueDtoByKeyAsync(key);
 
         return Ok(IssueDto);
@@ -51,7 +51,7 @@ public class IssueController : ControllerBase
     [HttpGet("all")]
     public async Task<ActionResult<List<IssueDto>>> GetAllIssues()
     {
-        l.log($"Received get all issues request");
+        l.LogDebug($"Received get all issues request");
         var issues = await _is.GetAllIssues();
         return Ok(issues);
 
@@ -59,7 +59,7 @@ public class IssueController : ControllerBase
     [HttpGet("id/{id}")]
     public async Task<ActionResult<IssueDto>> GetIssueById(int id)
     {
-        l.log($"Received get issue by id request: {id}");
+        l.LogDebug($"Received get issue by id request: {id}");
         var IssueDto = await _is.GetIssueDtoByIdAsync(id);
        
         return Ok(IssueDto);
@@ -68,7 +68,7 @@ public class IssueController : ControllerBase
     [HttpPut("assign")]
     public async Task<ActionResult<IssueDto>> AssignIssue([FromBody] AssignIssueRequest req)
     {
-        l.log($"Received assign issue request: {req}");
+        l.LogDebug($"Received assign issue request: {req}");
         IssueDto issueDto = await _is.AssignIssueAsync(req);
         return Ok(issueDto);
     }
@@ -76,7 +76,7 @@ public class IssueController : ControllerBase
     [HttpPut("rename")]
     public async Task<ActionResult<IssueDto>> RenameIssue([FromBody] RenameIssueRequest req)
     {
-        l.log($"Received rename issue request: {req.id}, {req.newTitle}");
+        l.LogDebug($"Received rename issue request: {req.id}, {req.newTitle}");
         IssueDto issueDto = await _is.RenameIssueAsync(req);
         return Ok(issueDto);
     }
@@ -84,7 +84,7 @@ public class IssueController : ControllerBase
     [HttpPut("assign-team")]
     public async Task<ActionResult<IssueDto>> AssignTeam([FromBody] AssignTeamRequest req)
     {
-        l.log($"Received AssignTeam request: {req.IssueId}, {req.TeamId}");
+        l.LogDebug($"Received AssignTeam request: {req.IssueId}, {req.TeamId}");
         IssueDto issueDto = await _is.AssignTeamAsync(req);
         return Ok(issueDto);
     }
@@ -92,7 +92,7 @@ public class IssueController : ControllerBase
     [HttpPut("update-status")]
     public async Task<ActionResult<IssueDto>> ChangeIssueStatus([FromBody] ChangeIssueStatusRequest req)
     {
-        l.log($"Received update issue status request: {req.IssueId}, {req.NewStatus}");
+        l.LogDebug($"Received update issue status request: {req.IssueId}, {req.NewStatus}");
         IssueDto issueDto = await _is.ChangeIssueStatusAsync(req);
         return Ok(issueDto);
     }
@@ -100,7 +100,7 @@ public class IssueController : ControllerBase
     [HttpPut("update-priority")]
     public async Task<ActionResult<IssueDto>> UpdateIssuePriority([FromBody] ChangeIssuePriorityRequest req)
     {
-        l.log($"Received update issue priority request: {req.IssueId}, {req.NewPriority}");
+        l.LogDebug($"Received update issue priority request: {req.IssueId}, {req.NewPriority}");
         IssueDto issueDto = await _is.ChangeIssuePriorityAsync(req);
         return Ok(issueDto);
     }
@@ -108,7 +108,7 @@ public class IssueController : ControllerBase
     [HttpPut("update-due-date")]
     public async Task<ActionResult<IssueDto>> UpdateDueDate([FromBody] UpdateDueDateRequest req)
     {
-        l.log($"Received update due date request: {req.IssueId}, {req.DueDate}");
+        l.LogDebug($"Received update due date request: {req.IssueId}, {req.DueDate}");
         IssueDto issueDto = await _is.UpdateDueDateAsync(req);
         return Ok(issueDto);
     }
@@ -116,7 +116,7 @@ public class IssueController : ControllerBase
     [HttpGet("user/{userId:int}")]
     public async Task<ActionResult<List<IssueDto>>> GetAllIssuesByUserId(int userId)
     {
-        l.log($"Received get all issues by user id request: {userId}");
+        l.LogDebug($"Received get all issues by user id request: {userId}");
         var issuesDto = await _is.GetAllIssuesByUserId(userId);
         return Ok(issuesDto);
     }
@@ -124,7 +124,7 @@ public class IssueController : ControllerBase
     [HttpGet("project/{projectId:int}")]
     public async Task<ActionResult<List<IssueDto>>> GetAllIssuesByProjectId(int projectId)
     {
-        l.log($"Received get all issues by project id request: {projectId}");
+        l.LogDebug($"Received get all issues by project id request: {projectId}");
         var issuesDto = await _is.GetAllIssuesByProjectId(projectId);
         return Ok(issuesDto);
     }

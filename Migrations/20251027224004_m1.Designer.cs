@@ -12,7 +12,7 @@ using Task_System.Data;
 namespace Task_System.Migrations
 {
     [DbContext(typeof(PostgresqlDbContext))]
-    [Migration("20251024211354_m1")]
+    [Migration("20251027224004_m1")]
     partial class m1
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace Task_System.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("public")
                 .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -41,7 +42,7 @@ namespace Task_System.Migrations
                     b.HasIndex("UsersId")
                         .HasDatabaseName("ix_role_user_users_id");
 
-                    b.ToTable("role_user", (string)null);
+                    b.ToTable("role_user", "public");
                 });
 
             modelBuilder.Entity("Task_System.Model.Entity.Activity", b =>
@@ -70,7 +71,7 @@ namespace Task_System.Migrations
                     b.HasIndex("IssueId")
                         .HasDatabaseName("ix_activities_issue_id");
 
-                    b.ToTable("activities", (string)null);
+                    b.ToTable("activities", "public");
 
                     b.UseTptMappingStrategy();
                 });
@@ -92,7 +93,7 @@ namespace Task_System.Migrations
                     b.HasKey("Id")
                         .HasName("pk_roles");
 
-                    b.ToTable("roles", (string)null);
+                    b.ToTable("roles", "public");
 
                     b.HasData(
                         new
@@ -124,7 +125,7 @@ namespace Task_System.Migrations
                     b.HasKey("Id")
                         .HasName("pk_teams");
 
-                    b.ToTable("teams", (string)null);
+                    b.ToTable("teams", "public");
                 });
 
             modelBuilder.Entity("Task_System.Model.Entity.User", b =>
@@ -141,7 +142,6 @@ namespace Task_System.Migrations
                         .HasColumnName("disabled");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("email");
 
@@ -151,12 +151,10 @@ namespace Task_System.Migrations
                         .HasColumnName("first_name");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("last_name");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("password");
 
@@ -165,14 +163,29 @@ namespace Task_System.Migrations
                         .HasColumnName("refresh_token");
 
                     b.Property<byte[]>("Salt")
-                        .IsRequired()
                         .HasColumnType("bytea")
                         .HasColumnName("salt");
+
+                    b.Property<string>("SlackUserId")
+                        .HasColumnType("text")
+                        .HasColumnName("slack_user_id");
 
                     b.HasKey("Id")
                         .HasName("pk_users");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("users", "public");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -1,
+                            Disabled = true,
+                            Email = "system.user@tasksystem.com",
+                            FirstName = "System User",
+                            LastName = "System User",
+                            Password = "Password",
+                            Salt = new byte[] { 87, 32, 87, 61, 195, 168, 195, 148, 85, 195, 140, 45, 194, 167, 195, 130, 78, 195, 175, 94, 195, 142, 88 }
+                        });
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.Comment", b =>
@@ -210,7 +223,7 @@ namespace Task_System.Migrations
                     b.HasIndex("IssueId")
                         .HasDatabaseName("ix_comments_issue_id");
 
-                    b.ToTable("comments", (string)null);
+                    b.ToTable("comments", "public");
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.Issue", b =>
@@ -286,7 +299,7 @@ namespace Task_System.Migrations
                     b.HasIndex("TeamId")
                         .HasDatabaseName("ix_issues_team_id");
 
-                    b.ToTable("issues", (string)null);
+                    b.ToTable("issues", "public");
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.Key", b =>
@@ -321,7 +334,7 @@ namespace Task_System.Migrations
                     b.HasIndex("ProjectId")
                         .HasDatabaseName("ix_keys_project_id");
 
-                    b.ToTable("keys", (string)null);
+                    b.ToTable("keys", "public");
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.Project", b =>
@@ -349,7 +362,7 @@ namespace Task_System.Migrations
                     b.HasKey("Id")
                         .HasName("pk_projects");
 
-                    b.ToTable("projects", (string)null);
+                    b.ToTable("projects", "public");
                 });
 
             modelBuilder.Entity("team_user", b =>
@@ -368,7 +381,7 @@ namespace Task_System.Migrations
                     b.HasIndex("UserId")
                         .HasDatabaseName("ix_team_user_user_id");
 
-                    b.ToTable("team_user", (string)null);
+                    b.ToTable("team_user", "public");
                 });
 
             modelBuilder.Entity("Task_System.Model.IssueFolder.ActivityPropertyUpdated", b =>
@@ -385,7 +398,7 @@ namespace Task_System.Migrations
                         .HasColumnType("text")
                         .HasColumnName("old_value");
 
-                    b.ToTable("activity_property_updated", (string)null);
+                    b.ToTable("activity_property_updated", "public");
                 });
 
             modelBuilder.Entity("RoleUser", b =>

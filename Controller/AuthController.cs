@@ -23,16 +23,16 @@ public class AuthController : ControllerBase
     [HttpPost("regenerate-tokens")]
     public async Task<ActionResult<Response>> RegenerateTokens([FromBody] RefreshAccessTokenRequest req)
     {
-        l.log($"Regenerating tokens for userId {req.UserId} with refresh token {req.RefreshToken}");
+        l.LogDebug($"Regenerating tokens for userId {req.UserId} with refresh token {req.RefreshToken}");
         User user = await _userService.GetByIdAsync(req.UserId);
         if (user.RefreshToken != req.RefreshToken)
         {
-            l.log($"Invalid refresh token for userId {req.UserId}");
+            l.LogDebug($"Invalid refresh token for userId {req.UserId}");
             return Unauthorized(new { message = "Invalid refresh token" });
         }
         string accessToken = _authService.GetAccessTokenByUserId(req.UserId);
         RefreshToken refreshToken = await _authService.GenerateRefreshToken(req.UserId);
-        l.log($"Generated new access token {accessToken} and refresh token {refreshToken.Token} for userId {req.UserId}");
+        l.LogDebug($"Generated new access token {accessToken} and refresh token {refreshToken.Token} for userId {req.UserId}");
         return Ok(new { accessToken, refreshToken });
     }
 

@@ -21,6 +21,8 @@ public class TestController : ControllerBase
     [HttpGet("env")]
     public ActionResult<String> TestDeploy()
     {
+        l.LogDebug("Test controller entered");
+
         //Env vars check
         string env = "";
         foreach (System.Collections.DictionaryEntry envVar in Environment.GetEnvironmentVariables())
@@ -29,7 +31,7 @@ public class TestController : ControllerBase
             if (key.StartsWith("TS_"))
             {
                 env = env + envVar.Key + " = " + envVar.Value + "\n";
-                l.log($"EnvVar: {envVar.Key} = {envVar.Value}");
+                l.LogDebug($"EnvVar: {envVar.Key} = {envVar.Value}");
             }
 
         }
@@ -77,8 +79,10 @@ public class TestController : ControllerBase
     }
     public TestController(ILogger<TestController> l, IUserService us, UserCnv userCnv)
     {
+        Console.WriteLine(">>> ENTER TestController constructor");
         this.l = l;
         _us = us;
         _userCnv = userCnv;
+        Console.WriteLine(">>> EXIT TestController constructor");
     }
 }

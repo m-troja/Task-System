@@ -1,7 +1,10 @@
-﻿namespace Task_System.Model.Request
-{
-    public record CreateIssueRequest(string Title, string? Description, string? Priority, int AuthorId, int? AssigneeId, 
-        string? DueDate, int ProjectId )
-    {
-    }
-}
+﻿namespace Task_System.Model.Request;
+
+public record CreateIssueRequest(
+    string title, 
+    string? description,
+    string? priority, 
+    int authorId, 
+    int? assigneeId, 
+    string? dueDate, 
+    int projectId )  {}
