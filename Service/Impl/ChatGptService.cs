@@ -45,9 +45,14 @@ public class ChatGptService : IChatGptService
         List<User> users = new List<User>();
         foreach (var chatGptUser in chatGptUsers)
         {
+            l.LogDebug($"Registering {chatGptUser}");
             if (chatGptUser == null) { throw new ArgumentException("Slack registration request is null"); }
             if (chatGptUser.slackUserId == null || chatGptUser.slackUserId.Trim() == "") { throw new ArgumentException("Slack name is null or empty"); }
-            if (chatGptUser.slackName == null || chatGptUser.slackName.Trim() == "") { throw new ArgumentException("SlackName is null or empty"); }
+            if (chatGptUser.slackName == null || chatGptUser.slackName.Trim() == "") 
+            { 
+                l.LogError($"Error registering {chatGptUser} - skipping");
+                continue; 
+            }
             User user;
             if (!_db.Users.Any(u => u.SlackUserId == chatGptUser.slackUserId))
             {

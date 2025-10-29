@@ -38,7 +38,7 @@ namespace Task_System.Model.Entity
 
         public override string? ToString()
         {
-            return "User(Id=" + Id + ", FirstName=" + FirstName + ", LastName=" + LastName + ", Email=" + Email + ")";
+            return "User(Id=" + Id + ", FirstName=" + FirstName + ", LastName=" + LastName + ", Email=" + Email + ", SlackUserID=" + SlackUserId + ")";
         }
     }
 }

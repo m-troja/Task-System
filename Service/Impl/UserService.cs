@@ -11,7 +11,7 @@ namespace Task_System.Service.Impl;
 
 public class UserService : IUserService
 {
-
+    private string SlackBotSlackUserId = "USLACKBOT";
     private readonly PostgresqlDbContext _db;
     private readonly ILogger<UserService> l;
     private readonly UserCnv _userCnv;
@@ -89,19 +89,20 @@ public class UserService : IUserService
 
     public async Task<int> GetIdBySlackUserId(string slackUserId)
     {
+        if (string.IsNullOrEmpty(slackUserId)) { throw new ArgumentException("Slack user ID cannot be null or empty", slackUserId); }
         l.LogDebug($"Getting user ID by Slack user ID: {slackUserId}");
-        if (string.IsNullOrEmpty(slackUserId)) { throw new ArgumentException("Slack user ID cannot be null or empty", nameof(slackUserId)); }
+        var users = await _chatGptService.GetAllChatGptUsersAsync();
+
         int id = await _db.Users.Where(u => u.SlackUserId == slackUserId)
             .Select(u => u.Id)
             .FirstOrDefaultAsync();
         l.LogDebug($"Fetched user ID: {id} for Slack user ID: {slackUserId}");
         if (id == 0)
         {
-            l.LogDebug($"User with Slack user ID '{slackUserId}' not found");
-            var users = await _chatGptService.GetAllChatGptUsersAsync();
-            User user = users.FirstOrDefault(u => u.SlackUserId == slackUserId) ?? throw new UserNotFoundException("User by Slack user ID '" + slackUserId + "' was not found after ChatGPT sync");
-            l.LogDebug("User fetched after ChatGPT sync: " + user);
-            return user.Id;
+            l.LogDebug($"User with Slack user ID '{slackUserId}' not found - assigning bot");
+            var BotUser = await _db.Users.Where(u => u.SlackUserId == SlackBotSlackUserId).FirstAsync();
+            l.LogDebug($"Bot fetched: {BotUser}");
+            return BotUser.Id;
         }
         return id;
     }
