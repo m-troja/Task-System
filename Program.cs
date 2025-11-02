@@ -207,3 +207,4 @@ finally
 {
     Log.CloseAndFlush();
 }
+// Test tag
