@@ -91,12 +91,26 @@ public class UserService : IUserService
     {
         if (string.IsNullOrEmpty(slackUserId)) { throw new ArgumentException("Slack user ID cannot be null or empty", slackUserId); }
         l.LogDebug($"Getting user ID by Slack user ID: {slackUserId}");
-        var users = await _chatGptService.GetAllChatGptUsersAsync();
 
         int id = await _db.Users.Where(u => u.SlackUserId == slackUserId)
             .Select(u => u.Id)
             .FirstOrDefaultAsync();
-        l.LogDebug($"Fetched user ID: {id} for Slack user ID: {slackUserId}");
+        l.LogDebug($"First fetch of user ID: {id} for Slack user ID: {slackUserId}");
+
+
+        if (id == 0)
+        {
+            l.LogDebug($"User with Slack user ID '{slackUserId}' not found - calling ChatGPT API");
+            var users = await _chatGptService.GetAllChatGptUsersAsync();
+            id = users.Find(u => u.SlackUserId == slackUserId)?.Id ?? 0;
+            l.LogDebug($"Second fetch of user ID: {id} for Slack user ID: {slackUserId}"); 
+            if (id != 0)
+            {
+                l.LogDebug($"User with Slack user ID '{slackUserId}' found after ChatGPT sync: ID {id}");
+                return id;
+            }
+        }
+
         if (id == 0)
         {
             l.LogDebug($"User with Slack user ID '{slackUserId}' not found - assigning bot");

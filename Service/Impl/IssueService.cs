@@ -315,7 +315,7 @@ namespace Task_System.Service.Impl
 
         public async Task<IssueDto> AssignTeamAsync(AssignTeamRequest req)
         {
-            l.LogDebug("Assigning team {req.TeamId} to issue {req.IssueId}");
+            l.LogDebug($"Assigning team {req.TeamId} to issue {req.IssueId}");
             Team team = await _teamService.GetTeamByIdAsync(req.TeamId);
             Issue issue = await GetIssueByIdAsync(req.IssueId);
             issue.Team = team;
