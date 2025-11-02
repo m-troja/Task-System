@@ -221,9 +221,9 @@ namespace Task_System.Service.Impl
         }
         public async Task<Issue> AssignIssueBySlackAsync(AssignIssueRequestChatGpt req)
         {
-            l.LogDebug($"Assigning issue by Slack with key {req.Key} to Slack user ID {req.SlackUserId}");
-            int issueId = await GetIssueIdFromKey(req.Key);
-            int newAssigneeId = await _userService.GetIdBySlackUserId(req.SlackUserId);
+            l.LogDebug($"Assigning issue by Slack with key {req.key} to Slack user ID {req.slackUserId}");
+            int issueId = await GetIssueIdFromKey(req.key);
+            int newAssigneeId = await _userService.GetIdBySlackUserId(req.slackUserId);
             var assignIssueRequest = new AssignIssueRequest(issueId, newAssigneeId);
             var issue = await AssignIssueAsync(assignIssueRequest);
             l.LogDebug($"Assigned issue {issueId} to user {newAssigneeId} successfully");
