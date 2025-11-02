@@ -2,14 +2,14 @@
 
 namespace Task_System.Model.DTO;
 
-public record IssueDto(
+public record IssueDtoChatGpt(
     int Id, string Key, 
     string Title, 
     string Description, 
     IssueStatus Status, 
-    IssuePriority Priority, 
-    int AuthorId, 
-    int AssigneeId, 
+    IssuePriority Priority,
+    string AuthorSlackId,
+    string AssigneeSlackId, 
     DateTime CreatedAt, 
     DateTime? DueDate,
     DateTime? UpdatedAt, 

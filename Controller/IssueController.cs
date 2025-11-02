@@ -7,6 +7,7 @@ using Task_System.Model.Response;
 using Task_System.Service;
 using Task_System.Log;
 using Microsoft.AspNetCore.Authorization;
+using Task_System.Model.DTO.Cnv;
 
 namespace Task_System.Controller;
 
@@ -16,6 +17,7 @@ public class IssueController : ControllerBase
 {
     private readonly IIssueService _is;
     private readonly ILogger<IssueController> l;
+    private readonly IssueCnv _issueCnv;
 
     [Authorize]
     [HttpPost]
@@ -69,8 +71,8 @@ public class IssueController : ControllerBase
     public async Task<ActionResult<IssueDto>> AssignIssue([FromBody] AssignIssueRequest req)
     {
         l.LogDebug($"Received assign issue request: {req}");
-        IssueDto issueDto = await _is.AssignIssueAsync(req);
-        return Ok(issueDto);
+        var issue = await _is.AssignIssueAsync(req);
+        return Ok(_issueCnv.ConvertIssueToIssueDto(issue));
     }
 
     [HttpPut("rename")]
@@ -129,9 +131,10 @@ public class IssueController : ControllerBase
         return Ok(issuesDto);
     }
 
-    public IssueController(IIssueService @is, ILogger<IssueController> l)
+    public IssueController(IIssueService @is, ILogger<IssueController> l, IssueCnv _issueCnv)
     {
         _is = @is;
         this.l = l;
+        this._issueCnv = _issueCnv;
     }
 }

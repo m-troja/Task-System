@@ -11,10 +11,11 @@ namespace Task_System.Service
         Task<IssueDto> GetIssueDtoByKeyAsync(string keyString);
         Task<IEnumerable<Issue>> GetAllAsync();
         Task<Issue> CreateIssueAsync(CreateIssueRequest cir);
-        Task<IssueDto> CreateIssueBySlackAsync(SlackCreateIssueRequest scis);
+        Task<IssueDtoChatGpt> CreateIssueBySlackAsync(SlackCreateIssueRequest scis);
 
         Task<bool> DeleteIssueAsync(int id);
-        Task<IssueDto> AssignIssueAsync(AssignIssueRequest uir);
+        Task<Issue> AssignIssueAsync(AssignIssueRequest uir);
+        Task<Issue> AssignIssueBySlackAsync(AssignIssueRequestChatGpt uir);
         Task<Issue> UpdateIssueAsync(Issue issue);
         Task<Project> GetProjectFromKey(string key);
         int GetIssueIdInsideProjectFromKey(string key);
@@ -27,6 +28,8 @@ namespace Task_System.Service
         Task<IEnumerable<IssueDto>> GetAllIssuesByProjectId(int projectId);
         Task<int> GetIssueIdFromKey(string key);
         Task<IEnumerable<IssueDto>> GetAllIssues();
+        Task deleteAllIssues();
+        Task deleteIssueById(int id);
 
     }
 }
