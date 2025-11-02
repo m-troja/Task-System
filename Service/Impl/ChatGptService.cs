@@ -50,7 +50,7 @@ public class ChatGptService : IChatGptService
             if (chatGptUser.slackUserId == null || chatGptUser.slackUserId.Trim() == "") { throw new ArgumentException("Slack name is null or empty"); }
             if (chatGptUser.slackName == null || chatGptUser.slackName.Trim() == "") 
             { 
-                l.LogError($"Error registering {chatGptUser} - skipping");
+                l.LogError($"Error registering {chatGptUser} - real slackName missing");
                 continue; 
             }
             User user;

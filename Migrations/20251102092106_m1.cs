@@ -26,7 +26,7 @@ namespace Task_System.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     short_name = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW() AT TIME ZONE 'UTC'")
                 },
                 constraints: table =>
                 {
@@ -293,6 +293,12 @@ namespace Task_System.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                schema: "public",
+                table: "projects",
+                columns: new[] { "id", "created_at", "description", "short_name" },
+                values: new object[] { -1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Predefined dummy project", "Dummy" });
 
             migrationBuilder.InsertData(
                 schema: "public",

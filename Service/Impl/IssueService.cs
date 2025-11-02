@@ -17,6 +17,7 @@ namespace Task_System.Service.Impl
     public class IssueService : IIssueService
     {
         private int SystemUserId = -1;
+        private int DummyProjectId = -1;
         private readonly PostgresqlDbContext _db;
         private readonly CommentCnv _commentCnv;
         private readonly IssueCnv _issueCnv;
@@ -62,9 +63,11 @@ namespace Task_System.Service.Impl
             }
             catch (ProjectNotFoundException e)
             {
-                l.LogDebug($"Cannot create issue because project {cir.projectId} was not found");
-                throw new IssueCreationException("Cannot create issue: " + e.Message);
+                l.LogDebug($"ProjectId {cir.projectId} was not found - assigned DummyProjectId={DummyProjectId}");
+                project = await _projectService.GetProjectById(DummyProjectId);
             }
+
+            l.LogDebug($"Retrieved project from DB: {project}");
 
             Issue issue;
 
@@ -73,8 +76,9 @@ namespace Task_System.Service.Impl
             {
 
                 int maxIdInsideProject = await _db.Issues
-                    .Where(i => i.ProjectId == cir.projectId)
+                    .Where(i => i.ProjectId == project.Id)
                     .MaxAsync(i => (int?)i.IdInsideProject) ?? 0;
+                l.LogDebug($"Retrieved maxIdInsideProject from DB: {maxIdInsideProject}");
 
                 int nextIdInsideProject = maxIdInsideProject + 1;
 
@@ -88,10 +92,11 @@ namespace Task_System.Service.Impl
                     Assignee = assignee,
                     AssigneeId = assignee?.Id,
                     DueDate = dueDateUtc,
-                    ProjectId = cir.projectId,
+                    ProjectId = project.Id,
                     IdInsideProject = nextIdInsideProject
                 };
 
+                l.LogDebug($"Defined new issue entity: {JsonSerializer.Serialize(issue)}");
 
                 _db.Issues.Add(issue);
                 await _db.SaveChangesAsync();

@@ -79,6 +79,11 @@ public class PostgresqlDbContext : DbContext
             .HasForeignKey(i => i.ProjectId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // Project - CreatedAt default value to UTC now
+        modelBuilder.Entity<Project>()
+            .Property(p => p.CreatedAt)
+            .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
         // KEY - one-to-one relationship with ISSUE 
         modelBuilder.Entity<Key>()
             .HasOne(k => k.Issue)
@@ -141,8 +146,13 @@ public class PostgresqlDbContext : DbContext
         // Seed System user
         modelBuilder.Entity<User>().HasData(
             new User { Id= -1, FirstName = "System User", LastName = "System User", Email = "system.user@tasksystem.com", Password = "Password", Salt = Encoding.UTF8.GetBytes("W W=èÔUÌ-§ÂNï^ÎX"), Disabled = true });
-    }
 
+        // Seed dummyProjectId
+        modelBuilder.Entity<Project>().HasData(
+            new Project { Id = -1, ShortName = "Dummy", Description = "Predefined dummy project",
+                CreatedAt = new DateTime(2024, 01, 01, 0, 0, 0, DateTimeKind.Utc)
+            });
+    }
 
     // Automatically set CreatedAt for entities implementing IAutomaticDates
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

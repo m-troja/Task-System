@@ -344,8 +344,10 @@ namespace Task_System.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
@@ -360,6 +362,15 @@ namespace Task_System.Migrations
                         .HasName("pk_projects");
 
                     b.ToTable("projects", "public");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -1,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Predefined dummy project",
+                            ShortName = "Dummy"
+                        });
                 });
 
             modelBuilder.Entity("team_user", b =>
