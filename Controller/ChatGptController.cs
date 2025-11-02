@@ -10,6 +10,7 @@ namespace Task_System.Controller;
 
 [ApiController]
 [Route("api/v1/chatgpt")]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ChatGptController: ControllerBase
 {
     private readonly ILogger<ChatGptController> l;
