@@ -40,11 +40,11 @@ public class ChatGptController: ControllerBase
         return _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
     }
 
-    public ChatGptController(IUserService userService, ILogger<ChatGptController> logger, IIssueService iss, IssueCnv _issueCnv)
+    public ChatGptController(IUserService userService, ILogger<ChatGptController> logger, IIssueService iss, IssueCnv issueCnv)
     {
         _userService = userService;
         l = logger;
         _iss = iss;
-        this._issueCnv = _issueCnv;
+        _issueCnv = issueCnv;
     }
 }
