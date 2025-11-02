@@ -11,6 +11,8 @@ namespace Task_System.Service
         Task<IssueDto> GetIssueDtoByKeyAsync(string keyString);
         Task<IEnumerable<Issue>> GetAllAsync();
         Task<Issue> CreateIssueAsync(CreateIssueRequest cir);
+        Task<IssueDto> CreateIssueBySlackAsync(SlackCreateIssueRequest scis);
+
         Task<bool> DeleteIssueAsync(int id);
         Task<IssueDto> AssignIssueAsync(AssignIssueRequest uir);
         Task<Issue> UpdateIssueAsync(Issue issue);
@@ -24,6 +26,7 @@ namespace Task_System.Service
         Task<IEnumerable<IssueDto>> GetAllIssuesByUserId(int userId);
         Task<IEnumerable<IssueDto>> GetAllIssuesByProjectId(int projectId);
         Task<int> GetIssueIdFromKey(string key);
+        Task<IEnumerable<IssueDto>> GetAllIssues();
 
     }
 }

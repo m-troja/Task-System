@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -14,7 +15,7 @@ using Task_System.Service.Impl;
 // Load env variables
 DotNetEnv.Env.Load("dev.env");
 var _LogDir = Environment.GetEnvironmentVariable("TS_LOG_DIR") ?? "/home/michal";
-var _LogFilename = Environment.GetEnvironmentVariable("TS_LOG_FILENAME") ?? "/home/michal";
+var _LogFilename = Environment.GetEnvironmentVariable("TS_LOG_FILENAME") ?? "log";
 var _HttpPort = Environment.GetEnvironmentVariable("TS_HTTP_PORT") ?? "6901";
 var _LogPath = Path.Combine(_LogDir, _LogFilename);
 
@@ -22,16 +23,47 @@ var _LogPath = Path.Combine(_LogDir, _LogFilename);
 // Configure Serilog
 // -------------------
 Log.Logger = new LoggerConfiguration()
+
+    // Debug (including all below)
+
     .MinimumLevel.Debug()
-    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
-    .MinimumLevel.Override("Microsoft.Hosting.Lifetime", Serilog.Events.LogEventLevel.Information)
-    .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
-    .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-    .WriteTo.File(_LogPath,
-                  rollingInterval: RollingInterval.Day,
-                  retainedFileCountLimit: 7,
-                  outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", Serilog.Events.LogEventLevel.Information)
+    .WriteTo.File(
+        Path.Combine(_LogDir, _LogFilename + "_.debug"),
+        rollingInterval: RollingInterval.Day,
+        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug,
+        rollOnFileSizeLimit: true,
+        retainedFileCountLimit: 7,
+        fileSizeLimitBytes: 50_000_000,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+        shared: true
+    )
+
+    // Error
+    .WriteTo.File(
+        Path.Combine(_LogDir, _LogFilename + "_.error"),
+        rollingInterval: RollingInterval.Day,
+        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error,
+        rollOnFileSizeLimit: true,
+        retainedFileCountLimit: 7,
+        fileSizeLimitBytes: 50_000_000,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+        shared: true
+    )
+
+    //  Info (Info + Error) 
+    .WriteTo.File(
+        Path.Combine(_LogDir, _LogFilename + "_.info"),
+        rollingInterval: RollingInterval.Day,
+        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information,
+        rollOnFileSizeLimit: true,
+        retainedFileCountLimit: 7,
+        fileSizeLimitBytes: 50_000_000,
+        outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+        shared: true
+    )
+
     .CreateLogger();
 
 try
@@ -39,6 +71,7 @@ try
     Log.Information("Starting Task-System WebApplication...");
 
     var builder = WebApplication.CreateBuilder(args);
+    DotNetEnv.Env.Load("dev.env");
 
     // -------------------
     // JWT Config
@@ -63,7 +96,7 @@ try
     })
     .AddJwtBearer(options =>
     {
-        var key = Encoding.UTF8.GetBytes(jwtSecret); // zmiana na UTF8
+        var key = Encoding.UTF8.GetBytes(jwtSecret);
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -101,6 +134,8 @@ try
     builder.Services.AddScoped<ILoginService, LoginService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<ITeamService, TeamService>();
+    builder.Services.AddScoped<IChatGptService, ChatGptService>();
+    builder.Services.AddHttpClient<IChatGptService, ChatGptService>();
     builder.Services.AddScoped<UserCnv>();
     builder.Services.AddScoped<TeamCnv>();
     builder.Services.AddScoped<CommentCnv>();
@@ -108,11 +143,10 @@ try
     builder.Services.AddScoped<ProjectCnv>();
     builder.Services.AddScoped<PasswordService>();
 
-    builder.Services.AddControllers()
-           .AddJsonOptions(opt =>
-           {
-               opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-           });
+    builder.Services.AddControllers().AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
     // -------------------
     // Swagger
@@ -130,14 +164,31 @@ try
                 .AllowAnyHeader());
     });
 
+    // ustaw port PRZED build()
+    builder.WebHost.UseUrls($"http://0.0.0.0:{_HttpPort}");
 
-    // App HttpPort
+    // TEST Enchance debug for Dependency Injection issues
+    builder.Logging.AddDebug();
+    builder.Logging.AddConsole();
+
     var app = builder.Build();
 
-    // CORS
-    app.UseCors("AllowAll");
+    // migracje
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<PostgresqlDbContext>();
+        db.Database.Migrate();
+    }
 
-    builder.WebHost.UseUrls($"http://0.0.0.0:{_HttpPort}");
+    app.UseMiddleware<GlobalExceptionHandler>();
+
+    // TEST LOG REQUESTS
+
+    app.UseRouting();
+    app.UseCors("AllowAll");
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
 
     if (app.Environment.IsDevelopment())
     {
@@ -145,21 +196,12 @@ try
         app.UseSwaggerUI();
     }
 
-    if (args.Length == 0 || !args[0].Contains("ef"))
-    {
-        app.UseMiddleware<GlobalExceptionHandler>();
-        app.UseRouting();
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.MapControllers();
-
-        Log.Information("Task-System WebApplication started successfully.");
-        app.Run();
-    }
+    Log.Information($"Task-System WebApplication started successfully on port {_HttpPort}");
+    app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Application terminated unexpectedly!");
+    Log.Error(ex, "Application terminated unexpectedly!");
 }
 finally
 {

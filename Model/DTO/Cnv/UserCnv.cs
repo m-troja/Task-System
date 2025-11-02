@@ -13,7 +13,8 @@ namespace Task_System.Model.DTO.Cnv
                 user.Email, 
                 user.Roles.Select(r => r.Name).ToList(), 
                 user.Teams.Select(t => t.Name).ToList(),
-                user.Disabled
+                user.Disabled,
+                user.SlackUserId
             );
         }
 

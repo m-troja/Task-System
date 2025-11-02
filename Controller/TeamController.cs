@@ -33,7 +33,7 @@ namespace Task_System.Controller
         [HttpGet("id/{id:int}")]
         public async Task<ActionResult<UserDto>> GetTeamById(int id)
         {
-            l.log($"Fetching team by id: {id}");
+            l.LogDebug($"Fetching team by id: {id}");
             var team =  await _ts.GetTeamByIdAsync(id);
 
             return Ok(_teamCnv.ConvertTeamToTeamDto(team));
@@ -43,7 +43,7 @@ namespace Task_System.Controller
         [HttpGet("all")]
         public async Task<ActionResult<List<TeamDto>>> GetAllTeams()
         {
-            l.log("Fetching all teams");
+            l.LogDebug("Fetching all teams");
             var teams = await _ts.GetAllTeamsAsync();
             return Ok(_teamCnv.ConvertTeamsToTeamDtos(teams));
         }
@@ -51,7 +51,7 @@ namespace Task_System.Controller
         [HttpPost("create")]
         public async Task<ActionResult<TeamDto>> CreateTeam([FromBody] CreateTeamRequest req)
         {
-            l.log($"Creating team with name: {req.Name}");
+            l.LogDebug($"Creating team with name: {req.Name}");
             
             var Team = await _ts.AddTeamAsync(req);
             return Ok(_teamCnv.ConvertTeamToTeamDto(Team));
@@ -60,7 +60,7 @@ namespace Task_System.Controller
         [HttpGet("issues/{teamId:int}")]
         public async Task<ActionResult<List<IssueDto>>> GetIssuesByTeamId(int teamId)
         {
-            l.log($"Fetching issues by teamId {teamId}");
+            l.LogDebug($"Fetching issues by teamId {teamId}");
             var issues = await _ts.GetIssuesByTeamId(teamId);
             return Ok(issues);
         }
@@ -68,7 +68,7 @@ namespace Task_System.Controller
         [HttpGet("users/{teamId:int}")]
         public async Task<ActionResult<List<UserDto>>> GetUsersByTeamId(int teamId)
         {
-            l.log($"Fetching users by teamId {teamId}");
+            l.LogDebug($"Fetching users by teamId {teamId}");
             var issues = await _ts.GetIssuesByTeamId(teamId);
             return Ok(issues);
         }

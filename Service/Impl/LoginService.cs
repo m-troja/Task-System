@@ -17,10 +17,15 @@ public class LoginService : ILoginService
 
     public async Task<User> LoginAsync(LoginRequest lr)
     {
-        l.log($"Attempting login for {lr.email.ToLower()} with pw {lr.password}");
+        l.LogDebug($"Attempting login for {lr.email.ToLower()} with pw {lr.password}");
 
         if (await IsUserDisabledAsync(lr.email)) { throw new UserDisabledException("User account is disabled"); }
         User user = await ValidateCredentials(lr);
+        if (user == null)
+        {
+            l.LogDebug("Returning null from LoginAsync");
+            return null;
+        }
         return user;
 
     }
@@ -30,35 +35,40 @@ public class LoginService : ILoginService
         string email = lr.email.ToLower();
         if (!new EmailAddressAttribute().IsValid(email))
         {
-            l.log("Login failed: invalid email format");
+            l.LogDebug("Login failed: invalid email format");
             throw new InvalidEmailOrPasswordException("invalid email format");
         }
         if (string.IsNullOrWhiteSpace(lr.password) || string.IsNullOrWhiteSpace(email))
         {
-            l.log("Login failed: empty email or password");
+            l.LogDebug("Login failed: empty email or password");
             throw new InvalidEmailOrPasswordException("empty email or password");
         }
         if (lr.password.Length > 250 || email.Length > 250)
         {
-            l.log("Login failed: email or password too long");
+            l.LogDebug("Login failed: email or password too long");
             throw new InvalidEmailOrPasswordException("email or password too long - max 250 chars");
         }
 
-        User user = await _userService.GetByEmailAsync(email);
+        User user = await _userService.TryGetByEmailAsync(email);
+        if (user == null)
+        {
+            l.LogDebug("Returning null from ValidateCredentials as result of TryGetByEmailAsync");
+            return null;
+        }
         byte[] UsersSalt = user.Salt;
         string HashedPw = _passwordService.HashPassword(lr.password, UsersSalt);
-        l.log($"Hashed pw: {HashedPw}");
-        l.log($"User's salt: {user.Salt}");
-        l.log($"Found user {user.Email}");
+        l.LogDebug($"Hashed pw: {HashedPw}");
+        l.LogDebug($"User's salt: {user.Salt}");
+        l.LogDebug($"Found user {user.Email}");
 
         if (user.Password == HashedPw)
         {
-            l.log($"Login successful for {user.Email}");
+            l.LogDebug($"Login successful for {user.Email}");
             return user;
         }
         else
         {
-            l.log("Login failed: wrong password");
+            l.LogDebug("Login failed: wrong password");
             throw new InvalidEmailOrPasswordException("Wrong email or password");
         }
     }
@@ -66,9 +76,10 @@ public class LoginService : ILoginService
     private async Task<bool> IsUserDisabledAsync(string email)
     {
         User user = await _userService.GetByEmailAsync(email);
+        if (user == null) return true;
         if (user.Disabled)
         {
-            l.log($"User {email} is disabled");
+            l.LogDebug($"User {email} is disabled");
             return true;
         }
         return false;

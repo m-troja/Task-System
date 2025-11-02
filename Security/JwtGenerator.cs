@@ -26,7 +26,7 @@ public class JwtGenerator
 
     public string GenerateAccessToken(int userId)
     {
-        l.log($"Generating access token for userId {userId}");
+        l.LogDebug($"Generating access token for userId {userId}");
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_jwtSecret);
 
@@ -47,7 +47,7 @@ public class JwtGenerator
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        l.log($"Access token: {token}");
+        l.LogDebug($"Access token: {token}");
         return tokenHandler.WriteToken(token);
     }
 
@@ -63,7 +63,7 @@ public class JwtGenerator
                 Token = Convert.ToBase64String(randomNumber),
                 Expires = DateTime.UtcNow.AddDays(7)
             };
-            l.log($"Refresh token: {RefreshToken.Token}, expires: {RefreshToken.Expires}");
+            l.LogDebug($"Refresh token: {RefreshToken.Token}, expires: {RefreshToken.Expires}");
             return RefreshToken; 
             
         }

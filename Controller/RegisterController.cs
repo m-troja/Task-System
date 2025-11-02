@@ -17,7 +17,7 @@ public class RegisterController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Response>> RegisterUser(RegistrationRequest rr)
     {
-        l.log($"Received registration request: {rr}");
+        l.LogDebug($"Received registration request: {rr}");
         await _rs.Register(rr);
         return await Task.FromResult(new Response(ResponseType.REGISTRATION_OK, rr.Email) );
     }

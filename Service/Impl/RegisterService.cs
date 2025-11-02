@@ -6,6 +6,7 @@ using Task_System.Exception.LoginException;
 using Task_System.Exception.ProjectException;
 using Task_System.Exception.Registration;
 using Task_System.Exception.UserException;
+using Task_System.Log;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
 using Task_System.Security;
@@ -19,51 +20,54 @@ namespace Task_System.Service.Impl
         private readonly IUserService _us;
         private readonly IRoleService _rs;
         private readonly PasswordService _passwordService;
-
+        private readonly ILogger<RegisterService> l;
+        private readonly IChatGptService _chatGptService;
 
         public async Task Register(RegistrationRequest rr)
         {
-            string email = rr.Email.ToLower();
+            if (rr.Email == null || rr.Password == null || rr.FirstName == null || rr.LastName == null)
+            {
+                l.LogError("Registration failed: Missing required fields");
+                throw new System.Exception("Registration failed: Missing required fields");
+            }
+            l.LogInformation("Received registration request: " + rr);
+            
+            string email = rr.Email.ToLower() ;
 
             if (!new EmailAddressAttribute().IsValid(rr.Email))
                 throw new RegisterEmailException("Invalid email address");
 
             byte[] salt = _passwordService.GenerateSalt();
             string password = _passwordService.HashPassword(rr.Password, salt);
-            
-            var user = new User(rr.FirstName, rr.LastName, email, password);
-            user.Salt = salt;
-            user.Password = password;
-            user.Roles.Add(await _rs.GetRoleByName(Role.ROLE_USER));
-            user.RefreshToken = null;
-            if (!await ValidateNewUserAsync(user)) {
+            Role role= await _rs.GetRoleByName(Role.ROLE_USER);
+            var user = new User(rr.FirstName, rr.LastName, email, password, salt, role);
+            if (!await ValidateNewUserAsync(email)) {
                 return ;
             }
-
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
-            Console.WriteLine("User registered successfully: " + user);
         }
 
-        private async Task<bool> ValidateNewUserAsync(User user)
+        private async Task<bool> ValidateNewUserAsync(string email)
         {
-            try
+            var existingUserByEmail = await _us.TryGetByEmailAsync(email);
+            if(existingUserByEmail != null)
             {
-                var existingUserByEmail = await _us.GetByEmailAsync(user.Email);
-                throw new UserAlreadyExistsException($"Email '{user.Email}' is already registered.");
-            }
-            catch (UserNotFoundException)
-            {
+                l.LogError("Registration failed: Email already registered");
+                throw new UserAlreadyExistsException("Registration failed: Email already registered");
             }
 
             return true;
         }
-        public RegisterService(PostgresqlDbContext db, IUserService us, IRoleService rs, PasswordService passwordService)
+
+        public RegisterService(PostgresqlDbContext db, IUserService us, IRoleService rs, PasswordService passwordService, ILogger<RegisterService> logger, IChatGptService chatGptService)
         {
             _db = db;
             _us = us;
             _rs = rs;
             _passwordService = passwordService;
+            l = logger;
+            _chatGptService = chatGptService;
         }
     }
 }

@@ -11,7 +11,7 @@ using Task_System.Service.Impl;
 
 namespace Task_System.Controller; 
 
-[Authorize]
+//[Authorize]
 [ApiController]
 [Route("api/v1/user")]
 public class UserController : ControllerBase
@@ -30,7 +30,7 @@ public class UserController : ControllerBase
     [HttpGet("id/{id:int}")]
     public async Task<ActionResult<UserDto>> GetUserById(int id)
     {
-        l.log($"Fetching user by id: {id}");
+        l.LogDebug($"Fetching user by id: {id}");
         var user =  await _us.GetByIdAsync(id);
 
         return Ok(_userCnv.ConvertUserToDto(user));
@@ -39,8 +39,12 @@ public class UserController : ControllerBase
     [HttpGet("email/{email}")]
     public async Task<ActionResult<UserDto>> GetUserByEmail(string email)
     {
-        l.log($"Fetching user by email: {email}");
+        l.LogDebug($"Fetching user by email: {email}");
         var user = await _us.GetByEmailAsync(email);
+        if (user == null)
+        {
+            return NotFound($"User with email {email} was not found");
+        }
 
         return Ok(_userCnv.ConvertUserToDto(user)); ;
     }
@@ -48,7 +52,7 @@ public class UserController : ControllerBase
     [HttpGet("all")]
     public async Task<ActionResult<List<UserDto>>> GetAllUsers()
     {
-        l.log("Fetching all users");
+        l.LogDebug("Fetching all users");
         var users = await _us.GetAllUsersAsync();
         return Ok(_userCnv.ConvertUsersToUsersDto(users));
     }

@@ -18,17 +18,17 @@ public class TeamService : ITeamService
 
     public async Task<List<Team>> GetAllTeamsAsync()
     {
-        l.log("Getting all teams from the db");
+        l.LogDebug("Getting all teams from the db");
         return await _db.Teams.ToListAsync();
     }
 
     public async Task<Team> GetTeamByIdAsync(int id)
     {
-        l.log($"Getting team by id: {id}");
+        l.LogDebug($"Getting team by id: {id}");
         var Team = await _db.Teams.FirstAsync(t => t.Id == id);
         if (Team == null)
         {
-            l.log($"Team with id {id} not found");
+            l.LogDebug($"Team with id {id} not found");
             throw new KeyNotFoundException($"Team with id {id} not found");
         }
         return Team;
@@ -38,7 +38,7 @@ public class TeamService : ITeamService
     {
         if (req.Name == null || req.Name.Trim() == "")
         {
-            l.log("Team name is null or empty");
+            l.LogDebug("Team name is null or empty");
             throw new ArgumentException("Team name cannot be null or empty");
         }
         Team team; 
@@ -54,7 +54,7 @@ public class TeamService : ITeamService
 
         if (team != null)
         {
-            l.log($"Team with name {req.Name} already exists");
+            l.LogDebug($"Team with name {req.Name} already exists");
             throw new ArgumentException($"Team with name {req.Name} already exists");
         }   
         var NewTeam = new Team
@@ -70,13 +70,13 @@ public class TeamService : ITeamService
     {
         if (name == null || name.Trim() == "")
         {
-            l.log("Team name is null or empty");
+            l.LogDebug("Team name is null or empty");
             throw new ArgumentException("Team name cannot be null or empty");
         }
         Team team = await _db.Teams.FirstOrDefaultAsync(t => t.Name == name);
         if (team == null)
         {
-            l.log($"Team with name {name} was not found");
+            l.LogDebug($"Team with name {name} was not found");
             throw new KeyNotFoundException($"Team with name {name} was not found");
         }
         return team;
@@ -86,7 +86,7 @@ public class TeamService : ITeamService
     {
         var Team = await GetTeamByIdAsync(teamId);
         List<Issue> issues = Team.Issues.ToList();
-        l.log($"Found {issues.Count} issues in team with id {teamId}");
+        l.LogDebug($"Found {issues.Count} issues in team with id {teamId}");
         return _issueCnv.ConvertIssueListToIssueDtoList(issues);
     }
 
@@ -94,7 +94,7 @@ public class TeamService : ITeamService
     {
         var Team = await GetTeamByIdAsync(teamId);
         List<User> users = Team.Users.ToList();
-        l.log($"Found {users.Count} users in team with id {teamId}");
+        l.LogDebug($"Found {users.Count} users in team with id {teamId}");
         return _userCnv.ConvertUsersToUsersDto(users);
     }
 

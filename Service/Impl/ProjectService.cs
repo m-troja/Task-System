@@ -45,9 +45,9 @@ public class ProjectService : IProjectService
 
     public async Task<IEnumerable<Project>> GetAllProjectsAsync()
     {
-        l.log("Getting all projects from the db");
+        l.LogDebug("Getting all projects from the db");
         List<Project> projects = await _db.Projects.ToListAsync();
-        l.log($"Found {projects.Count} projects in the db");
+        l.LogDebug($"Found {projects.Count} projects in the db");
         return projects;
     }
 
