@@ -8,7 +8,6 @@ using Task_System.Service;
 
 namespace Task_System.Controller;
 
-[AllowAnonymous]
 [ApiController]
 [Route("api/v1/chatgpt")]
 public class ChatGptController: ControllerBase
