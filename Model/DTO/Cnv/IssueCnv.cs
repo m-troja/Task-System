@@ -6,6 +6,7 @@ namespace Task_System.Model.DTO.Cnv;
 public class IssueCnv
 {
     private readonly CommentCnv _commentCnv;
+    private readonly ILogger<IssueCnv> logger;
     public IssueDto ConvertIssueToIssueDto(Issue Issue)
     {
         ICollection<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(Issue.Comments);
@@ -28,7 +29,31 @@ public class IssueCnv
         
         return issueDto;
     }
+    public IssueDtoChatGpt ConvertIssueToIssueDtoChatGpt(Issue Issue)
+    {
+        logger.LogDebug($"Converting {Issue} to IssueDtoChatGpt");
+        logger.LogDebug($"Assignee is {Issue.Assignee}, Id {Issue.AssigneeId}");
+        logger.LogDebug($"Author is {Issue.Author}, Id {Issue.AuthorId}");
+        ICollection<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(Issue.Comments);
 
+        var issueDto = new IssueDtoChatGpt(
+            Issue.Id,
+                Issue.Key.KeyString,
+                Issue.Title,
+                Issue.Description ?? "No description",
+                Issue.Status,
+                Issue.Priority ?? IssuePriority.NORMAL,
+                Issue.Author.SlackUserId ?? "Empty",
+                Issue.Assignee.SlackUserId ?? "Empty",
+                Issue.CreatedAt,
+                Issue.DueDate,
+                Issue.UpdatedAt,
+                commentDtos,
+                Issue.ProjectId
+            );
+        logger.LogInformation($"Converted IssueId: {Issue.Id} to {issueDto}");
+        return issueDto;
+    }
     public List<IssueDto> ConvertIssueListToIssueDtoList(List<Issue> issues)
     {
         var issueDtos = new List<IssueDto>();
@@ -39,8 +64,9 @@ public class IssueCnv
         return issueDtos;
     }
 
-    public IssueCnv(CommentCnv commentCnv)
+    public IssueCnv(CommentCnv commentCnv, ILogger<IssueCnv> logger)
     {
         _commentCnv = commentCnv;
+        this.logger = logger;
     }
 }

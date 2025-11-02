@@ -19,8 +19,8 @@ public class LoginService : ILoginService
     {
         l.LogDebug($"Attempting login for {lr.email.ToLower()} with pw {lr.password}");
 
-        if (await IsUserDisabledAsync(lr.email)) { throw new UserDisabledException("User account is disabled"); }
         User user = await ValidateCredentials(lr);
+
         if (user == null)
         {
             l.LogDebug("Returning null from LoginAsync");
@@ -32,6 +32,7 @@ public class LoginService : ILoginService
 
     private async Task<User> ValidateCredentials(LoginRequest lr)
     {
+
         string email = lr.email.ToLower();
         if (!new EmailAddressAttribute().IsValid(email))
         {
@@ -68,9 +69,12 @@ public class LoginService : ILoginService
         }
         else
         {
+            if (await IsUserDisabledAsync(lr.email)) { throw new UserDisabledException("User account is disabled"); }
+
             l.LogDebug("Login failed: wrong password");
             throw new InvalidEmailOrPasswordException("Wrong email or password");
         }
+
     }
 
     private async Task<bool> IsUserDisabledAsync(string email)

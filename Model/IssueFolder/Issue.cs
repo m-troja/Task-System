@@ -42,5 +42,10 @@ namespace Task_System.Model.IssueFolder
         }
         public Issue()  { }
 
+        override
+        public string ToString()
+        {
+            return "Issue(Id=" + Id + ", Title=" + Title + ", Description=" + Description + ", Status=" + Status + ", Priority=" + Priority + ", AuthorId=" + AuthorId + ", AssigneeId=" + AssigneeId + ", ProjectId=" + ProjectId + ", CreatedAt=" + CreatedAt + ", DueDate=" + DueDate + ", UpdatedAt=" + UpdatedAt + ")";
+        }
     }
 }

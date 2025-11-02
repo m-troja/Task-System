@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Immutable;
 using Task_System.Data;
 using Task_System.Exception.IssueException;
 using Task_System.Exception.UserException;
@@ -16,6 +18,7 @@ public class CommentService : ICommentService
     private readonly IIssueService _issueService;
     private readonly IUserService _userService;
     private readonly CommentCnv _commentCnv;
+    private readonly ILogger<CommentService> logger;
     public async Task<CommentDto> CreateCommentAsync(CreateCommentRequest ccr)
     {
         Issue issue = _issueService.GetIssueByIdAsync(ccr.IssueId).Result;
@@ -26,16 +29,31 @@ public class CommentService : ICommentService
         return _commentCnv.ConvertCommentToCommentDto(comment);
     }
 
-    public Task<IEnumerable<Comment>> GetCommentsByIssueIdAsync(int issueId)
+    public async Task<IEnumerable<CommentDto>> GetCommentsByIssueIdAsync(int issueId)
     {
-        throw new NotImplementedException();
+        List<Comment> comments = await _db.Comments.Where(c => c.IssueId == issueId).ToListAsync();
+
+        return _commentCnv.ConvertCommentListToCommentDtoList(comments);
     }
 
-    public CommentService(PostgresqlDbContext db, IIssueService issueService, IUserService userService, CommentCnv commentCnv)
+    public CommentService(PostgresqlDbContext db, IIssueService issueService, IUserService userService, CommentCnv commentCnv, ILogger<CommentService> logger)
     {
         _db = db;
         _issueService = issueService;
         _userService = userService;
         _commentCnv = commentCnv;
+        this.logger = logger;
     }
+
+    public async Task DeleteAllCommentsByIssueId(int issueId)
+    {
+        await _db.Database.ExecuteSqlAsync($"DELETE FROM Comments where issue_id={issueId}");
+        logger.LogInformation($"Deleted comment where Id={issueId}");
+    }
+    public async Task DeleteCommentById(int id)
+    {
+        await _db.Database.ExecuteSqlAsync($"DELETE FROM Comments where id={id}");
+        logger.LogInformation($"Deleted comment where Id={id}");
+    }
+
 }

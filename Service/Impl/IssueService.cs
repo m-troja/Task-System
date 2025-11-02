@@ -96,7 +96,7 @@ namespace Task_System.Service.Impl
                     IdInsideProject = nextIdInsideProject
                 };
 
-                l.LogDebug($"Defined new issue entity: {JsonSerializer.Serialize(issue)}");
+                l.LogDebug($"Defined new issue entity: {issue}");
 
                 _db.Issues.Add(issue);
                 await _db.SaveChangesAsync();
@@ -165,6 +165,8 @@ namespace Task_System.Service.Impl
             l.LogDebug($"Fetching issue entity for issueId {id}");
             Issue? issue = await _db.Issues
                                       .Include(i => i.Key)      
+                                      .Include(i => i.Author)
+                                      .Include(i => i.Assignee)
                                       .Include(i => i.Project)  
                                       .Include(i => i.Comments)  
                                       .FirstOrDefaultAsync(i => i.Id == id); 
@@ -194,7 +196,7 @@ namespace Task_System.Service.Impl
             return issueDto;
         }
 
-        public async Task<IssueDto> AssignIssueAsync(AssignIssueRequest air)
+        public async Task<Issue> AssignIssueAsync(AssignIssueRequest air)
         {
             l.LogDebug($"Assigning issue {air.IssueId} to user {air.AssigneeId}");
             User newAssignee = await _userService.GetByIdAsync(air.AssigneeId);
@@ -214,11 +216,18 @@ namespace Task_System.Service.Impl
             Issue updatedIssue = await UpdateIssueAsync(issue);
             l.LogDebug($"Updated issue {updatedIssue.Id} in database");
 
-            IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(updatedIssue);
-            l.LogDebug($"Converted updated issue to DTO: {issueDto}");
-
             var activity = await _activityService.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_ASSIGNEE, (oldAssignee.Id).ToString(), (newAssignee.Id).ToString(), issue.Id);
-            return issueDto;
+            return updatedIssue;
+        }
+        public async Task<Issue> AssignIssueBySlackAsync(AssignIssueRequestChatGpt req)
+        {
+            l.LogDebug($"Assigning issue by Slack with key {req.key} to Slack user ID {req.slackUserId}");
+            int issueId = await GetIssueIdFromKey(req.key);
+            int newAssigneeId = await _userService.GetIdBySlackUserId(req.slackUserId);
+            var assignIssueRequest = new AssignIssueRequest(issueId, newAssigneeId);
+            var issue = await AssignIssueAsync(assignIssueRequest);
+            l.LogDebug($"Assigned issue {issueId} to user {newAssigneeId} successfully");
+            return issue;
         }
 
         public int GetIssueIdInsideProjectFromKey(string key)
@@ -379,7 +388,7 @@ namespace Task_System.Service.Impl
             return _issueCnv.ConvertIssueToIssueDto(updatedIssue);
         }
 
-        public async Task<IssueDto> CreateIssueBySlackAsync(SlackCreateIssueRequest scis)
+        public async Task<IssueDtoChatGpt> CreateIssueBySlackAsync(SlackCreateIssueRequest scis)
         {
             l.LogDebug("Creating issue via Slack with request: " + scis);
             l.LogDebug("Fetching author and assignee IDs from Slack user IDs");
@@ -396,7 +405,7 @@ namespace Task_System.Service.Impl
                  scis.projectId
              );
             Issue issue = await CreateIssueAsync(createIssueRequest);
-            IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(issue);
+            var issueDto = _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
             l.LogDebug($"Created issue via Slack successfully: {issueDto}");
             return issueDto;
         }
@@ -412,6 +421,19 @@ namespace Task_System.Service.Impl
             l.LogDebug($"Fetched total {issueDtos.Count} issues from database");
             return issueDtos;
         }
+
+        public async Task deleteAllIssues()
+        {
+            await _db.Database.ExecuteSqlRawAsync("DELETE FROM Issues");
+            l.LogInformation("Deleted all issues from database");
+        }
+
+        public async Task deleteIssueById(int id)
+        {
+            await _db.Database.ExecuteSqlAsync($"DELETE FROM Issues WHERE id = {id}");
+            l.LogInformation($"Deleted issue where Id={id}");
+        }
+
 
     }
 }
