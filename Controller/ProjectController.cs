@@ -35,7 +35,7 @@ public class ProjectController : ControllerBase
     public async Task<ActionResult<List<ProjectDto>>> GetAllProjects()
     {
         var projects = await _ps.GetAllProjectsAsync();
-        return Ok(projects);
+        return Ok(_projectCnv.ConvertProjectsToProjectDtos(projects));
     }
 
     public ProjectController(IProjectService ps, ProjectCnv projectCnv)

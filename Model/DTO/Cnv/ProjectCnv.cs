@@ -22,6 +22,11 @@ public class ProjectCnv
         };
     }
 
+    public List<ProjectDto> ConvertProjectsToProjectDtos(IEnumerable<Project> projects)
+    {
+        return projects.Select(p => ConvertProjectToProjectDto(p)).ToList();
+    }
+
     public ProjectCnv(IssueCnv issueCnv)
     {
         _issueCnv = issueCnv;

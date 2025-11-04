@@ -13,7 +13,11 @@ public class ProjectService : IProjectService
     private readonly ILogger<ProjectService> l;
     public async Task<Project> GetProjectById(int id)
     {
-        Project? project = await _db.Projects.Where(p => p.Id == id).FirstOrDefaultAsync();
+        Project? project = await _db.Projects
+            .Where(p => p.Id == id)
+            .Include(p => p.Issues)
+            .Include(p => p.Keys)
+            .FirstOrDefaultAsync();
         if (project == null) throw new ProjectNotFoundException($"Project id {id} was not found");
         return project;
     }
@@ -46,7 +50,10 @@ public class ProjectService : IProjectService
     public async Task<IEnumerable<Project>> GetAllProjectsAsync()
     {
         l.LogDebug("Getting all projects from the db");
-        List<Project> projects = await _db.Projects.ToListAsync();
+        List<Project> projects = await _db.Projects
+            .Include(p => p.Issues)
+            .Include(p => p.Keys)
+            .ToListAsync();
         l.LogDebug($"Found {projects.Count} projects in the db");
         return projects;
     }
