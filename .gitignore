@@ -1,0 +1,14 @@
+dev.env
+.git
+.vs
+bin
+obj
+publish
+appsettings.Development.json
+/Properties/PublishProfiles
+/log*
+*.user
+/Log
+Task-System/packages
+Task-System/bin
+Task-System/obj
