@@ -9,3 +9,6 @@ appsettings.Development.json
 /log*
 *.user
 /Log
+Task-System/obj
+Task-System/bin
+Task-System/packages
