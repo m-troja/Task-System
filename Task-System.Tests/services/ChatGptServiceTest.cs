@@ -58,6 +58,29 @@ public class ChatGptServiceTest
         Assert.NotNull(usersFromService);
         Assert.Equal(2, usersFromService.Count);
     }
+
+    [Fact]
+    public async Task<List<User>> RegisterSLackUsers_ShouldRegisterUsers()
+    {
+        // given
+        var db = GetInMemoryDb();
+        var logger = GetLoggerStub();
+        var service = new ChatGptService(logger, new HttpClient(), db);
+        var chatGptUsers = new List<ChatGptUser>
+        {
+            new ChatGptUser(1, "slackName1", "U12345678"),
+            new ChatGptUser(2, "slackName2", "U22345678")
+        };
+        // when
+        var registeredUsers = await service.RegisterSlackUsers(chatGptUsers);
+        // then
+        Assert.NotNull(registeredUsers);
+        Assert.Equal(2, registeredUsers.Count);
+        Assert.Contains(registeredUsers, u => u.SlackUserId == "U12345678" && u.FirstName == "slackName1");
+        Assert.Contains(registeredUsers, u => u.SlackUserId == "U22345678" && u.FirstName == "slackName2");
+        return registeredUsers;
+    }
+
     private void SetPrivateField(object obj, string fieldName, object value)
     {
         var field = obj.GetType().GetField(fieldName, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);

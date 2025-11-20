@@ -65,6 +65,4 @@ public class ChatGptService : IChatGptService
         }
         return users;
     }
-
-
 }
