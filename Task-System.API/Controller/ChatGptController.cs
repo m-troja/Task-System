@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Task_System.Log;
+﻿using Microsoft.AspNetCore.Mvc;
 using Task_System.Model.DTO;
 using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Request;
@@ -11,7 +9,7 @@ namespace Task_System.Controller;
 [ApiController]
 [Route("api/v1/chatgpt")]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ChatGptController: ControllerBase
+public class ChatGptController : ControllerBase
 {
     private readonly ILogger<ChatGptController> l;
     private readonly IUserService _userService;
