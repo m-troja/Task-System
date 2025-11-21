@@ -13,9 +13,9 @@ public class LoginService : ILoginService
 {
     private readonly IUserService _userService;
     private readonly ILogger<LoginService> logger;
-    private readonly PasswordService _passwordService;
+    private readonly IPasswordService _passwordService;
 
-    public LoginService(IUserService userService, ILogger<LoginService> logger, PasswordService passwordService, IJwtGenerator jwtGenerator)
+    public LoginService(IUserService userService, ILogger<LoginService> logger, IPasswordService passwordService, IJwtGenerator jwtGenerator)
     {
         _userService = userService;
         this.logger = logger;

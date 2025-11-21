@@ -128,14 +128,14 @@ try
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<ITeamService, TeamService>();
     builder.Services.AddScoped<IChatGptService, ChatGptService>();
+    builder.Services.AddScoped<IPasswordService, PasswordService>();
+    builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
     builder.Services.AddHttpClient<IChatGptService, ChatGptService>();
     builder.Services.AddScoped<UserCnv>();
     builder.Services.AddScoped<TeamCnv>();
     builder.Services.AddScoped<CommentCnv>();
     builder.Services.AddScoped<IssueCnv>();
     builder.Services.AddScoped<ProjectCnv>();
-    builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
-    builder.Services.AddScoped<IPasswordService, PasswordService>();
 
     builder.Services.AddControllers().AddJsonOptions(options =>
     {
@@ -201,4 +201,3 @@ finally
 {
     Log.CloseAndFlush();
 }
-// Test tag 2.0.1
