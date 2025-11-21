@@ -8,16 +8,15 @@ namespace Task_System.Service.Impl;
 public class AuthService : IAuthService
 {
     private readonly PostgresqlDbContext _db;
-    private readonly ILogger<ActivityService> l;
-    private readonly JwtGenerator _jwtGenerator;
+    private readonly ILogger<AuthService> l;
+    private readonly IJwtGenerator _jwtGenerator;
     private readonly IUserService _userService;
-
 
     public string GetAccessTokenByUserId(int userId)
     {
         string AccessToken =  _jwtGenerator.GenerateAccessToken(userId);
         l.LogDebug($"Generated access token for user {userId}: {AccessToken}");
-        return AccessToken;
+        return AccessToken;     
     }
 
     public async Task<RefreshToken> GenerateRefreshToken(int UserId)
@@ -32,7 +31,7 @@ public class AuthService : IAuthService
         return NewRefreshToken;
     }
 
-    public AuthService(PostgresqlDbContext db, ILogger<ActivityService> l, JwtGenerator jwtGenerator, IUserService userService)
+    public AuthService(PostgresqlDbContext db, ILogger<AuthService> l, IJwtGenerator jwtGenerator, IUserService userService)
     {
         _db = db;
         this.l = l;

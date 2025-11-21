@@ -88,7 +88,7 @@ public class LoginService : ILoginService
         }
         return false;
     }
-    public LoginService(IUserService userService, ILogger<LoginService> l, PasswordService passwordService, JwtGenerator jwtGenerator)
+    public LoginService(IUserService userService, ILogger<LoginService> l, PasswordService passwordService, IJwtGenerator jwtGenerator)
     {
         _userService = userService;
         this.l = l;

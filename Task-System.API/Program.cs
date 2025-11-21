@@ -9,6 +9,7 @@ using Task_System.Data;
 using Task_System.Exception.Handler;
 using Task_System.Model.DTO.Cnv;
 using Task_System.Security;
+using Task_System.Security.Impl;
 using Task_System.Service;
 using Task_System.Service.Impl;
 
@@ -80,14 +81,6 @@ try
     var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT issuer not configured.");
     var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT audience not configured.");
 
-    // Register JwtGenerator
-    builder.Services.AddSingleton<JwtGenerator>(sp =>
-    {
-        var config = sp.GetRequiredService<IConfiguration>();
-        var logger = sp.GetRequiredService<ILogger<JwtGenerator>>();
-        return new JwtGenerator(config, logger);
-    });
-
     // Authentication
     builder.Services.AddAuthentication(options =>
     {
@@ -141,7 +134,8 @@ try
     builder.Services.AddScoped<CommentCnv>();
     builder.Services.AddScoped<IssueCnv>();
     builder.Services.AddScoped<ProjectCnv>();
-    builder.Services.AddScoped<PasswordService>();
+    builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
+    builder.Services.AddScoped<IPasswordService, PasswordService>();
 
     builder.Services.AddControllers().AddJsonOptions(options =>
     {

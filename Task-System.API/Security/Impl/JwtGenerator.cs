@@ -7,16 +7,16 @@ using Microsoft.IdentityModel.Tokens;
 using Task_System.Model.Entity;
 using Task_System.Log;
 
-namespace Task_System.Security;
+namespace Task_System.Security.Impl;
 
-public class JwtGenerator
+public class JwtGenerator : IJwtGenerator
 {
     private readonly string _jwtSecret;
     private readonly string _jwtIssuer;
     private readonly string _jwtAudience;
-    private readonly ILogger<JwtGenerator> l;
+    private readonly ILogger<IJwtGenerator> l;
 
-    public JwtGenerator(IConfiguration config, ILogger<JwtGenerator> logger)
+    public JwtGenerator(IConfiguration config, ILogger<IJwtGenerator> logger)
     {
         _jwtSecret = config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT secret not configured.");
         _jwtIssuer = config["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT issuer not configured.");

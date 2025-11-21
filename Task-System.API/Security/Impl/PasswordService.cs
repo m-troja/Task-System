@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 namespace Task_System.Security;
 
-public class PasswordService
+public class PasswordService : IPasswordService
 {
     private readonly ILogger<PasswordService> l;
     public string HashPassword(string password, byte[] salt)
