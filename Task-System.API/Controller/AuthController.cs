@@ -21,19 +21,25 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
 
     [HttpPost("regenerate-tokens")]
-    public async Task<ActionResult<Response>> RegenerateTokens([FromBody] RefreshAccessTokenRequest req)
+    public async Task<ActionResult<TokenResponseDto>> RegenerateTokens([FromBody] RefreshTokenRequest req)
     {
         l.LogDebug($"Regenerating tokens for userId {req.UserId} with refresh token {req.RefreshToken}");
+
         User user = await _userService.GetByIdAsync(req.UserId);
+
         if (user.RefreshToken != req.RefreshToken)
         {
             l.LogDebug($"Invalid refresh token for userId {req.UserId}");
-            return Unauthorized(new { message = "Invalid refresh token" });
+            // Zwracamy DTO błędu z HTTP 401
+            return Unauthorized(new Response(ResponseType.ERROR, "Invalid refresh token"));
         }
+
         string accessToken = _authService.GetAccessTokenByUserId(req.UserId);
         RefreshToken refreshToken = await _authService.GenerateRefreshToken(req.UserId);
+
         l.LogDebug($"Generated new access token {accessToken} and refresh token {refreshToken.Token} for userId {req.UserId}");
-        return Ok(new { accessToken, refreshToken });
+
+        return Ok(new TokenResponseDto(accessToken, refreshToken));
     }
 
     public AuthController(ILogger<LoginService> l, ILoginService loginService, IUserService userService, IAuthService authService)

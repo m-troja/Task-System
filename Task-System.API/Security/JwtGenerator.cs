@@ -57,12 +57,9 @@ public class JwtGenerator
         using (var rng = RandomNumberGenerator.Create())
         {
             rng.GetBytes(randomNumber);
-            var RefreshToken = new RefreshToken
-            {
-                UserId = userId,
-                Token = Convert.ToBase64String(randomNumber),
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
+            var RefreshToken = new RefreshToken(
+                Convert.ToBase64String(randomNumber), userId, DateTime.UtcNow.AddDays(7), false
+                );
             l.LogDebug($"Refresh token: {RefreshToken.Token}, expires: {RefreshToken.Expires}");
             return RefreshToken; 
             

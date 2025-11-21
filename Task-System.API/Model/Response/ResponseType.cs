@@ -6,7 +6,8 @@
         COMMENT_CREATED_OK,
         LOGIN_OK,
         NEW_REFRESH_TOKEN_ISSUED,
-        NEW_ACCESS_TOKEN_ISSUED
+        NEW_ACCESS_TOKEN_ISSUED,
+        ERROR
     }
     
     
