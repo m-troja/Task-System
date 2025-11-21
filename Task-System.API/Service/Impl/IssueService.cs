@@ -446,6 +446,5 @@ namespace Task_System.Service.Impl
             l.LogInformation($"Deleted issue where Id={id}");
         }
 
-
     }
 }

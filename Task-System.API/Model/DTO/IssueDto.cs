@@ -1,4 +1,5 @@
-﻿using Task_System.Model.IssueFolder;
+﻿using Task_System.Model.Entity;
+using Task_System.Model.IssueFolder;
 
 namespace Task_System.Model.DTO;
 
@@ -15,6 +16,7 @@ public record IssueDto(
     DateTime? DueDate,
     DateTime? UpdatedAt, 
     ICollection<CommentDto> Comments, 
-    int ProjectId)
+    int ProjectId,
+    Team Team)
 { }
 

@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
 
 namespace Task_System.Model.DTO.Cnv;
@@ -24,7 +25,8 @@ public class IssueCnv
                 Issue.DueDate,
                 Issue.UpdatedAt,
                 commentDtos,
-                Issue.ProjectId
+                Issue.ProjectId,
+                Issue.Team ?? new Team("No Team")
             );
         
         return issueDto;
@@ -44,7 +46,7 @@ public class IssueCnv
                 Issue.Status,
                 Issue.Priority ?? IssuePriority.NORMAL,
                 Issue.Author.SlackUserId ?? "Empty",
-                Issue.Assignee.SlackUserId ?? "Empty",
+                Issue.Assignee?.SlackUserId ?? "Empty",
                 Issue.CreatedAt,
                 Issue.DueDate,
                 Issue.UpdatedAt,

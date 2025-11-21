@@ -57,10 +57,7 @@ public class TeamService : ITeamService
             l.LogDebug($"Team with name {req.Name} already exists");
             throw new ArgumentException($"Team with name {req.Name} already exists");
         }   
-        var NewTeam = new Team
-        {
-            Name = req.Name,
-        };
+        var NewTeam = new Team(req.Name);
         await _db.Teams.AddAsync(NewTeam);
         await _db.SaveChangesAsync();
         return NewTeam;

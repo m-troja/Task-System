@@ -11,7 +11,7 @@ using Task_System.Model.Entity;
 using Task_System.Service.Impl;
 using Xunit;
 
-namespace Task_System.Tests.services;
+namespace Task_System.Tests.Services;
 public class ChatGptServiceTest
 {
     private PostgresqlDbContext GetInMemoryDb()
@@ -71,6 +71,7 @@ public class ChatGptServiceTest
             new ChatGptUser(1, "slackName1", "U12345678"),
             new ChatGptUser(2, "slackName2", "U22345678")
         };
+
         // when
         var registeredUsers = await service.RegisterSlackUsers(chatGptUsers);
         // then

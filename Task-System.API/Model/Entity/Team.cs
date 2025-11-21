@@ -1,12 +1,16 @@
 ﻿using Task_System.Model.IssueFolder;
 
-namespace Task_System.Model.Entity
+namespace Task_System.Model.Entity;
+
+public class Team
 {
-    public class Team
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public ICollection<Issue>? Issues { get; set; } = new List<Issue>();
+    public ICollection<User>? Users { get; set; } = new List<User>();
+
+    public Team(string name)
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = null!;
-        public ICollection<Issue> Issues { get; set; } = new List<Issue>();
-        public ICollection<User> Users { get; set; } = new List<User>();
+        Name = name;
     }
 }
