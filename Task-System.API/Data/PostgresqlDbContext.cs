@@ -106,8 +106,10 @@ public class PostgresqlDbContext : DbContext
                     .OnDelete(DeleteBehavior.Cascade);
 
         // ACTIVITY - Table per type mapping
-        modelBuilder.Entity<Activity>().ToTable("activities");
-        modelBuilder.Entity<ActivityPropertyUpdated>().ToTable("activity_property_updated");
+        modelBuilder.Entity<Activity>()
+            .HasDiscriminator<string>("ActivityType")
+            .HasValue<ActivityPropertyCreated>("Created")
+            .HasValue<ActivityPropertyUpdated>("Updated");
 
         // ISSUE - relationship to TEAM (Team)
         modelBuilder.Entity<Issue>()
