@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
         if (user.RefreshToken != req.RefreshToken)
         {
             l.LogDebug($"Invalid refresh token for userId {req.UserId}");
-            // Zwracamy DTO błędu z HTTP 401
+            
             return Unauthorized(new Response(ResponseType.ERROR, "Invalid refresh token"));
         }
 
