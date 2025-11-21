@@ -12,86 +12,64 @@ namespace Task_System.Service.Impl;
 public class LoginService : ILoginService
 {
     private readonly IUserService _userService;
-    private readonly ILogger<LoginService> l;
+    private readonly ILogger<LoginService> logger;
     private readonly PasswordService _passwordService;
 
-    public async Task<User> LoginAsync(LoginRequest lr)
+    public LoginService(IUserService userService, ILogger<LoginService> logger, PasswordService passwordService, IJwtGenerator jwtGenerator)
     {
-        l.LogDebug($"Attempting login for {lr.email.ToLower()} with pw {lr.password}");
-
-        User user = await ValidateCredentials(lr);
-
-        if (user == null)
-        {
-            l.LogDebug("Returning null from LoginAsync");
-            return null;
-        }
-        return user;
-
+        _userService = userService;
+        this.logger = logger;
+        _passwordService = passwordService;
     }
 
-    private async Task<User> ValidateCredentials(LoginRequest lr)
+    public async Task<User> LoginAsync(LoginRequest request)
     {
+        logger.LogDebug($"Attempting login for {request.email.ToLower()}");
 
-        string email = lr.email.ToLower();
-        if (!new EmailAddressAttribute().IsValid(email))
-        {
-            l.LogDebug("Login failed: invalid email format");
-            throw new InvalidEmailOrPasswordException("invalid email format");
-        }
-        if (string.IsNullOrWhiteSpace(lr.password) || string.IsNullOrWhiteSpace(email))
-        {
-            l.LogDebug("Login failed: empty email or password");
-            throw new InvalidEmailOrPasswordException("empty email or password");
-        }
-        if (lr.password.Length > 250 || email.Length > 250)
-        {
-            l.LogDebug("Login failed: email or password too long");
-            throw new InvalidEmailOrPasswordException("email or password too long - max 250 chars");
-        }
+        ValidateInput(request);
 
-        User user = await _userService.TryGetByEmailAsync(email);
+        var user = await _userService.TryGetByEmailAsync(request.email.ToLower());
         if (user == null)
         {
-            l.LogDebug("Returning null from ValidateCredentials as result of TryGetByEmailAsync");
-            return null;
-        }
-        byte[] UsersSalt = user.Salt;
-        string HashedPw = _passwordService.HashPassword(lr.password, UsersSalt);
-        l.LogDebug($"Hashed pw: {HashedPw}");
-        l.LogDebug($"User's salt: {user.Salt}");
-        l.LogDebug($"Found user {user.Email}");
-
-        if (user.Password == HashedPw)
-        {
-            l.LogDebug($"Login successful for {user.Email}");
-            return user;
-        }
-        else
-        {
-            if (await IsUserDisabledAsync(lr.email)) { throw new UserDisabledException("User account is disabled"); }
-
-            l.LogDebug("Login failed: wrong password");
+            logger.LogDebug("Login failed: user not found");
             throw new InvalidEmailOrPasswordException("Wrong email or password");
         }
 
-    }
-
-    private async Task<bool> IsUserDisabledAsync(string email)
-    {
-        User user = await _userService.GetByEmailAsync(email);
-        if (user == null) return true;
         if (user.Disabled)
         {
-            l.LogDebug($"User {email} is disabled");
-            return true;
+            logger.LogDebug($"Login failed: user {user.Email} is disabled");
+            throw new UserDisabledException("User account is disabled");
         }
-        return false;
+
+        var hashedPassword = _passwordService.HashPassword(request.password, user.Salt);
+        if (hashedPassword != user.Password)
+        {
+            logger.LogDebug("Login failed: wrong password");
+            throw new InvalidEmailOrPasswordException("Wrong email or password");
+        }
+
+        logger.LogDebug($"Login successful for {user.Email}");
+        return user;
     }
-    public LoginService(IUserService userService, ILogger<LoginService> l, PasswordService passwordService, IJwtGenerator jwtGenerator)
+
+    private void ValidateInput(LoginRequest request)
     {
-        _userService = userService;
-        this.l = l;
-        _passwordService = passwordService;
+        if (!new EmailAddressAttribute().IsValid(request.email))
+        {
+            logger.LogDebug("Login failed: invalid email format");
+            throw new InvalidEmailOrPasswordException("Invalid email format");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.password) || string.IsNullOrWhiteSpace(request.email))
+        {
+            logger.LogDebug("Login failed: empty email or password");
+            throw new InvalidEmailOrPasswordException("Email or password cannot be empty");
+        }
+
+        if (request.password.Length > 250 || request.email.Length > 250)
+        {
+            logger.LogDebug("Login failed: email or password too long");
+            throw new InvalidEmailOrPasswordException("Email or password too long - max 250 chars");
+        }
     }
 }
