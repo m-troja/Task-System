@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Task_System.Tests.Service;
 
-public class ProjectServiceTests
+public class ProjectServiceTest
 {
     private PostgresqlDbContext GetInMemoryDb()
     {

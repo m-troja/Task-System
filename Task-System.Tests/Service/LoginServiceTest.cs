@@ -13,13 +13,13 @@ using Xunit;
 
 namespace Task_System.Tests.Service
 {
-    public class LoginServiceTests
+    public class LoginServiceTest
     {
         private readonly Mock<IUserService> _mockUserService = new();
         private readonly Mock<ILogger<LoginService>> _mockLogger = new();
         private readonly PasswordService _passwordService;
 
-        public LoginServiceTests()
+        public LoginServiceTest()
         {
             _passwordService = new PasswordService(new LoggerFactory().CreateLogger<PasswordService>());
         }

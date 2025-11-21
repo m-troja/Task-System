@@ -2,21 +2,19 @@
 using Task_System.Data;
 using Task_System.Model.Entity;
 
-namespace Task_System.Service.Impl
+namespace Task_System.Service.Impl;
+
+public class RoleService : IRoleService
 {
-    public class RoleService : IRoleService
+    private readonly PostgresqlDbContext _db;
+    public async Task<Role> GetRoleByName(string name)
     {
-        private readonly PostgresqlDbContext _db;
+        Task<Role> role = _db.Roles.Where(r => r.Name == name).FirstAsync();
+        return await role;
+    }
 
-        public async Task<Role> GetRoleByName(string name)
-        {
-            Task<Role> role = _db.Roles.Where(r => r.Name == name).FirstAsync();
-            return await role;
-        }
-
-        public RoleService(PostgresqlDbContext db)
-        {
-            _db = db;
-        }
+    public RoleService(PostgresqlDbContext db)
+    {
+        _db = db;
     }
 }

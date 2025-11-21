@@ -41,7 +41,11 @@ public class LoginService : ILoginService
             throw new UserDisabledException("User account is disabled");
         }
 
+        if (user.Salt == null)
+            throw new ArgumentNullException(nameof(user.Salt));
+
         var hashedPassword = _passwordService.HashPassword(request.password, user.Salt);
+
         if (hashedPassword != user.Password)
         {
             logger.LogDebug("Login failed: wrong password");
