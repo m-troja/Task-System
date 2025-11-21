@@ -9,7 +9,7 @@ using Task_System.Service;
 using Task_System.Service.Impl;
 using Xunit;
 
-namespace Task_System.Tests.Services;
+namespace Task_System.Tests.Service;
 
 public class UserServiceTests
 {

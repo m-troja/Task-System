@@ -7,7 +7,7 @@ using Task_System.Model.Request;
 using Task_System.Service.Impl;
 using Xunit;
 
-namespace Task_System.Tests.Services;
+namespace Task_System.Tests.Service;
 
 public class ProjectServiceTests
 {

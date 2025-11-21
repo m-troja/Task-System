@@ -11,7 +11,7 @@ using Task_System.Model.Entity;
 using Task_System.Service.Impl;
 using Xunit;
 
-namespace Task_System.Tests.Services;
+namespace Task_System.Tests.Service;
 public class ChatGptServiceTest
 {
     private PostgresqlDbContext GetInMemoryDb()
