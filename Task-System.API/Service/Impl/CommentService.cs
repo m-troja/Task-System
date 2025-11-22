@@ -19,6 +19,7 @@ public class CommentService : ICommentService
     private readonly IUserService _userService;
     private readonly CommentCnv _commentCnv;
     private readonly ILogger<CommentService> logger;
+
     public async Task<CommentDto> CreateCommentAsync(CreateCommentRequest ccr)
     {
         Issue issue = _issueService.GetIssueByIdAsync(ccr.IssueId).Result;

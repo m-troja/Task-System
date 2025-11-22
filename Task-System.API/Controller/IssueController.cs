@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Task_System.Exception.IssueException;
+using Task_System.Log;
 using Task_System.Model.DTO;
+using Task_System.Model.DTO.Cnv;
 using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
 using Task_System.Model.Response;
 using Task_System.Service;
-using Task_System.Log;
-using Microsoft.AspNetCore.Authorization;
-using Task_System.Model.DTO.Cnv;
+using Task_System.Service.Impl;
 
 namespace Task_System.Controller;
 
@@ -129,6 +130,22 @@ public class IssueController : ControllerBase
         l.LogDebug($"Received get all issues by project id request: {projectId}");
         var issuesDto = await _is.GetAllIssuesByProjectId(projectId);
         return Ok(issuesDto);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<string>> DeletelIssueById(int id)
+    {
+        l.LogInformation($"Triggered endpoint DeletelIssueById {id}");
+        await _is.deleteIssueById(id);
+        return Ok($"Deleted issue {id}");
+    }
+
+    [HttpDelete("all")]
+    public async Task<ActionResult<string>> DeleteAllIssues()
+    {
+        l.LogInformation("Triggered endpoint Delete all issues");
+        await _is.deleteAllIssues();
+        return Ok("All issues deleted successfully");
     }
 
     public IssueController(IIssueService @is, ILogger<IssueController> l, IssueCnv _issueCnv)

@@ -20,16 +20,19 @@ public class CommentController : ControllerBase
     [Route("create")]   
     public async Task<ActionResult<CommentDto>> CreateComment([FromBody] CreateCommentRequest cmr)
     {
-        await _cs.CreateCommentAsync(cmr);
-        return Ok();
+        var dto = await _cs.CreateCommentAsync(cmr);
+        return Ok(dto);
     }
+
     [HttpGet]
     [Route("issue/{issueId:int}")]
     public async Task<ActionResult<List<CommentDto>>> GetCommentsByIssueId(int issueId)
     {
-        logger.LogInformation($"ReceivedGetCommentsByIssueId {issueId}");
+        logger.LogInformation($"Received GetCommentsByIssueId {issueId}");
+
         var comments = await _cs.GetCommentsByIssueIdAsync(issueId);
-        return Ok(comments);
+
+        return Ok(comments.ToList());
     }
 
     [HttpDelete]
@@ -37,8 +40,9 @@ public class CommentController : ControllerBase
     public async Task<ActionResult<string>> DeleteAllCommentsByIssueId(int issueId)
     {
         await _cs.DeleteAllCommentsByIssueId(issueId);
-        return Ok($"Deleted comment by issueId={issueId}");
+        return Ok($"Deleted all comments for issue id={issueId}");
     }
+
     [HttpDelete]
     [Route("{id:int}")]
     public async Task<ActionResult<string>> DeleteCommentById(int id)

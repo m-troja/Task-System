@@ -56,4 +56,20 @@ public class UserController : ControllerBase
         var users = await _us.GetAllUsersAsync();
         return Ok(_userCnv.ConvertUsersToUsersDto(users));
     }
+
+    [HttpDelete("all")]
+    public async Task<ActionResult<string>> DeleteAllUsers()
+    {
+        l.LogInformation("Triggered endpoint Delete all users");
+        await _us.deleteAllUsers();
+        return Ok("All users deleted successfully");
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<string>> DeletelUserById(int id)
+    {
+        l.LogInformation($"Triggered endpoint DeletelUserById {id}");
+        await _us.deleteUserById(id);
+        return Ok($"Deleted user {id}");
+    }
 }
