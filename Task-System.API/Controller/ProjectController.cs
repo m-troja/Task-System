@@ -28,7 +28,7 @@ public class ProjectController : ControllerBase
     public async Task<ActionResult<ProjectDto>> CreateProject(CreateProjectRequest cpr)
     {
         var createdProject = await _ps.CreateProject(cpr);
-        return Ok(createdProject);
+        return Ok(_projectCnv.ConvertProjectToProjectDto(createdProject));
     }
 
     [HttpGet("all")]
