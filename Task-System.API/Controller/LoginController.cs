@@ -25,19 +25,19 @@ public class LoginController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "LOGIN_OK", typeof(LoginResponse))]
     public async Task<ActionResult<Response>> Login([FromBody] LoginRequest lr)
     {
-        l.LogDebug($"Received login request for {lr.email} with pw {lr.password}");
+        l.LogDebug($"Received login request {lr}");
         User user = await _loginService.LoginAsync(lr);
         if (user == null)
         {
-            l.LogError($"Failed to login user {lr}");
-            return Unauthorized($"Failed to login user {lr.email} ");
+            l.LogError($"Failed to login user {lr.email}");
+            return Unauthorized(new Response(ResponseType.ERROR, $"Failed to login {lr.email}"));
         }
         l.LogDebug($"User {user} logged in successfully");
 
-        string AccessToken = _authService.GetAccessTokenByUserId(user.Id);
+        string accessToken = _authService.GetAccessTokenByUserId(user.Id);
         RefreshToken refreshToken = await _authService.GenerateRefreshToken(user.Id);
 
-        return Ok(new { AccessToken, refreshToken });
+        return Ok(new TokenResponseDto(accessToken, refreshToken));
     }
 
     public LoginController(ILogger<LoginService> l, ILoginService loginService, IUserService userService, IAuthService authService)
