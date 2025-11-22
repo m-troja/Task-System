@@ -3,7 +3,8 @@
 namespace Task_System.Model.DTO;
 
 public record IssueDtoChatGpt(
-    int Id, string Key, 
+    int Id, 
+    string Key, 
     string Title, 
     string Description, 
     IssueStatus Status, 
@@ -13,6 +14,7 @@ public record IssueDtoChatGpt(
     DateTime CreatedAt, 
     DateTime? DueDate,
     DateTime? UpdatedAt, 
-    ICollection<CommentDto> Comments, int ProjectId)
+    ICollection<CommentDto> Comments, 
+    int ProjectId)
 { }
 

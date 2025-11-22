@@ -15,7 +15,7 @@ public class ActivityServiceTests
     private PostgresqlDbContext GetInMemoryDb(string dbName = null)
     {
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
-            .UseInMemoryDatabase(databaseName: dbName ?? "ActivityTestDb_" + Guid.NewGuid())
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         return new PostgresqlDbContext(options);
     }

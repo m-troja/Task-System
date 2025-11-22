@@ -27,7 +27,7 @@ namespace Task_System.Model.IssueFolder
         public DateTime CreatedAt { get ; set ; }
 
         public Issue(string title, string? description, IssuePriority? priority,  User author, User? assignee, DateTime? dueDate, 
-            int authorId, int? assigneeId, int projectId, int idInsideProject, User Author)
+            int authorId, int? assigneeId, int projectId, int idInsideProject)
         {
             Title = title;
             Description = description;
