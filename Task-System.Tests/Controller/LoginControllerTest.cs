@@ -82,7 +82,7 @@ namespace Task_System.Tests.Controller
             var response = Assert.IsType<Response>(unauthorized.Value);
 
             Assert.Equal(ResponseType.ERROR, response.responseType);
-            Assert.Contains("ghost@example.com", response.message);
+            Assert.Contains("user@test.com", response.message);
 
             authService.Verify(a => a.GetAccessTokenByUserId(It.IsAny<int>()), Times.Never);
             authService.Verify(a => a.GenerateRefreshToken(It.IsAny<int>()), Times.Never);
