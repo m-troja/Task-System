@@ -154,8 +154,6 @@ public class UserControllerTest
         userServiceMock.Verify(s => s.DeleteAllUsers(), Times.Once);
     }
 
-    // --- NOWE TESTY ---
-
     [Fact]
     public async Task GetUserById_ShouldReturnOk_WhenUserHasSlackId()
     {
@@ -203,10 +201,10 @@ public class UserControllerTest
         var roleUser = new Role { Name = "USER" };
 
         var users = new List<User>
-{
-    new User("John", "Doe", "john@test.com", "hashed", new byte[] {1}, roleAdmin) { Id = 1 },
-    new User("SlackUser", "SLACK123") { Id = 2, Roles = new List<Role> { roleUser } }
-};
+        {
+            new User("John", "Doe", "john@test.com", "hashed", new byte[] {1}, roleAdmin) { Id = 1 },
+            new User("SlackUser", "SLACK123") { Id = 2, Roles = new List<Role> { roleUser } }
+        };
 
         userServiceMock.Setup(s => s.GetAllUsersAsync()).ReturnsAsync(users);
 
@@ -234,5 +232,4 @@ public class UserControllerTest
 
         userServiceMock.Verify(s => s.GetAllUsersAsync(), Times.Once);
     }
-
 }
