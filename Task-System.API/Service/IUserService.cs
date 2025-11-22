@@ -13,8 +13,8 @@ namespace Task_System.Service
         Task UpdateUserAsync(User user);
         Task<List<User>> GetAllUsersAsync();
         Task<UserDto> GetUserBySlackUserIdAsync(string slackUserId);
-        Task deleteAllUsers();
-        Task deleteUserById(int id);
+        Task DeleteAllUsers();
+        Task DeleteUserById(int id);
 
     }
 }

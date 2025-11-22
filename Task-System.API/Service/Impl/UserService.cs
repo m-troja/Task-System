@@ -120,13 +120,13 @@ public class UserService : IUserService
         }
         return id;
     }
-    public async Task deleteAllUsers()
+    public async Task DeleteAllUsers()
     {
         await _db.Database.ExecuteSqlRawAsync("DELETE FROM Users");
         l.LogInformation("Deleted all Users from database");
     }
 
-    public async Task deleteUserById(int id)
+    public async Task DeleteUserById(int id)
     {
         await _db.Database.ExecuteSqlAsync($"DELETE FROM Users WHERE id = {id}");
         l.LogInformation($"Deleted User by Id={id}");
