@@ -36,7 +36,7 @@ public class RegisterService : IRegisterService
         _chatGptService = chatGptService;
     }
 
-    public async Task Register(RegistrationRequest request)
+    public async Task<User> Register(RegistrationRequest request)
     {
         if (request == null)
         {
@@ -81,6 +81,7 @@ public class RegisterService : IRegisterService
         await _db.SaveChangesAsync();
 
         _logger.LogInformation($"User registered successfully: {email}");
+        return user;
     }
 
     private async Task<bool> IsEmailAvailableAsync(string email)

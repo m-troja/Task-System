@@ -5,6 +5,6 @@ namespace Task_System.Service
 {
     public interface IRegisterService
     {
-        public Task Register(RegistrationRequest rr);
+        public Task<User> Register(RegistrationRequest rr);
     }
 }
