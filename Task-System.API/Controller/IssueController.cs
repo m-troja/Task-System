@@ -12,6 +12,7 @@ using Task_System.Service.Impl;
 
 namespace Task_System.Controller;
 
+[Authorize]
 [ApiController]
 [Route("api/v1/issue")]
 public class IssueController : ControllerBase
