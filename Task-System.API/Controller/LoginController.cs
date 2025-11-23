@@ -19,6 +19,7 @@ public class LoginController : ControllerBase
     private readonly ILoginService _loginService;
     private readonly IUserService _userService;
     private readonly IAuthService _authService;
+    private readonly string ExpiryMinutes = Environment.GetEnvironmentVariable("ACCESS_TOKEN_EXPIRY_MINUTES") ?? "2";
 
     [HttpPost("login")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
@@ -34,7 +35,7 @@ public class LoginController : ControllerBase
         }
         l.LogDebug($"User {user} logged in successfully");
 
-        string accessToken = _authService.GetAccessTokenByUserId(user.Id);
+        var accessToken = _authService.GetAccessTokenByUserId(user.Id);
         RefreshToken refreshToken = await _authService.GenerateRefreshToken(user.Id);
 
         return Ok(new TokenResponseDto(accessToken, refreshToken));

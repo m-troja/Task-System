@@ -15,6 +15,7 @@ public class JwtGenerator : IJwtGenerator
     private readonly string _jwtIssuer;
     private readonly string _jwtAudience;
     private readonly ILogger<IJwtGenerator> l;
+    private readonly string ExpiryMinutes = Environment.GetEnvironmentVariable("ACCESS_TOKEN_EXPIRY_MINUTES") ?? "2";
 
     public JwtGenerator(IConfiguration config, ILogger<IJwtGenerator> logger)
     {
@@ -24,11 +25,12 @@ public class JwtGenerator : IJwtGenerator
         l = logger;
     }
 
-    public string GenerateAccessToken(int userId)
+    public AccessToken GenerateAccessToken(int userId)
     {
         l.LogDebug($"Generating access token for userId {userId}");
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_jwtSecret);
+        var expiry = DateTime.UtcNow.AddMinutes(int.Parse(ExpiryMinutes));
 
         var claims = new ClaimsIdentity(new[]
         {
@@ -38,7 +40,7 @@ public class JwtGenerator : IJwtGenerator
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = claims,
-            Expires = DateTime.UtcNow.AddMinutes(5),
+            Expires = expiry,
             Issuer = _jwtIssuer,
             Audience = _jwtAudience,
             SigningCredentials = new SigningCredentials(
@@ -48,7 +50,7 @@ public class JwtGenerator : IJwtGenerator
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
         l.LogDebug($"Access token: {token}");
-        return tokenHandler.WriteToken(token);
+        return new AccessToken(tokenHandler.WriteToken(token), expiry);
     }
 
     public RefreshToken GenerateRefreshToken(int userId)

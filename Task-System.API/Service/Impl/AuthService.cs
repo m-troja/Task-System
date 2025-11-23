@@ -12,9 +12,9 @@ public class AuthService : IAuthService
     private readonly IJwtGenerator _jwtGenerator;
     private readonly IUserService _userService;
 
-    public string GetAccessTokenByUserId(int userId)
+    public AccessToken GetAccessTokenByUserId(int userId)
     {
-        string AccessToken =  _jwtGenerator.GenerateAccessToken(userId);
+        var AccessToken =  _jwtGenerator.GenerateAccessToken(userId);
         l.LogDebug($"Generated access token for user {userId}: {AccessToken}");
         return AccessToken;     
     }

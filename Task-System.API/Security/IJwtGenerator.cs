@@ -11,7 +11,8 @@ namespace Task_System.Security;
 
 public interface IJwtGenerator
 {
-    public string GenerateAccessToken(int userId);
+    public AccessToken GenerateAccessToken(int userId);
 
     public RefreshToken GenerateRefreshToken(int userId);
+
 }

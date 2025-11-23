@@ -68,6 +68,7 @@ public class RegisterService : IRegisterService
             throw new UserAlreadyExistsException("Email already registered");
         }
 
+        
         // Generate salt and hash password
         byte[] salt = _passwordService.GenerateSalt();
         string hashedPassword = _passwordService.HashPassword(request.Password, salt);
@@ -75,7 +76,22 @@ public class RegisterService : IRegisterService
         // Get role
         Role role = await _roleService.GetRoleByName(Role.ROLE_USER);
 
-        var user = new User(request.FirstName, request.LastName, email, hashedPassword, salt, role);
+        var userBySlackUserId = await GetUserBySlackUserId(request.SlackUserId);
+        if (userBySlackUserId != null)
+        {
+            userBySlackUserId.FirstName = request.FirstName;
+            userBySlackUserId.LastName = request.LastName;
+            userBySlackUserId.Email = email;
+            userBySlackUserId.Password = hashedPassword;
+            userBySlackUserId.Salt = salt;
+            userBySlackUserId.Disabled = false;
+            userBySlackUserId.Roles.Add(role);
+            _db.Users.Update(userBySlackUserId);
+            await _db.SaveChangesAsync();
+            _logger.LogInformation($"User registered successfully with SlackUserId: {request.SlackUserId}");
+            return userBySlackUserId;
+        }
+        var user = new User(request.FirstName, request.LastName, email, hashedPassword, salt, role) { SlackUserId = request.SlackUserId };
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
@@ -84,6 +100,19 @@ public class RegisterService : IRegisterService
         return user;
     }
 
+    private async Task<User?> GetUserBySlackUserId(string slackUserId)
+    {
+        var user = await _db.Users.Where(u => u.SlackUserId == slackUserId).FirstOrDefaultAsync();
+        if (user == null)
+        {
+            _logger.LogDebug("No user found with SlackUserId: {SlackUserId}", slackUserId);
+        }
+        else
+        {
+            _logger.LogDebug($"Fetched user by SlackUserId: {user}", user);
+        }
+        return user;
+    }
     private async Task<bool> IsEmailAvailableAsync(string email)
     {
         var existingUser = await _userService.TryGetByEmailAsync(email);

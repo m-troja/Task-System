@@ -5,7 +5,7 @@ namespace Task_System.Service;
 
 public interface IAuthService
 {
-    string GetAccessTokenByUserId(int userId);
+    AccessToken GetAccessTokenByUserId(int userId);
     Task<RefreshToken> GenerateRefreshToken(int UserId);
 
 }

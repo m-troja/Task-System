@@ -34,7 +34,7 @@ public class AuthController : ControllerBase
             return Unauthorized(new Response(ResponseType.ERROR, "Invalid refresh token"));
         }
 
-        string accessToken = _authService.GetAccessTokenByUserId(req.UserId);
+        var accessToken = _authService.GetAccessTokenByUserId(req.UserId);
         RefreshToken refreshToken = await _authService.GenerateRefreshToken(req.UserId);
 
         l.LogDebug($"Generated new access token {accessToken} and refresh token {refreshToken.Token} for userId {req.UserId}");

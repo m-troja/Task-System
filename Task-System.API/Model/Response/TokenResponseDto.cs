@@ -3,6 +3,6 @@
 namespace Task_System.Model.Response;
 
 public record TokenResponseDto(
-    string AccessToken,
+    AccessToken AccessToken,
     RefreshToken RefreshToken)
 {}
