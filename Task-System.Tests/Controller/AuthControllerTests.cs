@@ -31,7 +31,7 @@ public class AuthControllerTests
     {
         // given
         var user = new User("TestUser", "U1") { Id = 1 };
-        var refreshToken = new RefreshToken("valid-token", user.Id, DateTime.UtcNow);
+        var refreshToken = new RefreshToken("valid-token", user.Id, DateTime.UtcNow.AddMinutes(2));
         var req = new RefreshTokenRequest(1, refreshToken.Token);
         var accessToken = new AccessToken("new-access-token", DateTime.UtcNow.AddMinutes(2));
         var refreshTokenCnv = new RefreshTokenCnv();
@@ -41,6 +41,7 @@ public class AuthControllerTests
         _mockUserService.Setup(x => x.GetUserByRefreshTokenAsync(refreshToken.Token)).ReturnsAsync(user);
         _mockAuthService.Setup(x => x.GetAccessTokenByUserId(1)).Returns(accessToken);
         _mockAuthService.Setup(x => x.GenerateRefreshToken(1)).ReturnsAsync(refreshToken);
+        _mockAuthService.Setup(x => x.ValidateRefreshTokenRequest(req)).ReturnsAsync(true);
 
         var controller = CreateController();
 
@@ -74,6 +75,6 @@ public class AuthControllerTests
         var response = Assert.IsType<Response>(unauthorizedResult.Value);
 
         Assert.Equal(ResponseType.ERROR, response.responseType);
-        Assert.Equal("Invalid refresh token", response.message);
+        Assert.Equal("Validation failed", response.message);
     }
 }
