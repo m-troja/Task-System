@@ -139,7 +139,7 @@ public class UserService : IUserService
         l.LogDebug($"Saving RefreshToken = {refreshToken}");
         if (await GetRefreshTokenAsync(refreshToken.UserId) != null)
         {
-            l.LogDebug($"A vallid refreshToken for UserId = {refreshToken.UserId} exists. Skipping.");
+            l.LogDebug($"A valid refreshToken for UserId = {refreshToken.UserId} exists. Skipping.");
             return false;
         }
         else

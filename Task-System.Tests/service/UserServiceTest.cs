@@ -176,4 +176,48 @@ public class UserServiceTests
 
         Assert.Equal(555, id);
     }
+
+    [Fact]
+    public async Task SaveRefreshTokenAsync_ShouldReturnFalseWhenWhenRefreshTokenExists()
+    {
+        var db = GetInMemoryDb();
+        var logger = GetLoggerStub();
+        var chatGpt = new Mock<IChatGptService>();
+        var cnv = new UserCnv();
+        var refreshToken = new RefreshToken("token", 1, DateTime.UtcNow.AddMinutes(2));
+        var user = new User("test", "U123") { Id = 1 };
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+        db.RefreshTokens.Add(refreshToken);
+        await db.SaveChangesAsync();
+
+        Assert.Equal(1, user.RefreshTokens.Count);
+        Assert.Equal(refreshToken, user.RefreshTokens.First()); 
+
+        var service = new UserService(db, logger, cnv, chatGpt.Object);
+        var result = await service.SaveRefreshTokenAsync(refreshToken);
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task SaveRefreshTokenAsync_ShouldReturnFalseWhenWhenRefreshTokenIsExpired()
+    {
+        var db = GetInMemoryDb();
+        var logger = GetLoggerStub();
+        var chatGpt = new Mock<IChatGptService>();
+        var cnv = new UserCnv();
+        var refreshToken = new RefreshToken("token", 1, DateTime.Parse("2025-10-10"));
+        var user = new User("test", "U123") { Id = 1 };
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+        db.RefreshTokens.Add(refreshToken);
+        await db.SaveChangesAsync();
+
+        Assert.Equal(1, user.RefreshTokens.Count);
+        Assert.Equal(refreshToken, user.RefreshTokens.First());
+
+        var service = new UserService(db, logger, cnv, chatGpt.Object);
+        var result = await service.SaveRefreshTokenAsync(refreshToken);
+        Assert.True(result);
+    }
 }

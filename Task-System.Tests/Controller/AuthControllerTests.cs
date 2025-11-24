@@ -76,26 +76,4 @@ public class AuthControllerTests
         Assert.Equal(ResponseType.ERROR, response.responseType);
         Assert.Equal("Invalid refresh token", response.message);
     }
-
-    [Fact]
-    public async Task RegenerateTokens_ShouldReturnUnauthorized_WhenRefreshTokenExpired()
-    {
-        // given
-        var user = new User("TestUser", "U123");
-        var req = new RefreshTokenRequest(1, "invalid-token");
-
-        _mockUserService.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(user);
-
-        var controller = CreateController();
-
-        // when
-        var result = await controller.RegenerateTokens(req);
-
-        // then
-        var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result.Result);
-        var response = Assert.IsType<Response>(unauthorizedResult.Value);
-
-        Assert.Equal(ResponseType.ERROR, response.responseType);
-        Assert.Equal("Invalid refresh token", response.message);
-    }
 }
