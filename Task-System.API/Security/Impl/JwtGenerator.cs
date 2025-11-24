@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using Task_System.Model.Entity;
 using Task_System.Log;
+using Task_System.Model.Entity;
 
 namespace Task_System.Security.Impl;
 
@@ -50,17 +51,19 @@ public class JwtGenerator : IJwtGenerator
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
         l.LogDebug($"Access token: {token}");
-        return new AccessToken(tokenHandler.WriteToken(token), expiry);
+        var accessToken = new AccessToken(tokenHandler.WriteToken(token), expiry);
+        l.LogDebug($"Access token generated: {accessToken}");
+        return accessToken;
     }
 
-    public RefreshToken GenerateRefreshToken(int userId)
+    public RefreshToken GenerateRefreshToken(int userId, User user)
     {
         var randomNumber = new byte[32];
         using (var rng = RandomNumberGenerator.Create())
         {
             rng.GetBytes(randomNumber);
             var RefreshToken = new RefreshToken(
-                Convert.ToBase64String(randomNumber), userId, DateTime.UtcNow.AddDays(7), false
+                Convert.ToBase64String(randomNumber), userId, DateTime.UtcNow.AddDays(7)
                 );
             l.LogDebug($"Refresh token: {RefreshToken.Token}, expires: {RefreshToken.Expires}");
             return RefreshToken; 

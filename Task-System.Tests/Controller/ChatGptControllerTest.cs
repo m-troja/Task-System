@@ -19,9 +19,6 @@ using Xunit;
 namespace Task_System.Tests.Controller;
 public class ChatGptControllerTest
 {
-    private readonly Mock<IUserService> _mockUserService;
-    private readonly Mock<ILoginService> _mockLoginService;
-    private readonly Mock<IIssueService> _mockAuthService;
 
     public ILogger<ChatGptController> GetLogger() =>
         new LoggerFactory().CreateLogger<ChatGptController>();

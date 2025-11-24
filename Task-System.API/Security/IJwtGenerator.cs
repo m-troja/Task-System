@@ -13,6 +13,6 @@ public interface IJwtGenerator
 {
     public AccessToken GenerateAccessToken(int userId);
 
-    public RefreshToken GenerateRefreshToken(int userId);
+    public RefreshToken GenerateRefreshToken(int userId, User user);
 
 }

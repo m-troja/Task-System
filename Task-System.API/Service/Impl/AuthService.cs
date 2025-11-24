@@ -23,9 +23,9 @@ public class AuthService : IAuthService
     {
         User userByUserId = await _userService.GetByIdAsync(UserId);
         
-        var NewRefreshToken = _jwtGenerator.GenerateRefreshToken(UserId);
+        var NewRefreshToken = _jwtGenerator.GenerateRefreshToken(UserId, await _userService.GetByIdAsync(UserId));
         l.LogDebug($"Generated refresh token for userId {userByUserId.Id}: {NewRefreshToken.Token}, expires: {NewRefreshToken.Expires}");
-        userByUserId.RefreshToken = NewRefreshToken.Token;
+        userByUserId.RefreshTokens.Add(NewRefreshToken);
         await _userService.UpdateUserAsync(userByUserId);
 
         return NewRefreshToken;

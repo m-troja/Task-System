@@ -7,6 +7,7 @@ using Task_System.Service;
 using Task_System.Exception.Registration;
 using Task_System.Exception.UserException;
 using Task_System.Log;
+using Task_System.Exception.Tokens;
 
 namespace Task_System.Controller;
 

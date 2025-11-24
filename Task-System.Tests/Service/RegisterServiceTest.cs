@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Task_System.Data;
 using Task_System.Exception.Registration;
+using Task_System.Exception.Tokens;
 using Task_System.Exception.UserException;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
@@ -53,12 +54,7 @@ public class RegisterServiceTests
 
         var service = CreateService(db, mockUserService, mockRoleService);
 
-        var request = new RegistrationRequest(
-         "John",
-         "Doe",
-         "test@example.com",
-         "Password123!"
-     );
+        var request = new RegistrationRequest("Jan", "Kowalski", "test@example.com", "hashed", "U123456");
 
 
         // Act
@@ -83,7 +79,8 @@ public class RegisterServiceTests
             null,        
             "Doe",
             "test@example.com",
-            "Password123!"
+            "Password123!",
+            "U123456"
         );
 
         await Assert.ThrowsAsync<RegisterEmailException>(() => service.Register(request));
@@ -102,7 +99,8 @@ public class RegisterServiceTests
             "John",
             "Doe",
             "invalid-email", 
-            "Password123!"
+            "Password123!",
+            "U123456"
         );
 
         // Act & Assert
@@ -110,7 +108,7 @@ public class RegisterServiceTests
     }
 
     [Fact]
-    public async Task Register_ShouldThrowUserAlreadyExistsException_WhenEmailExists()
+    public async Task Register_ShouldThrowRegisterEmailException_WhenEmailExists()
     {
         var db = GetDb();
         var mockUserService = new Mock<IUserService>();
@@ -124,10 +122,12 @@ public class RegisterServiceTests
         var request = new RegistrationRequest(
             "John",
             "Doe",
-            "test@example.com",
-            "Password123!"
+            "invalid-email",
+            "Password123!",
+            "U123456"
         );
 
-        await Assert.ThrowsAsync<UserAlreadyExistsException>(() => service.Register(request));
+
+        await Assert.ThrowsAsync<RegisterEmailException>(() => service.Register(request));
     }
 }

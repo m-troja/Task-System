@@ -11,7 +11,7 @@ namespace Task_System.Model.Entity
         public string? Email { get; set; } = null!;
         public string? Password { get; set; } = null!;
         public byte[]? Salt { get; set; } = null!;
-        public string? RefreshToken { get; set; } = null!;
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public string? SlackUserId { get; set; } = null!;
         public Boolean Disabled { get; set; } = false;
         public ICollection<Role> Roles { get; set; } = new List<Role>();
@@ -39,6 +39,16 @@ namespace Task_System.Model.Entity
         public override string? ToString()
         {
             return "User(Id=" + Id + ", FirstName=" + FirstName + ", LastName=" + LastName + ", Email=" + Email + ", SlackUserID=" + SlackUserId + ")";
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is User user &&
+                   FirstName == user.FirstName &&
+                   LastName == user.LastName &&
+                   Email == user.Email &&
+                   SlackUserId == user.SlackUserId &&
+                   Disabled == user.Disabled;
         }
     }
 }

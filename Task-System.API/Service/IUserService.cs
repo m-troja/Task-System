@@ -15,6 +15,7 @@ namespace Task_System.Service
         Task<UserDto> GetUserBySlackUserIdAsync(string slackUserId);
         Task DeleteAllUsers();
         Task DeleteUserById(int id);
-
+        Task<bool> SaveRefreshTokenAsync(RefreshToken refreshToken);
+        Task<User> GetUserByRefreshTokenAsync(string token);
     }
 }

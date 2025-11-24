@@ -4,6 +4,7 @@ using Moq;
 using System;
 using System.Threading.Tasks;
 using Task_System.Controller;
+using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
 using Task_System.Model.Response;
@@ -20,19 +21,24 @@ public class AuthControllerTests
     private readonly Mock<IUserService> _mockUserService = new();
     private readonly Mock<IAuthService> _mockAuthService = new();
 
-    private AuthController CreateController() =>
-        new(_mockLogger.Object, _mockLoginService.Object, _mockUserService.Object, _mockAuthService.Object);
+    private AuthController CreateController() {
+        var refreshTokenCnv = new RefreshTokenCnv();
+        return new AuthController (_mockLogger.Object, _mockLoginService.Object, _mockUserService.Object, _mockAuthService.Object, refreshTokenCnv);
+    }
 
     [Fact]
     public async Task RegenerateTokens_ShouldReturnOk_WhenRefreshTokenIsValid()
     {
         // given
-        var user = new User("TestUser", "U1") { Id = 1, RefreshToken = "valid-token" };
-        var req = new RefreshTokenRequest(1, "valid-token");
-        var accessToken = "new-access-token";
-        var refreshToken = new RefreshToken("new-refresh-token", user.Id, DateTime.UtcNow, false);
+        var user = new User("TestUser", "U1") { Id = 1 };
+        var refreshToken = new RefreshToken("valid-token", user.Id, DateTime.UtcNow);
+        var req = new RefreshTokenRequest(1, refreshToken.Token);
+        var accessToken = new AccessToken("new-access-token", DateTime.UtcNow.AddMinutes(2));
+        var refreshTokenCnv = new RefreshTokenCnv();
+        var tokenResponseDto = new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken));
 
         _mockUserService.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(user);
+        _mockUserService.Setup(x => x.GetUserByRefreshTokenAsync(refreshToken.Token)).ReturnsAsync(user);
         _mockAuthService.Setup(x => x.GetAccessTokenByUserId(1)).Returns(accessToken);
         _mockAuthService.Setup(x => x.GenerateRefreshToken(1)).ReturnsAsync(refreshToken);
 
@@ -53,7 +59,29 @@ public class AuthControllerTests
     public async Task RegenerateTokens_ShouldReturnUnauthorized_WhenRefreshTokenIsInvalid()
     {
         // given
-        var user = new User("TestUser", "U1") { Id = 1, RefreshToken = "valid-token" };
+        var user = new User("TestUser", "U123");
+        var req = new RefreshTokenRequest(1, "invalid-token");
+
+        _mockUserService.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(user);
+
+        var controller = CreateController();
+
+        // when
+        var result = await controller.RegenerateTokens(req);
+
+        // then
+        var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result.Result);
+        var response = Assert.IsType<Response>(unauthorizedResult.Value);
+
+        Assert.Equal(ResponseType.ERROR, response.responseType);
+        Assert.Equal("Invalid refresh token", response.message);
+    }
+
+    [Fact]
+    public async Task RegenerateTokens_ShouldReturnUnauthorized_WhenRefreshTokenExpired()
+    {
+        // given
+        var user = new User("TestUser", "U123");
         var req = new RefreshTokenRequest(1, "invalid-token");
 
         _mockUserService.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(user);

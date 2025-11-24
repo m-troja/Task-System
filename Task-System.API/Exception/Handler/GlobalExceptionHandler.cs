@@ -3,6 +3,7 @@ using Task_System.Exception.IssueException;
 using Task_System.Exception.LoginException;
 using Task_System.Exception.ProjectException;
 using Task_System.Exception.Registration;
+using Task_System.Exception.Tokens;
 using Task_System.Exception.UserException;
 
 namespace Task_System.Exception.Handler
@@ -39,6 +40,7 @@ namespace Task_System.Exception.Handler
                     IssueNotFoundException => StatusCodes.Status400BadRequest,
                     ProjectNotFoundException => StatusCodes.Status404NotFound,
                     InvalidProjectData => StatusCodes.Status400BadRequest,
+                    InvalidRefreshTokenException => StatusCodes.Status400BadRequest,
                     _ => StatusCodes.Status500InternalServerError
                 };
                 var errorResponse = new Task_System.Exception.Error.ErrorResponse(
@@ -53,6 +55,7 @@ namespace Task_System.Exception.Handler
                         IssueNotFoundException => Task_System.Exception.Error.ErrorType.ISSUE_NOT_FOUND,
                         ProjectNotFoundException => Task_System.Exception.Error.ErrorType.PROJECT_NOT_FOUND,
                         InvalidProjectData => Task_System.Exception.Error.ErrorType.INVALID_PROJECT_DATA,
+                        InvalidRefreshTokenException => Task_System.Exception.Error.ErrorType.INVALID_REFRESH_TOKEN,
                         _ => Task_System.Exception.Error.ErrorType.SERVER_ERROR
                     },
                     ex.Message

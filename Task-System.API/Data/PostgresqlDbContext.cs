@@ -13,6 +13,7 @@ namespace Task_System.Data;
 public class PostgresqlDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Issue> Issues { get; set; }
     public DbSet<Comment> Comments { get; set; }
@@ -50,6 +51,13 @@ public class PostgresqlDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasMany(u => u.Roles)
             .WithMany(r => r.Users);
+
+        // USER - RefreshToken one-to-many relationship
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.RefreshTokens)
+            .WithOne(r => r.User)
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // ISSUE - relationship to USER (Assignee)
         modelBuilder.Entity<Issue>()

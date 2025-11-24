@@ -6,6 +6,8 @@ using Task_System.Model.Entity;
 using Task_System.Log;
 using Task_System.Model.DTO;
 using Task_System.Model.DTO.Cnv;
+using System.ComponentModel;
+using Task_System.Exception.Tokens;
 
 namespace Task_System.Service.Impl;
 
@@ -48,7 +50,7 @@ public class UserService : IUserService
         if (user == null)
         {
             l.LogError("User by email '" + email + "' was not found");
-            return null;
+            throw new UserNotFoundException("User by email '" + email + "' was not found");
         }
         return user;
     }
@@ -130,5 +132,68 @@ public class UserService : IUserService
     {
         await _db.Database.ExecuteSqlAsync($"DELETE FROM Users WHERE id = {id}");
         l.LogInformation($"Deleted User by Id={id}");
+    }
+
+    public async Task<bool> SaveRefreshTokenAsync(RefreshToken refreshToken)
+    {
+        l.LogDebug($"Saving RefreshToken = {refreshToken}");
+        if (await GetRefreshTokenAsync(refreshToken.UserId) != null)
+        {
+            l.LogDebug($"A vallid refreshToken for UserId = {refreshToken.UserId} exists. Skipping.");
+            return false;
+        }
+        else
+        {
+            l.LogDebug($"No existing RefreshToken for UserId = {refreshToken.UserId}. Adding new token.");
+            _db.RefreshTokens.Add(refreshToken);
+            return true;
+        }
+    }
+
+    private async Task<RefreshToken?> GetRefreshTokenAsync(int userId)
+    {
+        l.LogDebug($"Fetching RefreshToken for UserId = {userId}");
+        RefreshToken? refreshToken = await _db.RefreshTokens.FirstOrDefaultAsync(rt => rt.UserId == userId);
+        if (refreshToken != null)
+        {
+            if (refreshToken.IsRevoked || refreshToken.Expires <= DateTime.UtcNow)
+            {
+                l.LogDebug($"RefreshToken for UserId = {userId} is revoked or expired, deleting it");
+                _db.RefreshTokens.Remove(refreshToken);
+                return null;
+            }
+            else
+            {
+                l.LogDebug($"RefreshToken for UserId = {userId} is valid.");
+                return refreshToken;
+            }
+        }
+        else
+        {
+            l.LogDebug($"No RefreshToken found for UserId = {userId}.");
+            return null;
+        }
+    }
+
+    public async Task<User> GetUserByRefreshTokenAsync(string token)
+    {
+       l.LogDebug($"Fetching User by RefreshToken = {token}");
+        var refreshToken = await _db.RefreshTokens
+            .Include(rt => rt.User)
+            .ThenInclude(u => u.Roles)
+            .FirstOrDefaultAsync(rt => rt.Token == token);
+
+        if (refreshToken == null)
+        {
+            l.LogDebug("No RefreshToken found.");
+            throw new InvalidRefreshTokenException("Invalid refresh token");
+        }
+        if (refreshToken.IsRevoked || refreshToken.Expires <= DateTime.UtcNow)
+        {
+            l.LogDebug("Expired is revoked or expired.");
+            throw new InvalidRefreshTokenException("Expired refresh token");
+        }
+        l.LogDebug($"User fetched: {refreshToken.User}");
+        return refreshToken.User!;
     }
 }

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Task_System.Data;
 using Task_System.Model.DTO.Cnv;
+using Task_System.Model.Entity;
 using Task_System.Security;
 using Task_System.Service;
 using Task_System.Service.Impl;
@@ -45,14 +46,16 @@ public class AuthServiceTest
         int userId = 1;
         var mjwt = new Mock<IJwtGenerator>();
         var mu = new Mock<IUserService>();
-        mjwt.Setup(x => x.GenerateAccessToken(userId)).Returns("mocked_access_token");
+        var accessToken = new AccessToken("new-access-token", DateTime.UtcNow.AddMinutes(2));
+
+        mjwt.Setup(x => x.GenerateAccessToken(userId)).Returns(accessToken);
         var service = CreateService(GetDb(), mu, mjwt);
 
         // when
         var token = service.GetAccessTokenByUserId(userId);
 
         // then
-        Assert.Equal("mocked_access_token", token);
+        Assert.Equal("new-access-token", token.Token);
     }
 
 }

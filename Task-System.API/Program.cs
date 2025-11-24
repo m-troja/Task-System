@@ -136,6 +136,7 @@ try
     builder.Services.AddScoped<CommentCnv>();
     builder.Services.AddScoped<IssueCnv>();
     builder.Services.AddScoped<ProjectCnv>();
+    builder.Services.AddScoped<RefreshTokenCnv>();
 
     builder.Services.AddControllers().AddJsonOptions(options =>
     {

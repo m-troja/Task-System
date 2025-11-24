@@ -11,6 +11,7 @@
         LOGIN_ERROR,
         REGISTRATION_ERROR,
         INVALID_PROJECT_DATA,
-        USER_DISABLED
+        USER_DISABLED,
+        INVALID_REFRESH_TOKEN
     }
 }

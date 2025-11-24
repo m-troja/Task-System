@@ -96,18 +96,15 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetByEmailAsync_ShouldReturnNull_WhenNotFound()
+    public async Task GetByEmailAsync_ShouldReturnUserNotFoundException_WhenNotFound()
     {
         var db = GetInMemoryDb();
         var logger = GetLoggerStub();
         var chatGpt = new Mock<IChatGptService>();
         var cnv = new UserCnv();
-
         var service = new UserService(db, logger, cnv, chatGpt.Object);
 
-        var result = await service.GetByEmailAsync("missing@mail.com");
-
-        Assert.Null(result);
+        await Assert.ThrowsAsync<UserNotFoundException>( () =>  service.GetByEmailAsync("missing@mail.com"));
     }
 
     [Fact]

@@ -8,20 +8,21 @@ using Task_System.Security;
 using Task_System.Service;
 using Task_System.Service.Impl;
 using Microsoft.AspNetCore.Http;
+using Task_System.Model.DTO.Cnv;
 
 namespace Task_System.Controller;
 
 [ApiController]
-[Route("api/v1")]
+[Route("api/v1/login")]
 public class LoginController : ControllerBase
 {
     private readonly ILogger<LoginService> l;
     private readonly ILoginService _loginService;
     private readonly IUserService _userService;
     private readonly IAuthService _authService;
-    private readonly string ExpiryMinutes = Environment.GetEnvironmentVariable("ACCESS_TOKEN_EXPIRY_MINUTES") ?? "2";
+    private readonly RefreshTokenCnv refreshTokenCnv;
 
-    [HttpPost("login")]
+    [HttpPost]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [SwaggerResponse(StatusCodes.Status200OK, "LOGIN_OK", typeof(LoginResponse))]
     public async Task<ActionResult<Response>> Login([FromBody] LoginRequest lr)
@@ -36,16 +37,17 @@ public class LoginController : ControllerBase
         l.LogDebug($"User {user} logged in successfully");
 
         var accessToken = _authService.GetAccessTokenByUserId(user.Id);
-        RefreshToken refreshToken = await _authService.GenerateRefreshToken(user.Id);
-
-        return Ok(new TokenResponseDto(accessToken, refreshToken));
+        var refreshToken = await _authService.GenerateRefreshToken(user.Id);
+        var saved = await _userService.SaveRefreshTokenAsync(refreshToken);
+        return Ok(new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken)));
     }
 
-    public LoginController(ILogger<LoginService> l, ILoginService loginService, IUserService userService, IAuthService authService)
+    public LoginController(ILogger<LoginService> l, ILoginService loginService, IUserService userService, IAuthService authService, RefreshTokenCnv refreshTokenCnv)
     {
         this.l = l;
         _loginService = loginService;
         _userService = userService;
         _authService = authService;
+        this.refreshTokenCnv = refreshTokenCnv;
     }
 }

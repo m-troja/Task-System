@@ -32,7 +32,7 @@ public class RegisterControllerTest
         // arrange
         var rsMock = new Mock<IRegisterService>();
         var user = new User("Jan", "Kowalski", "test@example.com", "hashed", new byte[] { 1 }, new Role(Role.ROLE_USER));
-        var req = new RegistrationRequest("Jan", "Kowalski", "test@example.com", "hashed");
+        var req = new RegistrationRequest("Jan", "Kowalski", "test@example.com", "hashed", "U123456");
         rsMock.Setup(s => s.Register(req)).ReturnsAsync(user);
 
         var controller = CreateController(rsMock);
@@ -62,7 +62,7 @@ public class RegisterControllerTest
               .ThrowsAsync(new UserAlreadyExistsException("Email already registered"));
 
         var controller = CreateController(rsMock);
-        var req = new RegistrationRequest("Jan", "Kowalski", "test@example.com", "hashed");
+        var req = new RegistrationRequest("Jan", "Kowalski", "test@example.com", "hashed", "U123456");
 
         // act
         var result = await controller.RegisterUser(req);
@@ -78,7 +78,7 @@ public class RegisterControllerTest
     {
         // arrange
         var rsMock = new Mock<IRegisterService>();
-        var req = new RegistrationRequest("", "", "", "");
+        var req = new RegistrationRequest("", "", "", "", "");
         rsMock.Setup(s => s.Register(req))
               .ThrowsAsync(new RegisterEmailException("Missing required fields"));
 
