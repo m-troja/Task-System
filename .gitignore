@@ -9,6 +9,6 @@ appsettings.Development.json
 /log*
 *.user
 /Log
+Task-System/obj
 Task-System/packages
 Task-System/bin
-Task-System/obj

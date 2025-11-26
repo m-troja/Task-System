@@ -3,18 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36109.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task-System", "Task-System.csproj", "{A6EDED31-BC27-4E32-BEE1-36BFEF047E80}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task-System.API", "Task-System.API\Task-System.API.csproj", "{169BFFFE-DE35-4662-BF2E-39E4D767926E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task-System.Tests", "Task-System.Tests\Task-System.Tests.csproj", "{19CA304E-071E-4517-A552-53D21E289BA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A6EDED31-BC27-4E32-BEE1-36BFEF047E80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A6EDED31-BC27-4E32-BEE1-36BFEF047E80}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A6EDED31-BC27-4E32-BEE1-36BFEF047E80}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A6EDED31-BC27-4E32-BEE1-36BFEF047E80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
