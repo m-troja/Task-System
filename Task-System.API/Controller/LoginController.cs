@@ -39,7 +39,9 @@ public class LoginController : ControllerBase
         var accessToken = _authService.GetAccessTokenByUserId(user.Id);
         var refreshToken = await _authService.GenerateRefreshToken(user.Id);
         var saved = await _userService.SaveRefreshTokenAsync(refreshToken);
-        return Ok(new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken)));
+        var tokenDto = new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken));
+        l.LogDebug($"Generated tokens for user {user}: {tokenDto}");
+        return Ok(tokenDto);
     }
 
     public LoginController(ILogger<LoginService> l, ILoginService loginService, IUserService userService, IAuthService authService, RefreshTokenCnv refreshTokenCnv)

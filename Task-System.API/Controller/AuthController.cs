@@ -60,9 +60,11 @@ public class AuthController : ControllerBase
             var accessToken = _authService.GetAccessTokenByUserId(req.UserId);
             var refreshToken = await _authService.GenerateRefreshToken(req.UserId);
 
-            l.LogDebug($"Generated new access token {accessToken} and refresh token {refreshToken.Token} for userId {req.UserId}");
+            var saved = await _userService.SaveRefreshTokenAsync(refreshToken);
+            var tokenDto = new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken));
+            l.LogDebug($"Tokens for userId {req.UserId} regenerated successfully: {tokenDto}");
 
-            return Ok(new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken)));
+            return Ok();
         }
         else
         {
