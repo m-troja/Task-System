@@ -12,3 +12,4 @@ appsettings.Development.json
 Task-System/obj
 Task-System/packages
 Task-System/bin
+/Task-System.API/packages
