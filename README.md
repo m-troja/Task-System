@@ -73,7 +73,7 @@
 | **API Documentation**   | Swagger / OpenAPI 6.6.0                    |
 | **JSON Serialization**  | System.Text.Json + Enums as Strings        |
 | **Dependency Injection**| Built-in ASP.NET Core DI                    |
-
+| **Unit testing**| XUnit                    |
 ---
 
 ## Environment Configuration
