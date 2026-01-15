@@ -65,7 +65,7 @@ public class AuthController : ControllerBase
             var tokenDto = new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken));
             l.LogDebug($"Tokens for userId {userByRefreshToken.Id} regenerated successfully: {tokenDto}");
 
-            return Ok();
+            return Ok(tokenDto);
         }
         else
         {
