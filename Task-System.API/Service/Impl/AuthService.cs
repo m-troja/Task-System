@@ -62,12 +62,12 @@ public class AuthService : IAuthService
         }
         if (refreshToken.IsRevoked)
         {
-            l.LogDebug("Refresh token is revoked");
+            l.LogError("Refresh token is revoked");
             throw new TokenRevokedException("Refresh token is revoked");
         }
         if (refreshToken.Expires < DateTime.UtcNow)
         {
-            l.LogDebug("Refresh token expired");
+            l.LogError("Refresh token expired");
             throw new TokenExpiredException("Refresh token expired");
         }
         l.LogDebug("Token validated succesffully");

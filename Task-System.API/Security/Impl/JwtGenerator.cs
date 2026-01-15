@@ -50,7 +50,6 @@ public class JwtGenerator : IJwtGenerator
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        l.LogDebug($"Access token: {token}");
         var accessToken = new AccessToken(tokenHandler.WriteToken(token), expiry);
         l.LogDebug($"Access token generated: {accessToken}");
         return accessToken;

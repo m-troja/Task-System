@@ -137,9 +137,9 @@ public class UserService : IUserService
     public async Task<bool> SaveRefreshTokenAsync(RefreshToken refreshToken)
     {
         l.LogDebug($"Saving RefreshToken = {refreshToken}");
-        if (await GetRefreshTokenAsync(refreshToken.UserId) != null)
+        if (await GetUserByRefreshTokenAsync(refreshToken.Token) != null)
         {
-            l.LogDebug($"A valid refreshToken for UserId = {refreshToken.UserId} exists. Skipping.");
+            l.LogDebug($"A valid refreshToken for UserId = {refreshToken.UserId} exists - skipping saving.");
             return false;
         }
         else

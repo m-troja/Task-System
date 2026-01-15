@@ -1,28 +1,34 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using Task_System.Exception.LoginException;
+using Task_System.Exception.UserException;
+using Task_System.Log;
+using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
-using Task_System.Log;
+using Task_System.Model.Response;
 using Task_System.Security;
-using System.Threading.Tasks;
-using Task_System.Exception.UserException;
 
 namespace Task_System.Service.Impl;
 
 public class LoginService : ILoginService
 {
     private readonly IUserService _userService;
+    private readonly IAuthService _authService;
     private readonly ILogger<LoginService> logger;
     private readonly IPasswordService _passwordService;
+    private readonly RefreshTokenCnv refreshTokenCnv;
 
-    public LoginService(IUserService userService, ILogger<LoginService> logger, IPasswordService passwordService, IJwtGenerator jwtGenerator)
+    public LoginService(IUserService userService, ILogger<LoginService> logger, IPasswordService passwordService, IJwtGenerator jwtGenerator, IAuthService _authService, RefreshTokenCnv refreshTokenCnv)
     {
         _userService = userService;
         this.logger = logger;
         _passwordService = passwordService;
+        this._authService = _authService;
+        this.refreshTokenCnv = refreshTokenCnv;
     }
 
-    public async Task<User> LoginAsync(LoginRequest request)
+    public async Task<TokenResponseDto> LoginAsync(LoginRequest request)
     {
         logger.LogDebug($"Attempting login for {request.email.ToLower()}");
 
@@ -52,8 +58,19 @@ public class LoginService : ILoginService
             throw new InvalidEmailOrPasswordException("Wrong email or password");
         }
 
+        var tokenDto = await GenerateTokensForUser(user);
+
+        logger.LogDebug($"Generated tokens for user {user}: {tokenDto}");
         logger.LogDebug($"Login successful for {user.Email}");
-        return user;
+        return tokenDto;
+    }
+
+    private async Task<TokenResponseDto> GenerateTokensForUser(User user)
+    {
+        var accessToken = _authService.GetAccessTokenByUserId(user.Id);
+        var refreshToken = await _authService.GenerateRefreshToken(user.Id);
+        var saved = await _userService.SaveRefreshTokenAsync(refreshToken);
+        return new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken));
     }
 
     private void ValidateInput(LoginRequest request)

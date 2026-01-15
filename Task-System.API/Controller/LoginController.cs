@@ -18,9 +18,6 @@ public class LoginController : ControllerBase
 {
     private readonly ILogger<LoginService> l;
     private readonly ILoginService _loginService;
-    private readonly IUserService _userService;
-    private readonly IAuthService _authService;
-    private readonly RefreshTokenCnv refreshTokenCnv;
 
     [HttpPost]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
@@ -28,28 +25,21 @@ public class LoginController : ControllerBase
     public async Task<ActionResult<Response>> Login([FromBody] LoginRequest lr)
     {
         l.LogDebug($"Received login request {lr}");
-        User user = await _loginService.LoginAsync(lr);
-        if (user == null)
+
+        var tokenDto = await _loginService.LoginAsync(lr);
+        if (tokenDto == null)
         {
             l.LogError($"Failed to login user {lr.email}");
             return Unauthorized(new Response(ResponseType.ERROR, $"Failed to login {lr.email}"));
         }
-        l.LogDebug($"User {user} logged in successfully");
+        l.LogDebug($"User {lr.email} logged in successfully");
 
-        var accessToken = _authService.GetAccessTokenByUserId(user.Id);
-        var refreshToken = await _authService.GenerateRefreshToken(user.Id);
-        var saved = await _userService.SaveRefreshTokenAsync(refreshToken);
-        var tokenDto = new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken));
-        l.LogDebug($"Generated tokens for user {user}: {tokenDto}");
         return Ok(tokenDto);
     }
 
-    public LoginController(ILogger<LoginService> l, ILoginService loginService, IUserService userService, IAuthService authService, RefreshTokenCnv refreshTokenCnv)
+    public LoginController(ILogger<LoginService> l, ILoginService loginService)
     {
         this.l = l;
         _loginService = loginService;
-        _userService = userService;
-        _authService = authService;
-        this.refreshTokenCnv = refreshTokenCnv;
     }
 }

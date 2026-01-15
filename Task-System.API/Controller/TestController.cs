@@ -45,7 +45,7 @@ public class TestController : ControllerBase
 
         if (string.IsNullOrEmpty(userIdClaim))
         {
-            return Unauthorized(new { message = "Invalid token: missing user ID" });
+            return Unauthorized(new { message = "Token invalid or missing" });
         }
 
         if (!int.TryParse(userIdClaim, out int userId))

@@ -37,22 +37,22 @@ public class AuthController : ControllerBase
         }
         catch (InvalidRefreshTokenException ex)
         {
-            l.LogDebug($"Validation failed");
+            l.LogError($"Validation failed");
             return Unauthorized(new Response(ResponseType.ERROR, "Validation failed"));
         }
         catch (UserNotFoundException ex)
         {
-            l.LogDebug($"User not found");
+            l.LogError($"User not found");
             return NotFound(new Response(ResponseType.ERROR, "User not found"));
         }
         catch (TokenRevokedException ex)
         {
-            l.LogDebug($"Refresh token is revoked");
+            l.LogError($"Refresh token is revoked");
             return Unauthorized(new Response(ResponseType.ERROR, "Refresh token is revoked"));
         }
         catch (TokenExpiredException ex)
         {
-            l.LogDebug($"Refresh token expired");
+            l.LogError($"Refresh token expired");
             return Unauthorized(new Response(ResponseType.ERROR, "Refresh token expired"));
         }
         if (validated)
