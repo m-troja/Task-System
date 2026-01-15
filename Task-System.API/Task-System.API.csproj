@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>    
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Task_System</RootNamespace>
+    <RootNamespace>Task-System</RootNamespace>
     <InvariantGlobalization>true</InvariantGlobalization>
     <PublishAot>false</PublishAot>
   </PropertyGroup>

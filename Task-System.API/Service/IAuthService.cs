@@ -9,5 +9,5 @@ public interface IAuthService
     AccessToken GetAccessTokenByUserId(int userId);
     Task<RefreshToken> GenerateRefreshToken(int UserId);
     Task<Boolean> ValidateRefreshTokenRequest(RefreshTokenRequest req);
-
+    Task<AccessToken> GetAccessTokenByRefreshToken(string refreshToken);
 }

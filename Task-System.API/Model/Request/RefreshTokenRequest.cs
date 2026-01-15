@@ -1,6 +1,7 @@
 ﻿namespace Task_System.Model.Request
 {
-    public record RefreshTokenRequest(int UserId, string RefreshToken)
+    public record RefreshTokenRequest(
+        string RefreshToken)
     {
     }
 }

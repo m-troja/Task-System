@@ -23,6 +23,15 @@ public class AuthService : IAuthService
         return AccessToken;     
     }
 
+    public async Task<AccessToken> GetAccessTokenByRefreshToken(string refreshToken)
+    {
+        var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
+        var AccessToken = _jwtGenerator.GenerateAccessToken(user.Id);
+        l.LogDebug($"Generated access token for user {user.Id}: {AccessToken}");
+        return AccessToken;
+    }
+
+
     public async Task<RefreshToken> GenerateRefreshToken(int UserId)
     {
         User userByUserId = await _userService.GetByIdAsync(UserId);
@@ -37,16 +46,17 @@ public class AuthService : IAuthService
 
     public async Task<Boolean> ValidateRefreshTokenRequest(RefreshTokenRequest req)
     {
-        var userById = await _db.Users.FirstAsync(u => u.Id == req.UserId);
-        if (userById == null)
-        {
-            l.LogDebug($"User with id {req.UserId} not found");
-            throw new UserNotFoundException("User not found");
-        }
-        var userByRefreshToken  = await _db.Users.FirstOrDefaultAsync( u => u.RefreshTokens.Any(rt => rt.Token == req.RefreshToken));
+        //var userById = await _db.Users.FirstAsync(u => u.Id == req.UserId);
+        //if (userById == null)
+        //{
+        //    l.LogDebug($"User with id {req.UserId} not found");
+        //    throw new UserNotFoundException("User not found");
+        //}
+        var userByRefreshToken = await _db.Users.FirstOrDefaultAsync( u => u.RefreshTokens.Any(rt => rt.Token == req.RefreshToken));
         var refreshToken = _db.RefreshTokens.FirstOrDefault(rt => rt.Token == req.RefreshToken);
-        if (userByRefreshToken == null || refreshToken == null || refreshToken.UserId != userByRefreshToken.Id || refreshToken.UserId != req.UserId)
-        {
+        //if (userByRefreshToken == null || refreshToken == null || refreshToken.UserId != userByRefreshToken.Id || refreshToken.UserId != req.UserId)
+        if (userByRefreshToken == null || refreshToken == null || refreshToken.UserId != userByRefreshToken.Id )
+            {
             l.LogDebug("Refresh token or user not found");
             throw new InvalidRefreshTokenException("Refresh token or user not found");
         }

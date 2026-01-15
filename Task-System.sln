@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36109.1
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11217.181 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task-System.API", "Task-System.API\Task-System.API.csproj", "{169BFFFE-DE35-4662-BF2E-39E4D767926E}"
 EndProject
@@ -17,6 +17,30 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Debug|x64.Build.0 = Debug|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Debug|x86.Build.0 = Debug|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Release|x64.ActiveCfg = Release|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Release|x64.Build.0 = Release|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Release|x86.ActiveCfg = Release|Any CPU
+		{169BFFFE-DE35-4662-BF2E-39E4D767926E}.Release|x86.Build.0 = Release|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Debug|x64.Build.0 = Debug|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Debug|x86.Build.0 = Debug|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Release|x64.ActiveCfg = Release|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Release|x64.Build.0 = Release|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Release|x86.ActiveCfg = Release|Any CPU
+		{19CA304E-071E-4517-A552-53D21E289BA8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

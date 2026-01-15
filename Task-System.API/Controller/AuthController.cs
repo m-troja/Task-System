@@ -28,7 +28,7 @@ public class AuthController : ControllerBase
     [HttpPost("regenerate-tokens")]
     public async Task<ActionResult<TokenResponseDto>> RegenerateTokens([FromBody] RefreshTokenRequest req)
     {
-        l.LogDebug($"Received request to regenerate tokens for userId {req.UserId} with refresh token {req.RefreshToken}");
+        l.LogDebug($"Received request to regenerate tokens with refresh token {req.RefreshToken}");
 
         Boolean validated = false;
         try
@@ -57,12 +57,13 @@ public class AuthController : ControllerBase
         }
         if (validated)
         {
-            var accessToken = _authService.GetAccessTokenByUserId(req.UserId);
-            var refreshToken = await _authService.GenerateRefreshToken(req.UserId);
+            var accessToken = await _authService.GetAccessTokenByRefreshToken(req.RefreshToken);
+            var userByRefreshToken = await _userService.GetUserByRefreshTokenAsync(req.RefreshToken);
+            var refreshToken = await _authService.GenerateRefreshToken(userByRefreshToken.Id);
 
             var saved = await _userService.SaveRefreshTokenAsync(refreshToken);
             var tokenDto = new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken));
-            l.LogDebug($"Tokens for userId {req.UserId} regenerated successfully: {tokenDto}");
+            l.LogDebug($"Tokens for userId {userByRefreshToken.Id} regenerated successfully: {tokenDto}");
 
             return Ok();
         }
