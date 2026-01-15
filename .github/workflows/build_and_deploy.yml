@@ -15,7 +15,7 @@ jobs:
         with:
           dotnet-version: 9.0
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v2
+        uses: gittools/actions/gitversion/setup@v3
         with:
           versionSpec: '5.x'
       - name: Run GitVersion
