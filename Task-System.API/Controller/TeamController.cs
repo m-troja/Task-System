@@ -68,5 +68,21 @@ namespace Task_System.Controller
             var users = await _ts.GetUsersByTeamId(teamId); 
             return Ok(users);
         }
+
+        [HttpPut("{teamId:int}/add-user/{userId:int}")]
+        public async Task<ActionResult<TeamDto>> AddUserToTeam(int teamId, int userId)
+        {
+            _logger.LogDebug($"Triggered adding user {userId} to team {teamId}");
+            var team = await _ts.AddUserIntoTeam(teamId, userId);
+            return Ok(_teamCnv.ConvertTeamToTeamDto(team));
+        }
+
+        [HttpPut("{teamId:int}/remove-user/{userId:int}")]
+        public async Task<ActionResult<TeamDto>> RemoveUserFromTeam(int teamId, int userId)
+        {
+            _logger.LogDebug($"Triggered removing user {userId} to team {teamId}");
+            var team = await _ts.RemoveUserFromTeam(teamId, userId);
+            return Ok(_teamCnv.ConvertTeamToTeamDto(team));
+        }
     }
 }

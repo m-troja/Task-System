@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 using Task_System.Data;
+using Task_System.Exception.UserException;
 using Task_System.Model.DTO;
 using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
@@ -34,13 +36,17 @@ public class TeamService : ITeamService
     public async Task<List<Team>> GetAllTeamsAsync()
     {
         l.LogDebug("Getting all teams from the db");
-        return await _db.Teams.ToListAsync();
+        return await _db.Teams
+            .Include(t => t.Users)
+            .ToListAsync();
     }
 
     public async Task<Team> GetTeamByIdAsync(int id)
     {
         l.LogDebug($"Getting team by id: {id}");
-        var team = await _db.Teams.FirstOrDefaultAsync(t => t.Id == id);
+        var team = await _db.Teams
+            .Include(t => t.Users)
+            .FirstOrDefaultAsync(t => t.Id == id);
         if (team == null)
         {
             l.LogDebug($"Team with id {id} not found");
@@ -52,7 +58,9 @@ public class TeamService : ITeamService
     public async Task<Team> GetTeamByName(string name)
     {
         ValidateTeamName(name);
-        var team = await _db.Teams.FirstOrDefaultAsync(t => t.Name == name);
+        var team = await _db.Teams
+            .Include(t => t.Users)
+            .FirstOrDefaultAsync(t => t.Name == name);
         if (team == null)
         {
             l.LogDebug($"Team with name {name} was not found");
@@ -92,5 +100,47 @@ public class TeamService : ITeamService
         var users = team.Users?.ToList() ?? new List<User>();
         l.LogDebug($"Found {users.Count} users in team with id {teamId}");
         return _userCnv.ConvertUsersToUsersDto(users);
+    }
+
+    public async Task<Team> AddUserIntoTeam(int teamId, int userId)
+    {
+        User userById = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new UserNotFoundException("User by id " + userId + "' was not found");
+        Team teamById = await GetTeamByIdAsync(teamId) ?? throw new KeyNotFoundException($"Team with id {teamId} was not found");
+        if (teamById.Users == null)
+        {
+            l.LogDebug($"Team {teamId} contains no users");
+            throw new ArgumentException($"Team {teamId} contains no users");
+        }
+        else if (teamById.Users.Any(u => u.Id == userId)) {
+            l.LogDebug($"User with id: {userId} is already assigned to team with id: {teamId}");
+            throw new ArgumentException($"User with id: {userId} is already assigned to team with id: {teamId}");
+        }
+        teamById.Users.Add(userById);
+        _db.Teams.Update(teamById);
+        await _db.SaveChangesAsync();
+        l.LogDebug($"User with id: {userId} added to team with id: {teamId}");
+        return teamById;
+    }
+
+    public async Task<Team> RemoveUserFromTeam(int teamId, int userId)
+    {
+        Team teamById = await GetTeamByIdAsync(teamId) ?? throw new KeyNotFoundException($"Team with id {teamId} was not found");
+        User userById = teamById.Users?.FirstOrDefault(u => u.Id == userId) ?? throw new UserNotFoundException("User by id " + userId + "' was not found in team with id: " + teamId);
+
+        if (teamById.Users == null)
+        {
+            l.LogDebug($"Team {teamId} contains no users");
+            throw new ArgumentException($"Team {teamId} contains no users");
+        }
+        else if (!teamById.Users.Any(u => u.Id == userId)) {
+            l.LogDebug($"User with id: {userId} is not in team with id: {teamId}");
+            throw new ArgumentException($"User with id: {userId} is not in team with id: {teamId}");
+        }
+
+        teamById.Users.Remove(userById);
+        _db.Teams.Update(teamById);
+        await _db.SaveChangesAsync();
+        l.LogDebug($"User with id: {userId} removed from team with id: {teamId}");
+        return teamById;
     }
 }

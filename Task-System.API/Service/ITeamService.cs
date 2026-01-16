@@ -13,4 +13,6 @@ public interface ITeamService
     Task<Team> GetTeamByName(string name);
     Task<List<IssueDto>> GetIssuesByTeamId(int teamId);
     Task<List<UserDto>> GetUsersByTeamId(int teamId);
+    Task<Team> AddUserIntoTeam(int teamId, int userId);
+    Task<Team> RemoveUserFromTeam(int teamId, int userId);
 }
