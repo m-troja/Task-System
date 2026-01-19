@@ -31,7 +31,7 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", Serilog.Events.LogEventLevel.Information)
     .WriteTo.File(
-        Path.Combine(_LogDir, _LogFilename + "_.debug"),
+        Path.Combine(_LogDir, _LogFilename + ".debug"),
         rollingInterval: RollingInterval.Day,
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug,
         rollOnFileSizeLimit: true,
@@ -43,7 +43,7 @@ Log.Logger = new LoggerConfiguration()
 
     // Error
     .WriteTo.File(
-        Path.Combine(_LogDir, _LogFilename + "_.error"),
+        Path.Combine(_LogDir, _LogFilename + ".error"),
         rollingInterval: RollingInterval.Day,
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error,
         rollOnFileSizeLimit: true,
@@ -55,7 +55,7 @@ Log.Logger = new LoggerConfiguration()
 
     //  Info (Info + Error) 
     .WriteTo.File(
-        Path.Combine(_LogDir, _LogFilename + "_.info"),
+        Path.Combine(_LogDir, _LogFilename + ".info"),
         rollingInterval: RollingInterval.Day,
         restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information,
         rollOnFileSizeLimit: true,
@@ -77,9 +77,12 @@ try
     // -------------------
     // JWT Config
     // -------------------
-    var jwtSecret = builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT secret not configured.");
-    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT issuer not configured.");
-    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT audience not configured.");
+    var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
+        ?? throw new InvalidOperationException("JWT secret not configured.");
+    var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+        ?? throw new InvalidOperationException("JWT issuer not configured.");
+    var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+        ?? throw new InvalidOperationException("JWT audience not configured.");
 
     // Authentication
     builder.Services.AddAuthentication(options =>
@@ -192,12 +195,17 @@ try
     }
 
     Log.Information($"Task-System WebApplication started successfully on port {_HttpPort}");
+
+
     app.Run();
 }
 catch (Exception ex)
-{
-    Log.Error(ex, "Application terminated unexpectedly!");
+{ 
+    Log.Fatal(ex, "Application terminated unexpectedly!");
+    throw;
 }
+
+
 finally
 {
     Log.CloseAndFlush();

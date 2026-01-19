@@ -22,11 +22,11 @@ namespace Task_System.Tests.Controller
             Mock<ITeamService> teamService)
         {
             ILogger<IssueCnv> mockIssueService = new LoggerFactory().CreateLogger<IssueCnv>();
-            var commentCnv = new CommentCnv();
-            var issueCnv = new IssueCnv(commentCnv, mockIssueService);
-            ILogger<TeamCnv> teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
             var userCnv = new UserCnv();
-            var teamCnv = new TeamCnv(issueCnv, teamCnvLogger, userCnv);
+            var commentCnv = new CommentCnv();
+            var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
+            var teamCnv = new TeamCnv(teamCnvLogger);
+            var issueCnv = new IssueCnv(commentCnv, mockIssueService, teamCnv);
             var logger = new LoggerFactory().CreateLogger<TeamController>();
             return new TeamController(userService.Object, teamCnv, logger, teamService.Object);
         }
@@ -152,10 +152,10 @@ namespace Task_System.Tests.Controller
         {
             var issue1 = new IssueDto(1, "ISSUE-1", "Title1", "Desc1", IssueStatus.NEW,
                         IssuePriority.HIGH, 1, 2, DateTime.Parse("2025-11-22"), DateTime.Parse("2025-11-23"), DateTime.Parse("2025-11-24"),
-                        new List<CommentDto>(), 1, new Team("Team1"));
+                        new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
             var issue2 = new IssueDto(2, "ISSUE-2", "Title2", "Desc2", IssueStatus.NEW,
                         IssuePriority.HIGH, 1, 2, DateTime.Parse("2025-11-25"), DateTime.Parse("2025-11-26"), DateTime.Parse("2025-11-27"),
-                        new List<CommentDto>(), 1, new Team("Team2"));
+                        new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
             return new List<IssueDto> { issue1, issue2 };
         }
     }

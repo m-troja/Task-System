@@ -31,7 +31,10 @@ public class TeamServiceTests
         var mockLogger = new Mock<ILogger<TeamService>>();
         var issuesCnvLogger = new LoggerFactory().CreateLogger<IssueCnv>();
         var commentCnv = new CommentCnv();
-        var issueCnv = new IssueCnv(commentCnv, issuesCnvLogger);
+        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
+        var teamCnv = new TeamCnv(teamCnvLogger);
+        var loggerIssueCnv = new LoggerFactory().CreateLogger<IssueCnv>();
+        var issueCnv = new IssueCnv(commentCnv, loggerIssueCnv, teamCnv);
         var userCnv = new UserCnv();
         return new TeamService(db, mockLogger.Object, issueCnv, userCnv);
     }
@@ -143,6 +146,12 @@ public class TeamServiceTests
     [Fact]
     public async Task GetIssuesByTeamId_ShouldReturnIssues()
     {
+        var commentCnv = new CommentCnv();
+        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
+        var teamCnv = new TeamCnv(teamCnvLogger);
+        var loggerIssueCnv = new LoggerFactory().CreateLogger<IssueCnv>();
+        var issueCnv = new IssueCnv(commentCnv, loggerIssueCnv, teamCnv);
+
         // Arrange
         var db = GetDb();
         var team = new Team("Team1");
@@ -163,7 +172,7 @@ public class TeamServiceTests
         var service = new TeamService(
             db,
             mockLogger.Object,
-            new IssueCnv(new CommentCnv(), new LoggerFactory().CreateLogger<IssueCnv>()),
+            new IssueCnv(commentCnv, loggerIssueCnv, teamCnv),
             new UserCnv()
         );
 

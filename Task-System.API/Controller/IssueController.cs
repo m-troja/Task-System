@@ -24,7 +24,7 @@ public class IssueController : ControllerBase
     [Authorize]
     [HttpPost]
     [Route("create")]
-    public async Task<ActionResult<IssueCreatedResponse>> CreateIssue(CreateIssueRequest req)
+    public async Task<ActionResult<IssueDto>> CreateIssue(CreateIssueRequest req)
     {
         l.LogDebug($"Received create issue request: {req}");
         Issue issue;
@@ -38,8 +38,8 @@ public class IssueController : ControllerBase
             throw;
         }
 
-        var response = new IssueCreatedResponse(ResponseType.ISSUE_CREATED_OK, issue.Key.KeyString);
-        return Ok(response);
+        var issueDto = _issueCnv.ConvertIssueToIssueDto(issue);
+        return Ok(issueDto);
     }
 
     [HttpGet("key/{key}")]
