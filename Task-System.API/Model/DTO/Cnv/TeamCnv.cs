@@ -4,9 +4,7 @@ namespace Task_System.Model.DTO.Cnv;
 
 public class TeamCnv
 {
-    private readonly IssueCnv _issueCnv;
     private readonly ILogger<TeamCnv> l;
-    private readonly UserCnv _userCnv;
     public TeamDto ConvertTeamToTeamDto(Team team)
     {
         l.LogDebug($"Converting Team entity to TeamDto: {team}");
@@ -15,7 +13,7 @@ public class TeamCnv
            team.Id,
            team.Name,
            team.Issues?.Select(i => i.Id).ToList() ?? new List<int>(),
-           team.Users?.Select( u => _userCnv.ConvertUserToDto(u)).ToList() ?? new List<UserDto>()
+           team.Users?.Select( u => u.Id).ToList() ?? new List<int>()
         );
         l.LogDebug($"Converted TeamDto: {NewTeamDto}");
         return NewTeamDto;
@@ -31,10 +29,8 @@ public class TeamCnv
         return teamDtos;
     }
 
-    public TeamCnv(IssueCnv issueCnv, ILogger<TeamCnv> logger, UserCnv userCnv)
+    public TeamCnv(ILogger<TeamCnv> logger)
     {
-        _issueCnv = issueCnv;
         l = logger;
-        _userCnv = userCnv;
     }
 }

@@ -32,7 +32,7 @@ public class AuthControllerTests
         // given
         var user = new User("TestUser", "U1") { Id = 1 };
         var refreshToken = new RefreshToken("valid-token", user.Id, DateTime.UtcNow.AddMinutes(2));
-        var req = new RefreshTokenRequest(1, refreshToken.Token);
+        var req = new RefreshTokenRequest(refreshToken.Token);
         var accessToken = new AccessToken("new-access-token", DateTime.UtcNow.AddMinutes(2));
         var refreshTokenCnv = new RefreshTokenCnv();
         var tokenResponseDto = new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken));
@@ -61,7 +61,7 @@ public class AuthControllerTests
     {
         // given
         var user = new User("TestUser", "U123");
-        var req = new RefreshTokenRequest(1, "invalid-token");
+        var req = new RefreshTokenRequest("invalid-token");
 
         _mockUserService.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(user);
 

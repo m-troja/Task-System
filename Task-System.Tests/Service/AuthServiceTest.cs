@@ -70,7 +70,7 @@ public class AuthServiceTest
         var mjwt = new Mock<IJwtGenerator>();
         var mu = new Mock<IUserService>();
         var service = CreateService(db, mu, mjwt);
-        var req = new RefreshTokenRequest(1, "token");
+        var req = new RefreshTokenRequest("token");
 
         // db 
         db.Users.Add(user1);
@@ -98,7 +98,7 @@ public class AuthServiceTest
         var mjwt = new Mock<IJwtGenerator>();
         var mu = new Mock<IUserService>();
         var service = CreateService(db, mu, mjwt);
-        var req = new RefreshTokenRequest(1, "token");
+        var req = new RefreshTokenRequest("token");
 
         // db 
         db.Users.Add(user1);
@@ -124,7 +124,7 @@ public class AuthServiceTest
         var mjwt = new Mock<IJwtGenerator>();
         var mu = new Mock<IUserService>();
         var service = CreateService(db, mu, mjwt);
-        var req = new RefreshTokenRequest(1, "token");
+        var req = new RefreshTokenRequest("token");
 
         // db 
         db.Users.Add(user1);
@@ -150,7 +150,7 @@ public class AuthServiceTest
         var mjwt = new Mock<IJwtGenerator>();
         var mu = new Mock<IUserService>();
         var service = CreateService(db, mu, mjwt);
-        var req = new RefreshTokenRequest(1, "token");
+        var req = new RefreshTokenRequest("token");
 
         // db 
         db.Users.Add(user1);

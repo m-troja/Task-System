@@ -26,7 +26,7 @@ namespace Task_System.Tests.Controller
             var issueCnv = new IssueCnv(commentCnv, mockIssueService);
             ILogger<TeamCnv> teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
             var userCnv = new UserCnv();
-            var teamCnv = new TeamCnv(issueCnv, teamCnvLogger, userCnv);
+            var teamCnv = new TeamCnv(issueCnv, teamCnvLogger);
             var logger = new LoggerFactory().CreateLogger<TeamController>();
             return new TeamController(userService.Object, teamCnv, logger, teamService.Object);
         }

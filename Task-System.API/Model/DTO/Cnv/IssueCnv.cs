@@ -27,7 +27,7 @@ public class IssueCnv
                 Issue.UpdatedAt,
                 commentDtos,
                 Issue.ProjectId,
-                teamCnv.ConvertTeamToTeamDto(Issue.Team) 
+                teamCnv.ConvertTeamToTeamDto(Issue.Team) ?? new TeamDto(0, "No Team", new List<int>(), new List<int>())
             );
         
         return issueDto;
@@ -67,9 +67,10 @@ public class IssueCnv
         return issueDtos;
     }
 
-    public IssueCnv(CommentCnv commentCnv, ILogger<IssueCnv> logger)
+    public IssueCnv(CommentCnv commentCnv, ILogger<IssueCnv> logger, TeamCnv teamCnv)
     {
         _commentCnv = commentCnv;
         this.logger = logger;
+        this.teamCnv = teamCnv;
     }
 }

@@ -4,6 +4,6 @@ public record TeamDto(
     int Id, 
     string Name, 
     List<int> Issues, 
-    List<UserDto> users)
+    List<int> users)
 {
 }
