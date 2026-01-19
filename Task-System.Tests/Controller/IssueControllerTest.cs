@@ -47,8 +47,8 @@ public class IssueControllerTest
             new IssueCnv(commentCnv, mockIssueService, teamCnv));
         var expectedIssues = new List<Model.DTO.IssueDto>
         {
-            new IssueDto(1, "ISSUE-1", "Title1", "Description1", Model.IssueFolder.IssueStatus.NEW, Model.IssueFolder.IssuePriority.HIGH, 1, 2, DateTime.Parse("2025-11-01"), DateTime.Parse("2025-12-01"), DateTime.Parse("2025-11-02"), new List<Model.DTO.CommentDto>(), 1, new TeamDto("Team1")),
-            new IssueDto(2, "ISSUE-2", "Title2", "Description2", Model.IssueFolder.IssueStatus.DONE, Model.IssueFolder.IssuePriority.LOW, 2, 3, DateTime.Parse("2025-11-03"), DateTime.Parse("2025-12-03"), DateTime.Parse("2025-11-04"), new List<Model.DTO.CommentDto>(), 1, new TeamDto("Team2"))
+            new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.DONE, IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto( 1, "New Team", new List<int>(1), new List<int>(1))),
+            new IssueDto(2, "ISSUE-2", "Title2", "Description2", Model.IssueFolder.IssueStatus.DONE, Model.IssueFolder.IssuePriority.LOW, 2, 3, DateTime.Parse("2025-11-03"), DateTime.Parse("2025-12-03"), DateTime.Parse("2025-11-04"), new List<Model.DTO.CommentDto>(), 1, new List<CommentDto>(), 1, new TeamDto( 1, "New Team", new List<int>(1), new List<int>(1)))
         };
         mi.Setup(s => s.GetAllIssues())
           .ReturnsAsync(expectedIssues);
@@ -128,7 +128,7 @@ public class IssueControllerTest
         var req = new AssignIssueRequest(1, 20);
 
         var issueDto = new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.NEW,
-            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(_team));
+            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
 
         mi.Setup(s => s.AssignIssueAsync(req)).ReturnsAsync(BuildIssue());
 
@@ -190,8 +190,7 @@ public class IssueControllerTest
         var teamCnv = new TeamCnv(teamCnvLogger);
         var req = new ChangeIssueStatusRequest(1, "IN_PROGRESS");
 
-        var issueDto = new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.DONE,
-            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(teamCnv.ConvertTeamToTeamDto(new Team("new Team"))));
+        var issueDto = new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.DONE, IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto( 1, "New Team", new List<int>(1), new List<int>(1)));
 
         mi.Setup(s => s.ChangeIssueStatusAsync(req)).ReturnsAsync(issueDto);
 

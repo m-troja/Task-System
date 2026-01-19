@@ -22,11 +22,11 @@ namespace Task_System.Tests.Controller
             Mock<ITeamService> teamService)
         {
             ILogger<IssueCnv> mockIssueService = new LoggerFactory().CreateLogger<IssueCnv>();
-            var commentCnv = new CommentCnv();
-            var issueCnv = new IssueCnv(commentCnv, mockIssueService);
-            ILogger<TeamCnv> teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
             var userCnv = new UserCnv();
-            var teamCnv = new TeamCnv(issueCnv, teamCnvLogger);
+            var commentCnv = new CommentCnv();
+            var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
+            var teamCnv = new TeamCnv(teamCnvLogger);
+            var issueCnv = new IssueCnv(commentCnv, mockIssueService, teamCnv);
             var logger = new LoggerFactory().CreateLogger<TeamController>();
             return new TeamController(userService.Object, teamCnv, logger, teamService.Object);
         }
