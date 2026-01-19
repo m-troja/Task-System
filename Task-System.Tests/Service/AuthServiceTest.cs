@@ -111,7 +111,7 @@ public class AuthServiceTest
 
         // test invalid user id
         await Assert.ThrowsAsync<InvalidRefreshTokenException>( () => 
-            service.ValidateRefreshTokenRequest( new RefreshTokenRequest(2, "token")));
+            service.ValidateRefreshTokenRequest( new RefreshTokenRequest("token")));
     }
 
     [Fact]

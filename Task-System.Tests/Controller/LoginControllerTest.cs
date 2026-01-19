@@ -24,7 +24,7 @@ namespace Task_System.Tests.Controller
         {   
             var refreshTokenCnv = new RefreshTokenCnv();
             var logger = new LoggerFactory().CreateLogger<LoginService>();
-            return new LoginController(logger, loginService.Object, userService.Object, authService.Object, refreshTokenCnv);
+            return new LoginController(logger, loginService.Object);
         }
 
         [Fact]
@@ -40,8 +40,10 @@ namespace Task_System.Tests.Controller
             var request = new LoginRequest("user@test.com", "password");
             var user = new User { Id = 5, Email = "user@test.com" };
             var accessToken = new AccessToken("new-access-token", DateTime.UtcNow.AddMinutes(2));
-
-            loginService.Setup(s => s.LoginAsync(request)).ReturnsAsync(user);
+            TokenResponseDto tokenResponseDto = new TokenResponseDto( accessToken, 
+                new Model.DTO.RefreshTokenDto("token", DateTime.UtcNow.AddDays(7))
+            );
+            loginService.Setup(s => s.LoginAsync(request)).ReturnsAsync(tokenResponseDto);
             authService.Setup(a => a.GetAccessTokenByUserId(5)).Returns(accessToken);
             authService.Setup(a => a.GenerateRefreshToken(5))
                        .ReturnsAsync(new RefreshToken("new-refresh-token", 5, DateTime.Parse("2025-01-01")));
@@ -73,7 +75,11 @@ namespace Task_System.Tests.Controller
 
             var request = new LoginRequest("user@test.com", "pw123");
 
-            loginService.Setup(s => s.LoginAsync(request)).ReturnsAsync((User)null);
+            var accessToken = new AccessToken("new-access-token", DateTime.UtcNow.AddMinutes(2));
+            TokenResponseDto tokenResponseDto = new TokenResponseDto(accessToken,
+                new Model.DTO.RefreshTokenDto("token", DateTime.UtcNow.AddDays(7))
+            );
+            loginService.Setup(s => s.LoginAsync(request)).ReturnsAsync(tokenResponseDto);
 
             // act
             var result = await controller.Login(request);
@@ -102,7 +108,11 @@ namespace Task_System.Tests.Controller
             var request = new LoginRequest("user@test.com", "pw");
             var user = new User { Id = 77, Email = "user@test.com" };
 
-            loginService.Setup(s => s.LoginAsync(request)).ReturnsAsync(user);
+            var accessToken = new AccessToken("new-access-token", DateTime.UtcNow.AddMinutes(2));
+            TokenResponseDto tokenResponseDto = new TokenResponseDto(accessToken,
+                new Model.DTO.RefreshTokenDto("token", DateTime.UtcNow.AddDays(7))
+            );
+            loginService.Setup(s => s.LoginAsync(request)).ReturnsAsync(tokenResponseDto);
             authService.Setup(a => a.GetAccessTokenByUserId(77)).Returns<string>(null);
             authService.Setup(a => a.GenerateRefreshToken(77))
                        .ReturnsAsync(new RefreshToken("TOK", 77, DateTime.UtcNow));

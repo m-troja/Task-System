@@ -23,10 +23,10 @@ public class ProjectControllerTest
         var commentCnv = new CommentCnv();
 
         var mi = new Mock<IIssueService>();
-        var commentCnv = new CommentCnv();
         var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
         var teamCnv = new TeamCnv(teamCnvLogger);
-        var issueCnv = new IssueCnv(commentCnv, mi, teamCnv);
+        var issueCnv = new IssueCnv(commentCnv, issueCnvLogger, teamCnv);
+        var projectCnv = new ProjectCnv(issueCnv);
         return new ProjectController(psMock.Object, projectCnv);
     }
 

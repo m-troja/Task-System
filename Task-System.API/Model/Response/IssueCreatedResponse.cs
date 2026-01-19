@@ -4,5 +4,6 @@ namespace Task_System.Model.Response;
 
 public record IssueCreatedResponse(
     ResponseType responseType, 
-    string key
+    string key,
+    int id
 ){}

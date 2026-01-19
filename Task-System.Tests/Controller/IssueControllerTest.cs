@@ -48,7 +48,7 @@ public class IssueControllerTest
         var expectedIssues = new List<Model.DTO.IssueDto>
         {
             new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.DONE, IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto( 1, "New Team", new List<int>(1), new List<int>(1))),
-            new IssueDto(2, "ISSUE-2", "Title2", "Description2", Model.IssueFolder.IssueStatus.DONE, Model.IssueFolder.IssuePriority.LOW, 2, 3, DateTime.Parse("2025-11-03"), DateTime.Parse("2025-12-03"), DateTime.Parse("2025-11-04"), new List<Model.DTO.CommentDto>(), 1, new List<CommentDto>(), 1, new TeamDto( 1, "New Team", new List<int>(1), new List<int>(1)))
+            new IssueDto(2, "ISSUE-2", "Title2", "Description2", IssueStatus.DONE, IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto( 1, "New Team", new List<int>(1), new List<int>(1)))
         };
         mi.Setup(s => s.GetAllIssues())
           .ReturnsAsync(expectedIssues);
@@ -149,7 +149,7 @@ public class IssueControllerTest
         var req = new RenameIssueRequest(1, "NewTitle");
 
         var issueDto = new IssueDto(1, "ISSUE-1", "NewTitle", "D", IssueStatus.NEW,
-            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new Team("Team"));
+            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
 
         mi.Setup(s => s.RenameIssueAsync(req)).ReturnsAsync(issueDto);
 
@@ -211,7 +211,7 @@ public class IssueControllerTest
         var req = new ChangeIssuePriorityRequest(1, "HIGH");
 
         var issueDto = new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.NEW,
-            IssuePriority.LOW, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new Team("Team"));
+            IssuePriority.LOW, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
 
         mi.Setup(s => s.ChangeIssuePriorityAsync(req)).ReturnsAsync(issueDto);
 
@@ -232,7 +232,7 @@ public class IssueControllerTest
         var req = new UpdateDueDateRequest(1, DateTime.Parse("2030-01-01"));
 
         var issueDto = new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.NEW,
-            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Parse("2030-01-01"), DateTime.Now, new List<CommentDto>(), 1, new Team("Team"));
+            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Parse("2030-01-01"), DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
 
         mi.Setup(s => s.UpdateDueDateAsync(req)).ReturnsAsync(issueDto);
 
@@ -348,6 +348,6 @@ public class IssueControllerTest
     private IssueDto BuildIssueDto()
     {
         return new IssueDto(1, "ISSUE-1", "Title", "Desc", IssueStatus.NEW,
-                    IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new Team("Team"));    
+                    IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));    
     }
 }

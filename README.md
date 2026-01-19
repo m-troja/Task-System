@@ -86,8 +86,9 @@ TS_LOG_FILENAME=log
 TS_HTTP_PORT=6901
 
 JWT_SECRET=your_jwt_secret
-JWT_ISSUER=TaskSystem
-JWT_AUDIENCE=TaskSystemClients
+JWT_ISSUER=Task-System
+JWT_AUDIENCE=Task-System-Users
+ACCESS_TOKEN_EXPIRY_MINUTES=2
 
 DB_HOST=localhost
 DB_NAME=task_system

@@ -12,17 +12,18 @@ namespace Task_System.Security.Impl;
 
 public class JwtGenerator : IJwtGenerator
 {
-    private readonly string _jwtSecret;
-    private readonly string _jwtIssuer;
-    private readonly string _jwtAudience;
+    private readonly string JWT_SECRET;
+    private readonly string JWT_ISSUER;
+    private readonly string JWT_AUDIENCE;
     private readonly ILogger<IJwtGenerator> l;
-    private readonly string ExpiryMinutes = Environment.GetEnvironmentVariable("ACCESS_TOKEN_EXPIRY_MINUTES") ?? "2";
+    private readonly string ExpiryMinutes;
 
     public JwtGenerator(IConfiguration config, ILogger<IJwtGenerator> logger)
     {
-        _jwtSecret = config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT secret not configured.");
-        _jwtIssuer = config["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT issuer not configured.");
-        _jwtAudience = config["Jwt:Audience"] ?? throw new InvalidOperationException("JWT audience not configured.");
+        JWT_SECRET = Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new InvalidOperationException("JWT_SECRET not configured."); 
+        JWT_ISSUER = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? throw new InvalidOperationException("JWT_ISSUER not configured.");
+        JWT_AUDIENCE = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? throw new InvalidOperationException("JWT_AUDIENCE not configured.");
+        ExpiryMinutes = Environment.GetEnvironmentVariable("ACCESS_TOKEN_EXPIRY_MINUTES") ?? "2";
         l = logger;
     }
 
@@ -30,7 +31,7 @@ public class JwtGenerator : IJwtGenerator
     {
         l.LogDebug($"Generating access token for userId {userId}");
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_jwtSecret);
+        var key = Encoding.UTF8.GetBytes(JWT_SECRET);
         var expiry = DateTime.UtcNow.AddMinutes(int.Parse(ExpiryMinutes));
 
         var claims = new ClaimsIdentity(new[]
@@ -42,8 +43,8 @@ public class JwtGenerator : IJwtGenerator
         {
             Subject = claims,
             Expires = expiry,
-            Issuer = _jwtIssuer,
-            Audience = _jwtAudience,
+            Issuer = JWT_ISSUER,
+            Audience = JWT_AUDIENCE,
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature)

@@ -29,17 +29,35 @@ public class PostgresqlDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var dbName = Environment.GetEnvironmentVariable("TS_DB_NAME") ?? "testdb";
-        var dbHost = Environment.GetEnvironmentVariable("TS_DB_HOST") ?? "localhost";
-        var dbPort = Environment.GetEnvironmentVariable("TS_DB_PORT") ?? "5432";
-        var dbUser = Environment.GetEnvironmentVariable("TS_DB_USER") ?? "postgres";
-        var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "postgres";
+        Console.WriteLine("=== DbContext OnConfiguring START ===");
 
-        if (!optionsBuilder.IsConfigured)
+        try
         {
-            var connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};SearchPath=public";
+            var dbName = Environment.GetEnvironmentVariable("TS_DB_NAME") ?? "testdb";
+            var dbHost = Environment.GetEnvironmentVariable("TS_DB_HOST") ?? "localhost";
+            var dbPort = Environment.GetEnvironmentVariable("TS_DB_PORT") ?? "5432";
+            var dbUser = Environment.GetEnvironmentVariable("TS_DB_USER") ?? "postgres";
+            var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "postgres";
+            Console.WriteLine($"JWT_ISSUER: {Environment.GetEnvironmentVariable("JWT_ISSUER")}");
+            Console.WriteLine($"JWT_AUDIENCE: {Environment.GetEnvironmentVariable("JWT_AUDIENCE")}");
+            Console.WriteLine($"JWT_SECRET: {Environment.GetEnvironmentVariable("JWT_SECRET")}");
 
-            optionsBuilder.UseNpgsql(connectionString).UseSnakeCaseNamingConvention();
+
+            var connectionString =
+                $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};SearchPath=public";
+
+            optionsBuilder
+                .UseNpgsql(connectionString)
+                .UseSnakeCaseNamingConvention();
+
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine("!!! EXCEPTION DURING DB CONFIGURATION !!!");
+            Console.WriteLine(ex.GetType().FullName);
+            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex.StackTrace);
+            throw; 
         }
     }
 

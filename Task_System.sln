@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task_System.API", "Task-Sys
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task_System.Tests", "Task-System.Tests\Task_System.Tests.csproj", "{19CA304E-071E-4517-A552-53D21E289BA8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{76D1E317-2DB7-42C4-A2BB-DF0E34F2C656}"
+	ProjectSection(SolutionItems) = preProject
+		dev.env = dev.env
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

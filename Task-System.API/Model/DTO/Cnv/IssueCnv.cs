@@ -9,9 +9,14 @@ public class IssueCnv
     private readonly CommentCnv _commentCnv;
     private readonly ILogger<IssueCnv> logger;
     private readonly TeamCnv teamCnv;
+    
+
     public IssueDto ConvertIssueToIssueDto(Issue Issue)
     {
         ICollection<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(Issue.Comments);
+        TeamDto teamDto = Issue.Team is not null
+            ? teamCnv.ConvertTeamToTeamDto(Issue.Team)
+            : new TeamDto(-1, "", new List<int>(), new List<int>());
 
         var issueDto = new IssueDto(
             Issue.Id,
@@ -27,7 +32,7 @@ public class IssueCnv
                 Issue.UpdatedAt,
                 commentDtos,
                 Issue.ProjectId,
-                teamCnv.ConvertTeamToTeamDto(Issue.Team) ?? new TeamDto(0, "No Team", new List<int>(), new List<int>())
+                teamDto
             );
         
         return issueDto;
@@ -38,7 +43,7 @@ public class IssueCnv
         logger.LogDebug($"Assignee is {Issue.Assignee}, Id {Issue.AssigneeId}");
         logger.LogDebug($"Author is {Issue.Author}, Id {Issue.AuthorId}");
         ICollection<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(Issue.Comments);
-
+        
         var issueDto = new IssueDtoChatGpt(
             Issue.Id,
                 Issue.Key.KeyString,

@@ -31,7 +31,7 @@ public class ChatGptControllerTest
         var commentCnv = new CommentCnv();
         var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
         var teamCnv = new TeamCnv(teamCnvLogger);
-        var issueCnv = new IssueCnv(commentCnv, mockIssueService, teamCnv);
+        var issueCnv = new IssueCnv(commentCnv, issuesCnvLogger, teamCnv);
         return new ChatGptController(mu.Object, GetLogger(), mi.Object, issueCnv);
     }
 
@@ -79,10 +79,11 @@ public class ChatGptControllerTest
         // given
         var mu = new Mock<IUserService>();
         var mi = new Mock<IIssueService>();
+        var issuesCnvLogger = new LoggerFactory().CreateLogger<IssueCnv>();
         var commentCnv = new CommentCnv();
         var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
         var teamCnv = new TeamCnv(teamCnvLogger);
-        var issueCnv = new IssueCnv(commentCnv, mi, teamCnv);
+        var issueCnv = new IssueCnv(commentCnv, issuesCnvLogger, teamCnv);
         var controller = CreateController(mu, mi);
         var req = new AssignIssueRequestChatGpt("PROJ-1", "U12345678");
         var expectedIssue = BuildIssue(req);

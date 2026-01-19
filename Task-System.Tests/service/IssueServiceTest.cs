@@ -38,7 +38,11 @@ public class IssueServiceTests
         Mock<ITeamService> mt,
         Mock<IActivityService> ma)
     {
+        var loggerIssueCnv = new LoggerFactory().CreateLogger<IssueCnv>();
         var commentCnv = new CommentCnv();
+        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
+        var teamCnv = new TeamCnv(teamCnvLogger);
+        var issueCnv = new IssueCnv(commentCnv, loggerIssueCnv, teamCnv);
         var logger = new LoggerFactory().CreateLogger<IssueCnv>();
 
         return new IssueService(
@@ -142,7 +146,8 @@ public class IssueServiceTests
         var commentCnv = new CommentCnv();
         var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
         var teamCnv = new TeamCnv(teamCnvLogger);
-        var issueCnv = new IssueCnv(commentCnv, mi, teamCnv);
+        var loggerIssueCnv = new LoggerFactory().CreateLogger<IssueCnv>(); 
+        var issueCnv = new IssueCnv(commentCnv, loggerIssueCnv, teamCnv);
 
         var user1 = new User("Author", "U1") { Id = 10 };
         var user2 = new User("NewAssignee", "U2") { Id = 20 };
