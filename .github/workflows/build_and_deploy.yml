@@ -6,43 +6,65 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Install .NET 10
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
           include-prerelease: true
+
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v3
         with:
           versionSpec: '5.x'
+
       - name: Run GitVersion
         id: gitversion
         uses: gittools/actions/gitversion/execute@v2
+
+      - name: Restore NuGet packages
+        run: dotnet restore Task-System.API/Task_System.API.csproj
+
       - name: Build
-        run: dotnet build Task-System.API/Task_System.API.csproj --configuration Release /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+        run: dotnet build Task-System.API/Task_System.API.csproj \
+              --configuration Release \
+              /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+
       - name: Show build output
         run: ls -R Task-System.API/bin/Release/
+
+      - name: Publish
+        run: dotnet publish Task-System.API/Task_System.API.csproj \
+              --configuration Release \
+              --output publish \
+              /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+
+      - name: Show publish output
+        run: ls -R Task-System.API/publish/
+
       - name: Install SSH keys
         run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
 
       - name: Upload build via rsync
         run: |
           VERSION=${{ steps.gitversion.outputs.fullSemVer }}
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-          mkdir -p '${{ secrets.WORK_DIR }}/$VERSION';
-          if [ -L '${{ secrets.WORK_DIR }}/latest' ]; then
-            unlink '${{ secrets.WORK_DIR }}/latest';
-          fi
-          ln -s '$VERSION' '${{ secrets.WORK_DIR }}/latest' "
-          rsync -avz Task-System.API/bin/Release/net9.0/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/$VERSION/
+            mkdir -p '${{ secrets.WORK_DIR }}/$VERSION';
+            if [ -L '${{ secrets.WORK_DIR }}/latest' ]; then
+              unlink '${{ secrets.WORK_DIR }}/latest';
+            fi
+            ln -s '$VERSION' '${{ secrets.WORK_DIR }}/latest'
+          "
+          rsync -avz Task-System.API/publish/ \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.WORK_DIR }}/$VERSION/
 
-      
       - name: Cleanup
         run: rm -rf ~/.ssh
