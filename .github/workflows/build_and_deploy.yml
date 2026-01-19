@@ -23,7 +23,7 @@ jobs:
         id: gitversion
         uses: gittools/actions/gitversion/execute@v2
       - name: Build
-        run: dotnet build Task-System.API/Task-System.API.csproj --configuration Release /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+        run: dotnet build Task-System.API/Task_System.API.csproj --configuration Release /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
       - name: Show build output
         run: ls -R Task-System.API/bin/Release/
       - name: Install SSH keys
