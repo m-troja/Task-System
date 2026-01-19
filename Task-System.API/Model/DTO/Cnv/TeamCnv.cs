@@ -14,7 +14,7 @@ public class TeamCnv
        (
            team.Id,
            team.Name,
-           team.Issues?.Select(i => _issueCnv.ConvertIssueToIssueDto(i)).ToList() ?? new List<IssueDto>(),
+           team.Issues?.Select(i => i.Id).ToList() ?? new List<int>(),
            team.Users?.Select( u => _userCnv.ConvertUserToDto(u)).ToList() ?? new List<UserDto>()
         );
         l.LogDebug($"Converted TeamDto: {NewTeamDto}");

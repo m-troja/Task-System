@@ -10,13 +10,13 @@ public record IssueDto(
     string Description, 
     IssueStatus Status, 
     IssuePriority Priority, 
-    int AuthorId, 
-    int AssigneeId, 
+    int AuthorId,
+    int AssigneeId,
     DateTime CreatedAt, 
     DateTime? DueDate,
     DateTime? UpdatedAt, 
     ICollection<CommentDto> Comments, 
     int ProjectId,
-    Team Team)
+    TeamDto Team)
 { }
 

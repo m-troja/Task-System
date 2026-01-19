@@ -96,30 +96,32 @@ public class TeamService : ITeamService
 
     public async Task<List<UserDto>> GetUsersByTeamId(int teamId)
     {
-        var team = await GetTeamByIdAsync(teamId);
-        var users = team.Users?.ToList() ?? new List<User>();
-        l.LogDebug($"Found {users.Count} users in team with id {teamId}");
+        var users = await _db.Users
+              .Where(u => u.Teams.Any(t => t.Id == teamId))
+              .ToListAsync();
+
+        l.LogDebug($"Found {users.Count} users in team {teamId}");
         return _userCnv.ConvertUsersToUsersDto(users);
     }
 
     public async Task<Team> AddUserIntoTeam(int teamId, int userId)
     {
-        User userById = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId) ?? throw new UserNotFoundException("User by id " + userId + "' was not found");
-        Team teamById = await GetTeamByIdAsync(teamId) ?? throw new KeyNotFoundException($"Team with id {teamId} was not found");
-        if (teamById.Users == null)
-        {
-            l.LogDebug($"Team {teamId} contains no users");
-            throw new ArgumentException($"Team {teamId} contains no users");
-        }
-        else if (teamById.Users.Any(u => u.Id == userId)) {
-            l.LogDebug($"User with id: {userId} is already assigned to team with id: {teamId}");
-            throw new ArgumentException($"User with id: {userId} is already assigned to team with id: {teamId}");
-        }
-        teamById.Users.Add(userById);
-        _db.Teams.Update(teamById);
+        var user = await _db.Users
+             .Include(u => u.Teams)
+             .FirstOrDefaultAsync(u => u.Id == userId)
+             ?? throw new UserNotFoundException($"User {userId} not found");
+
+        var team = await _db.Teams
+            .Include(t => t.Users)
+            .FirstOrDefaultAsync(t => t.Id == teamId)
+            ?? throw new KeyNotFoundException($"Team {teamId} not found");
+
+        if (user.Teams.Any(t => t.Id == teamId))
+            throw new ArgumentException($"User {userId} already in team {teamId}");
+        user.Teams.Add(team);
         await _db.SaveChangesAsync();
         l.LogDebug($"User with id: {userId} added to team with id: {teamId}");
-        return teamById;
+        return team;
     }
 
     public async Task<Team> RemoveUserFromTeam(int teamId, int userId)

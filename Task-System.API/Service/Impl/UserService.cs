@@ -29,7 +29,11 @@ public class UserService : IUserService
     public async Task<User> GetByIdAsync(int id)
     {
         l.LogDebug($"Fetching user by id {id}");
-        User? user = await _db.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == id) ?? throw new UserNotFoundException("User by id '" + id + "' was not found");
+        User? user = await _db.Users
+            .Include(u => u.Roles)
+            .Include(u => u.Teams)
+            .FirstOrDefaultAsync(u => u.Id == id)
+            ?? throw new UserNotFoundException("User by id '" + id + "' was not found");
         l.LogDebug("User fetched: " + user);
         return user;
     }

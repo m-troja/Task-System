@@ -8,6 +8,7 @@ public class IssueCnv
 {
     private readonly CommentCnv _commentCnv;
     private readonly ILogger<IssueCnv> logger;
+    private readonly TeamCnv teamCnv;
     public IssueDto ConvertIssueToIssueDto(Issue Issue)
     {
         ICollection<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(Issue.Comments);
@@ -26,7 +27,7 @@ public class IssueCnv
                 Issue.UpdatedAt,
                 commentDtos,
                 Issue.ProjectId,
-                Issue.Team ?? new Team("No Team")
+                teamCnv.ConvertTeamToTeamDto(Issue.Team) 
             );
         
         return issueDto;
