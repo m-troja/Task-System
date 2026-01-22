@@ -6,7 +6,14 @@ public class CommentCnv
 {
     public CommentDto ConvertCommentToCommentDto(Comment comment)
     {
-        return new CommentDto(comment.Id, comment.IssueId, comment.Content, comment.AuthorId, comment.CreatedAt);
+        return new CommentDto(
+            comment.Id, 
+            comment.IssueId,
+            comment.Content, 
+            comment.AuthorId, 
+            comment.CreatedAt,
+            comment.UpdatedAt
+            );
     }
 
     public ICollection<CommentDto> ConvertCommentListToCommentDtoList(ICollection<Comment> comments)

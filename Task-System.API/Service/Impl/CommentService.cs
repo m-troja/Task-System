@@ -25,7 +25,11 @@ public class CommentService : ICommentService
     {
         var issue = await _issueService.GetIssueByIdAsync(req.IssueId);
         var user = await _userService.GetByIdAsync(req.AuthorId);
-        var comment = new Comment(req.Content, user, issue);
+        var comment = new Comment(req.Content, user, issue)
+        {
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
         return _commentCnv.ConvertCommentToCommentDto(comment);
@@ -38,6 +42,7 @@ public class CommentService : ICommentService
             throw new ContentNotFoundException($"Comment with Id={req.id} not found") ;
         }
         comment.Content = req.content;
+        comment.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
         return _commentCnv.ConvertCommentToCommentDto(comment);
