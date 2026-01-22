@@ -56,4 +56,12 @@ public class CommentController : ControllerBase
         _cs = cs;
         this.logger = logger;
     }
+    
+    [HttpPut]
+    [Route("edit")]
+    public async Task<ActionResult<CommentDto>> EditComment([FromBody] EditCommentRequest req)
+    {
+        var dto = await _cs.EditCommentAsync(req);
+        return Ok(dto);
+    }
 }

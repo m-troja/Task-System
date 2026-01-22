@@ -8,7 +8,7 @@ public class Comment
     public string Content { get; set; }
     public int AuthorId { get; set; }      // FK
     public int IssueId { get; set; }       // FK
-    public DateTime CreatedAt { get; set; }   // UTC
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;   // UTC
     public User Author { get; set; }
     public Issue Issue { get; set; }
     public Comment(string content, User author, Issue issue)

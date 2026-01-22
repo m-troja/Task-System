@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using Task_System.Data;
+using Task_System.Exception;
 using Task_System.Exception.IssueException;
 using Task_System.Exception.UserException;
 using Task_System.Model.DTO;
@@ -20,16 +21,27 @@ public class CommentService : ICommentService
     private readonly CommentCnv _commentCnv;
     private readonly ILogger<CommentService> logger;
 
-    public async Task<CommentDto> CreateCommentAsync(CreateCommentRequest ccr)
+    public async Task<CommentDto> CreateCommentAsync(CreateCommentRequest req)
     {
-        Issue issue = _issueService.GetIssueByIdAsync(ccr.IssueId).Result;
-        User user = _userService.GetByIdAsync(ccr.AuthorId).Result;
-        Comment comment = new Comment(ccr.Content, user, issue);
+        var issue = await _issueService.GetIssueByIdAsync(req.IssueId);
+        var user = await _userService.GetByIdAsync(req.AuthorId);
+        var comment = new Comment(req.Content, user, issue);
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
         return _commentCnv.ConvertCommentToCommentDto(comment);
     }
+    public async Task<CommentDto> EditCommentAsync(EditCommentRequest req)
+    {
+        var comment = await _db.Comments.FirstOrDefaultAsync(c => c.Id == req.id);
+        if (comment == null)
+        {
+            throw new ContentNotFoundException($"Comment with Id={req.id} not found") ;
+        }
+        comment.Content = req.content;
+        await _db.SaveChangesAsync();
 
+        return _commentCnv.ConvertCommentToCommentDto(comment);
+    }
     public async Task<IEnumerable<CommentDto>> GetCommentsByIssueIdAsync(int issueId)
     {
         List<Comment> comments = await _db.Comments.Where(c => c.IssueId == issueId).ToListAsync();
