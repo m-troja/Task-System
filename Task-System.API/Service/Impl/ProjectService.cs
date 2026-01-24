@@ -29,6 +29,14 @@ public class ProjectService : IProjectService
         return project;
     }
 
+    public async Task DeleteProjectById(int id)
+    {
+        var project = await GetProjectById(id);
+        _db.Projects.Remove(project);
+        await _db.SaveChangesAsync();
+        l.LogDebug($"Project with id {id} deleted");
+    }
+
     public async Task<Project> CreateProject(CreateProjectRequest cpr)
     {
         if (cpr.description == null) cpr = cpr with { description = "" };
