@@ -145,4 +145,13 @@ public class TeamService : ITeamService
         l.LogDebug($"User with id: {userId} removed from team with id: {teamId}");
         return teamById;
     }
+    public async Task DeleteTeamById(int teamId)
+    {
+        var team = await GetTeamByIdAsync(teamId);
+        _db.Teams.Remove(team);
+        await _db.SaveChangesAsync();
+        l.LogDebug($"Deleted team with id: {teamId}");
+    }
+
+
 }

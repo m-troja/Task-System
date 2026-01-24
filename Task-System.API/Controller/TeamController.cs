@@ -36,6 +36,14 @@ namespace Task_System.Controller
 
             return Ok(_teamCnv.ConvertTeamToTeamDto(team));
         }
+        [HttpDelete("id/{id:int}")]
+        public async Task<ActionResult<string>>DeleteTeamById(int id)
+        {
+            _logger.LogDebug($"Delete team by id: {id}");
+            await _ts.DeleteTeamById(id);
+
+            return Ok($"Deleted team id={id}");
+        }
 
         [HttpGet("all")]
         public async Task<ActionResult<List<TeamDto>>> GetAllTeams()

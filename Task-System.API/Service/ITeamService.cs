@@ -15,4 +15,5 @@ public interface ITeamService
     Task<List<UserDto>> GetUsersByTeamId(int teamId);
     Task<Team> AddUserIntoTeam(int teamId, int userId);
     Task<Team> RemoveUserFromTeam(int teamId, int userId);
+    Task DeleteTeamById(int teamId);
 }
