@@ -31,8 +31,8 @@ public class AuthControllerTests
         // given
         var req = new RefreshTokenRequest("valid-token");
         var tokenResponseDto = new TokenResponseDto(
-            new AccessToken("access-token", DateTime.Parse("2026-02-01T00:00:00Z")),
-            new RefreshTokenDto("refresh-token", DateTime.Parse("2026-02-01T00:00:00Z"))
+           new AccessToken("new-access-token", DateTime.UtcNow.AddMinutes(2)),
+            new RefreshTokenDto("token", DateTime.UtcNow.AddDays(7))
             );
 
         _mockAuthService.Setup(x => x.RegenerateTokensByRefreshToken(req.RefreshToken)).ReturnsAsync(tokenResponseDto);

@@ -20,12 +20,12 @@ using Xunit;
 namespace Task_System.Tests.Service;
 public class AuthServiceTest
 {
-    private PostgresqlDbContext GetDb()
+    private static PostgresqlDbContext GetDb()
     {
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
+
         return new PostgresqlDbContext(options);
     }
     private ILogger<AuthService> Log()
