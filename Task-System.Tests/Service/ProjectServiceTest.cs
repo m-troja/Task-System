@@ -16,7 +16,12 @@ public class ProjectServiceTest
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        return new PostgresqlDbContext(options);
+
+        var db = new PostgresqlDbContext(options);
+        db.Projects.RemoveRange(db.Projects);
+        db.SaveChanges();
+
+        return db;
     }
 
     private ILogger<ProjectService> GetLoggerStub() =>

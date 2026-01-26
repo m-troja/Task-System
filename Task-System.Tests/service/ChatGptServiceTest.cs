@@ -19,7 +19,13 @@ public class ChatGptServiceTest
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        return new PostgresqlDbContext(options);
+
+        var db = new PostgresqlDbContext(options);
+
+        db.Activities.RemoveRange(db.Activities);
+        db.SaveChanges();
+
+        return db;
     }
 
     private ILogger<ChatGptService> GetLoggerStub() =>

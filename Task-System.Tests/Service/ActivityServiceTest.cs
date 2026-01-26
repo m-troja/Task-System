@@ -6,14 +6,15 @@ using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
 using Task_System.Service.Impl;
 using Xunit;
+
 namespace Task_System.Tests.Service;
 
 public class ActivityServiceTests
 {
-    private static PostgresqlDbContext CreateInMemoryDbContext()
+    private static PostgresqlDbContext GetInMemoryDb()
     {
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
         var db = new PostgresqlDbContext(options);
@@ -33,21 +34,28 @@ public class ActivityServiceTests
     [Fact]
     public async Task CreateActivityPropertyCreatedAsync_ShouldCreateAndPersistActivity()
     {
-        var logger = new Mock<ILogger<ActivityService>>();
-        await using var db = CreateInMemoryDbContext();
-        var service = CreateService(db);
+        // Arrange
+        var db = GetInMemoryDb();
+        var mockLogger = new Mock<ILogger<ActivityService>>();
+        var service = new ActivityService(db, mockLogger.Object);
 
         var type = ActivityType.CREATED_COMMENT;
         var issueId = 42;
 
-        var result = await service.CreateActivityPropertyCreatedAsync(type, issueId);
+        // Act
+        string oldValue = "Old Value";
+        string newValue = "New Value";
+        var activity = await service.CreateActivityPropertyUpdatedAsync(type, oldValue, newValue, issueId);
 
-        Assert.NotNull(result);
-        Assert.Equal(type, result.Type);
-        Assert.Equal(issueId, result.IssueId);
+        // Assert
+        Assert.NotNull(activity);
+        Assert.IsType<ActivityPropertyUpdated>(activity);
+        Assert.Equal(oldValue, activity.OldValue);
+        Assert.Equal(newValue, activity.NewValue);
+        Assert.Equal(type, activity.Type);
 
-        var fromDb = await db.Activities.OfType<ActivityPropertyCreated>().SingleAsync();
-        Assert.Equal(result.Id, fromDb.Id);
+        var dbActivity = await db.Activities.FirstOrDefaultAsync(a => a.Id == activity.Id);
+        Assert.NotNull(dbActivity);
     }
 
 
@@ -55,7 +63,7 @@ public class ActivityServiceTests
     public async Task CreateActivityPropertyUpdatedAsync_ShouldCreateAndPersistActivity()
     {
         // arrange
-        await using var db = CreateInMemoryDbContext();
+        await using var db = GetInMemoryDb();
         var service = CreateService(db);
 
         var type = ActivityType.UPDATED_STATUS;

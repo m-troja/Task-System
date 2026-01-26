@@ -23,6 +23,12 @@ public class TeamServiceTests
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
+
+        var db = new PostgresqlDbContext(options);
+
+        db.Teams.RemoveRange(db.Teams);
+        db.SaveChanges();
+
         return new PostgresqlDbContext(options);
     }
 
