@@ -19,6 +19,11 @@ public class UserServiceTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
+        var db = new PostgresqlDbContext(options);
+
+        db.Users.RemoveRange(db.Users);
+        db.SaveChanges();
+
         return new PostgresqlDbContext(options);
     }
 

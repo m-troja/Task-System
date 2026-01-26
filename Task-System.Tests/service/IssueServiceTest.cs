@@ -22,7 +22,13 @@ public class IssueServiceTests
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;   
+            .Options;
+
+        var db = new PostgresqlDbContext(options);
+
+        db.Issues.RemoveRange(db.Issues);
+        db.SaveChanges();
+
         return new PostgresqlDbContext(options);
     }
 
