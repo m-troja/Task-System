@@ -23,8 +23,7 @@ public class IssueControllerTest
     public ILogger<IssueController> GetLogger() =>
         new LoggerFactory().CreateLogger<IssueController>();
 
-    private IssueController CreateController(
-        Mock<IIssueService> mi)
+    private IssueController CreateController(  Mock<IIssueService> mi)
     {
         ILogger<IssueCnv> mockIssueService = new LoggerFactory().CreateLogger<IssueCnv>();
         var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
@@ -39,16 +38,13 @@ public class IssueControllerTest
     public async Task GetAllIssues_ShouldReturnIssues_WhenIssuesExist()
     {
         // given
-        ILogger<IssueCnv> mockIssueService = new LoggerFactory().CreateLogger<IssueCnv>();
-        var commentCnv = new CommentCnv();
-        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
-        var teamCnv = new TeamCnv(teamCnvLogger); 
-        var controller = new IssueController(mi.Object, GetLogger(), 
-            new IssueCnv(commentCnv, mockIssueService, teamCnv));
+        int id = 1;
+        var mi = new Mock<IIssueService>();
+        var controller = CreateController(mi);
         var expectedIssues = new List<Model.DTO.IssueDto>
         {
-            new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.DONE, IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto( 1, "New Team", new List<int>(1), new List<int>(1))),
-            new IssueDto(2, "ISSUE-2", "Title2", "Description2", IssueStatus.DONE, IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto( 1, "New Team", new List<int>(1), new List<int>(1)))
+            BuildIssueDto(id),
+            BuildIssueDto(id++)
         };
         mi.Setup(s => s.GetAllIssues())
           .ReturnsAsync(expectedIssues);
@@ -64,10 +60,11 @@ public class IssueControllerTest
     [Fact]
     public async Task GetIssueById_ShouldReturnIssue_WhenExists()
     {
+        int id = 1;
         var mi = new Mock<IIssueService>();
         var controller = CreateController(mi);
 
-        var issue = BuildIssueDto();
+        var issue = BuildIssueDto(id);
 
         mi.Setup(s => s.GetIssueDtoByIdAsync(1)).ReturnsAsync(issue);
 
@@ -82,10 +79,11 @@ public class IssueControllerTest
     [Fact]
     public async Task GetIssueByKey_ShouldReturnIssue_WhenExists()
     {
+        int id = 1;
         var mi = new Mock<IIssueService>();
         var controller = CreateController(mi);
 
-        var issue = BuildIssueDto();
+        var issue = BuildIssueDto(id);
 
         mi.Setup(s => s.GetIssueDtoByKeyAsync("ISSUE-1")).ReturnsAsync(issue);
 
@@ -100,12 +98,13 @@ public class IssueControllerTest
     [Fact]
     public async Task CreateIssue_ShouldReturnCreatedResponse()
     {
+        int id = 1;
         var mi = new Mock<IIssueService>();
         var controller = CreateController(mi);
 
         var req = new CreateIssueRequest("Hello", "desc", "NORMAL", 10, 10, null, 100);
         var project = new Project("PROJ", "Desc" );
-        var issue = BuildIssue();
+        var issue = BuildIssue(id);
 
         mi.Setup(s => s.CreateIssueAsync(req))
             .ReturnsAsync(issue);
@@ -113,24 +112,23 @@ public class IssueControllerTest
         var result = await controller.CreateIssue(req);
 
         var ok = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result.Result);
-        var returned = Assert.IsType<IssueCreatedResponse>(ok.Value);
+        var returned = Assert.IsType<IssueDto>(ok.Value);
 
-        Assert.Equal("PROJ-1", returned.key);
-        Assert.Equal(ResponseType.ISSUE_CREATED_OK, returned.responseType);
+        Assert.Equal("PROJ-1", returned.Key);
     }
 
     [Fact]
     public async Task AssignIssue_ShouldReturnUpdatedIssue()
     {
+        int id = 1;
         var mi = new Mock<IIssueService>();
         var controller = CreateController(mi);
 
         var req = new AssignIssueRequest(1, 20);
 
-        var issueDto = new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.NEW,
-            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
+        var issueDto = BuildIssueDto(id);
 
-        mi.Setup(s => s.AssignIssueAsync(req)).ReturnsAsync(BuildIssue());
+        mi.Setup(s => s.AssignIssueAsync(req)).ReturnsAsync(BuildIssue(id));
 
         mi.Setup(s => s.GetIssueDtoByIdAsync(1)).ReturnsAsync(issueDto);
 
@@ -143,13 +141,13 @@ public class IssueControllerTest
     [Fact]
     public async Task RenameIssue_ShouldReturnUpdatedIssue()
     {
+        int id = 1;
         var mi = new Mock<IIssueService>();
         var controller = CreateController(mi);
 
         var req = new RenameIssueRequest(1, "NewTitle");
 
-        var issueDto = new IssueDto(1, "ISSUE-1", "NewTitle", "D", IssueStatus.NEW,
-            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
+        var issueDto = BuildIssueDto(id);
 
         mi.Setup(s => s.RenameIssueAsync(req)).ReturnsAsync(issueDto);
 
@@ -164,12 +162,13 @@ public class IssueControllerTest
     [Fact]
     public async Task AssignTeam_ShouldReturnUpdatedIssue()
     {
+        int id = 1;
         var mi = new Mock<IIssueService>();
         var controller = CreateController(mi);
 
         var req = new AssignTeamRequest(1, 50);
 
-        var issueDto = BuildIssueDto();
+        var issueDto = BuildIssueDto(id);
 
         mi.Setup(s => s.AssignTeamAsync(req)).ReturnsAsync(issueDto);
 
@@ -178,19 +177,21 @@ public class IssueControllerTest
         var ok = Assert.IsType<Microsoft.AspNetCore.Mvc.OkObjectResult>(result.Result);
         var returned = Assert.IsType<IssueDto>(ok.Value);
 
-        Assert.Equal("Team", returned.Team.Name);
+        Assert.Equal("New Team", returned.Team.Name);
     }
 
     [Fact]
     public async Task ChangeIssueStatus_ShouldReturnUpdatedIssue()
     {
+        int id = 1;
+
         var mi = new Mock<IIssueService>();
         var controller = CreateController(mi);
         var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
         var teamCnv = new TeamCnv(teamCnvLogger);
         var req = new ChangeIssueStatusRequest(1, "IN_PROGRESS");
 
-        var issueDto = new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.DONE, IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto( 1, "New Team", new List<int>(1), new List<int>(1)));
+        var issueDto = BuildIssueDto(id);
 
         mi.Setup(s => s.ChangeIssueStatusAsync(req)).ReturnsAsync(issueDto);
 
@@ -205,13 +206,14 @@ public class IssueControllerTest
     [Fact]
     public async Task UpdateIssuePriority_ShouldReturnUpdatedIssue()
     {
+        int id = 1;
+
         var mi = new Mock<IIssueService>();
         var controller = CreateController(mi);
 
         var req = new ChangeIssuePriorityRequest(1, "HIGH");
 
-        var issueDto = new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.NEW,
-            IssuePriority.LOW, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
+        var issueDto = BuildIssueDto(id); 
 
         mi.Setup(s => s.ChangeIssuePriorityAsync(req)).ReturnsAsync(issueDto);
 
@@ -226,13 +228,13 @@ public class IssueControllerTest
     [Fact]
     public async Task UpdateDueDate_ShouldReturnUpdatedIssue()
     {
+        int id = 1;
         var mi = new Mock<IIssueService>();
         var controller = CreateController(mi);
 
         var req = new UpdateDueDateRequest(1, DateTime.Parse("2030-01-01"));
 
-        var issueDto = new IssueDto(1, "ISSUE-1", "T", "D", IssueStatus.NEW,
-            IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Parse("2030-01-01"), DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));
+        var issueDto = BuildIssueDto(id);
 
         mi.Setup(s => s.UpdateDueDateAsync(req)).ReturnsAsync(issueDto);
 
@@ -306,17 +308,17 @@ public class IssueControllerTest
         Assert.Equal("All issues deleted successfully", ok.Value);
     }
 
-    private Issue BuildIssue()
+    private Issue BuildIssue(int id)
     {
-        var project = new Project() { Id = 1, ShortName = "PROJ" };
-        var key = new Key() { Id = 1, KeyString = "PROJ-1", Project = project, ProjectId = project.Id };
+        var project = new Project() { Id = id, ShortName = "PROJ" };
+        var key = new Key() { Id = id, KeyString = "PROJ-1", Project = project, ProjectId = project.Id };
 
         return new Issue(
             "Title",
             "Desc",
             IssuePriority.HIGH,
-            new User { Id = 1, FirstName = "John", LastName = "Doe" },
-            new User { Id = 2, FirstName = "John", LastName = "Doe" },
+            new User { Id = id, FirstName = "John", LastName = "Doe" },
+            new User { Id = id++, FirstName = "John", LastName = "Doe" },
             DateTime.Parse("2025-01-01"),
             1,
             2,
@@ -331,7 +333,6 @@ public class IssueControllerTest
             Key = key
         };
     }
-
     private User BuildUser()
     {
         return new User
@@ -345,9 +346,9 @@ public class IssueControllerTest
         );
     }
     
-    private IssueDto BuildIssueDto()
+    private IssueDto BuildIssueDto(int id)
     {
-        return new IssueDto(1, "ISSUE-1", "Title", "Desc", IssueStatus.NEW,
+        return new IssueDto(id, "ISSUE-1", "Title", "Desc", IssueStatus.NEW,
                     IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));    
     }
 }

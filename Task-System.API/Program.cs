@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -119,7 +120,9 @@ try
     // -------------------
     // Register services
     // -------------------
-    builder.Services.AddDbContext<PostgresqlDbContext>();
+    builder.Services.AddDbContext<PostgresqlDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IActivityService, ActivityService>();
     builder.Services.AddScoped<ICommentService, CommentService>();
