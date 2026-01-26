@@ -56,7 +56,7 @@ public class JwtGenerator : IJwtGenerator
         return accessToken;
     }
 
-    public RefreshToken GenerateRefreshToken(int userId, User user)
+    public RefreshToken GenerateRefreshToken(int userId)
     {
         var randomNumber = new byte[32];
         using (var rng = RandomNumberGenerator.Create())

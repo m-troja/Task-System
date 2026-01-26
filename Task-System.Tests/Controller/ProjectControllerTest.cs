@@ -27,7 +27,8 @@ public class ProjectControllerTest
         var teamCnv = new TeamCnv(teamCnvLogger);
         var issueCnv = new IssueCnv(commentCnv, issueCnvLogger, teamCnv);
         var projectCnv = new ProjectCnv(issueCnv);
-        return new ProjectController(psMock.Object, projectCnv);
+        var projectControllerLogger = new LoggerFactory().CreateLogger<ProjectController>();
+        return new ProjectController(psMock.Object, projectCnv, projectControllerLogger);
     }
 
     [Fact]
