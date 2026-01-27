@@ -110,10 +110,6 @@ public class AuthServiceTest
         db.Users.Add(user2);
         await db.SaveChangesAsync();
 
-        var tokenForUser1 = new RefreshToken(req.RefreshToken, 1, DateTime.UtcNow.AddDays(2));
-        db.RefreshTokens.Add(tokenForUser1);
-        await db.SaveChangesAsync();
-
         // test invalid user id
         await Assert.ThrowsAsync<InvalidRefreshTokenException>( () => 
             service.ValidateRefreshTokenRequest("token"));

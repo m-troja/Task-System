@@ -211,7 +211,7 @@ public class UserServiceTests
         var logger = GetLoggerStub();
         var chatGpt = new Mock<IChatGptService>();
         var cnv = new UserCnv();
-        var refreshToken = new RefreshToken("token", 1, DateTime.Parse("2025-10-10"));
+        var refreshToken = new RefreshToken("token", 1, DateTime.UtcNow.AddMinutes(-2));
         var user = new User("test", "U123") { Id = 1 };
         db.Users.Add(user);
         await db.SaveChangesAsync();
@@ -223,6 +223,6 @@ public class UserServiceTests
 
         var service = new UserService(db, logger, cnv, chatGpt.Object);
         var result = await service.SaveRefreshTokenAsync(refreshToken);
-        Assert.True(result);
+        Assert.False(result);
     }
 }

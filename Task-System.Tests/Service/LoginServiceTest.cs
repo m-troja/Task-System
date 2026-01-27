@@ -4,9 +4,11 @@ using System;
 using System.Threading.Tasks;
 using Task_System.Exception.LoginException;
 using Task_System.Exception.UserException;
+using Task_System.Model.DTO;
 using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
 using Task_System.Model.Request;
+using Task_System.Model.Response;
 using Task_System.Security;
 using Task_System.Service;
 using Task_System.Service.Impl;
@@ -49,12 +51,20 @@ namespace Task_System.Tests.Service
                 Salt = salt,
                 Password = hashedPassword,
                 Disabled = false
-            };
+            }; 
+            var at = new AccessToken("access-token", DateTime.UtcNow.AddMinutes(2));
+            var rt = new RefreshToken("refresh-token", user.Id, DateTime.UtcNow.AddDays(7));
+            var rtDto = _refreshTokenCnv.EntityToDto(rt);
+
+            var tokenResponseDto = new TokenResponseDto(  at, rtDto);
+
+            
 
             var request = new LoginRequest("test@example.com", password);
 
             _mockUserService.Setup(x => x.TryGetByEmailAsync("test@example.com")).ReturnsAsync(user);
-
+            _mockAuthService.Setup(x => x.GetAccessTokenByUserId(user.Id)).Returns(at);    
+            _mockAuthService.Setup(x => x.GenerateRefreshToken(user.Id)).ReturnsAsync(rt);
             var service = CreateService();
 
             // Act

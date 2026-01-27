@@ -193,6 +193,7 @@ public class IssueControllerTest
 
         var issueDto = BuildIssueDto(id);
 
+
         mi.Setup(s => s.ChangeIssueStatusAsync(req)).ReturnsAsync(issueDto);
 
         var result = await controller.ChangeIssueStatus(req);
@@ -348,7 +349,7 @@ public class IssueControllerTest
     
     private IssueDto BuildIssueDto(int id)
     {
-        return new IssueDto(id, "ISSUE-1", "Title", "Desc", IssueStatus.NEW,
-                    IssuePriority.HIGH, 1, 2, DateTime.Now, DateTime.Now, DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));    
+        return new IssueDto(id, "ISSUE-1", "NewTitle", "Desc", IssueStatus.DONE,
+                    IssuePriority.LOW, 1, 2, DateTime.Now, DateTime.Parse("2030-01-01"), DateTime.Now, new List<CommentDto>(), 1, new TeamDto(1, "New Team", new List<int>(1), new List<int>(1)));    
     }
 }

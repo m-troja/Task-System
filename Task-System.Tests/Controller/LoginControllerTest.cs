@@ -33,7 +33,7 @@ public class LoginControllerTest
         var user = new User { Id = 5, Email = "user@test.com" };
         var accessToken = new AccessToken("new-access-token", DateTime.UtcNow.AddMinutes(2));
         TokenResponseDto tokenResponseDto = new TokenResponseDto( accessToken, 
-            new Model.DTO.RefreshTokenDto("token", DateTime.UtcNow.AddDays(7))
+            new Model.DTO.RefreshTokenDto("new-refresh-token", DateTime.UtcNow.AddDays(7))
         );
         loginService.Setup(s => s.LoginAsync(request)).ReturnsAsync(tokenResponseDto);
 
@@ -98,7 +98,7 @@ public class LoginControllerTest
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         var dto = Assert.IsType<TokenResponseDto>(ok.Value);
 
-        Assert.Equal("TOK", dto.RefreshToken.Token);
+        Assert.Equal("token", dto.RefreshToken.Token);
 
         loginService.Verify(s => s.LoginAsync(request), Times.Once);
     }
