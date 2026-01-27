@@ -39,8 +39,8 @@ public class CommentControllerTest
 
         var expectedComments = new List<CommentDto>
         {
-            new CommentDto(1, 1, "Content1", 1, DateTime.Parse("2025-11-01")),
-            new CommentDto(2, 1, "Content2", 1, DateTime.Parse("2025-11-02"))
+            new CommentDto(1, 1, "Content1", 1, DateTime.Parse("2025-11-01"),  DateTime.Parse("2025-11-01")),
+            new CommentDto(2, 1, "Content2", 1, DateTime.Parse("2025-11-02"), DateTime.Parse("2025-11-01"))
         };
 
         mc.Setup(s => s.GetCommentsByIssueIdAsync(issueId))
@@ -103,7 +103,7 @@ public class CommentControllerTest
         var mc = new Mock<ICommentService>();
         var controller = new CommentController(mc.Object, GetLogger());
         var createRequest = new CreateCommentRequest("Content", 1, 1);
-        var expectedDto = new CommentDto(1, 1, "Content1", 1, DateTime.Parse("2025-11-01"));
+        var expectedDto = new CommentDto(1, 1, "Content1", 1, DateTime.Parse("2025-11-01"),  DateTime.Parse("2025-11-01"));
 
         mc.Setup(s => s.CreateCommentAsync(createRequest))
           .ReturnsAsync(expectedDto)

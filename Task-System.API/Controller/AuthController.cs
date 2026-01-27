@@ -20,24 +20,21 @@ namespace Task_System.Controller;
 public class AuthController : ControllerBase
 {
     private readonly ILogger<LoginService> l;
-    private readonly ILoginService _loginService;
-    private readonly IUserService _userService;
     private readonly IAuthService _authService;
-    private readonly RefreshTokenCnv refreshTokenCnv;
 
     [HttpPost("regenerate-tokens")]
-    public async Task<ActionResult<TokenResponseDto>> RegenerateTokens([FromBody] RefreshTokenRequest req)
+    public async Task<ActionResult<TokenResponseDto>> RegenerateTokensByRefreshToken([FromBody] RefreshTokenRequest req)
     {
         l.LogDebug($"Received request to regenerate tokens with refresh token {req.RefreshToken}");
 
         Boolean validated = false;
         try
         {
-            validated = await _authService.ValidateRefreshTokenRequest(req);
+            validated = await _authService.ValidateRefreshTokenRequest(req.RefreshToken);
         }
         catch (InvalidRefreshTokenException ex)
         {
-            l.LogError($"Validation failed");
+            l.LogError($"Validation failed: {ex}");
             return Unauthorized(new Response(ResponseType.ERROR, "Validation failed"));
         }
         catch (UserNotFoundException ex)
@@ -57,13 +54,8 @@ public class AuthController : ControllerBase
         }
         if (validated)
         {
-            var accessToken = await _authService.GetAccessTokenByRefreshToken(req.RefreshToken);
-            var userByRefreshToken = await _userService.GetUserByRefreshTokenAsync(req.RefreshToken);
-            var refreshToken = await _authService.GenerateRefreshToken(userByRefreshToken.Id);
-
-            var saved = await _userService.SaveRefreshTokenAsync(refreshToken);
-            var tokenDto = new TokenResponseDto(accessToken, refreshTokenCnv.EntityToDto(refreshToken));
-            l.LogDebug($"Tokens for userId {userByRefreshToken.Id} regenerated successfully: {tokenDto}");
+            var tokenDto = await _authService.RegenerateTokensByRefreshToken(req.RefreshToken);
+            l.LogDebug($"Tokens regenerated successfully by refreshToken={req.RefreshToken}");  
 
             return Ok(tokenDto);
         }
@@ -73,12 +65,9 @@ public class AuthController : ControllerBase
         }
     }
 
-    public AuthController(ILogger<LoginService> l, ILoginService loginService, IUserService userService, IAuthService authService, RefreshTokenCnv refreshTokenCnv)
+    public AuthController(ILogger<LoginService> l, IAuthService authService)
     {
         this.l = l;
-        _loginService = loginService;
-        _userService = userService;
         _authService = authService;
-        this.refreshTokenCnv = refreshTokenCnv;
     }
 }

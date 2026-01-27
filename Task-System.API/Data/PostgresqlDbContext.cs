@@ -29,7 +29,8 @@ public class PostgresqlDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        Console.WriteLine("=== DbContext OnConfiguring START ===");
+        if (optionsBuilder.IsConfigured)
+            return;
 
         try
         {
@@ -38,10 +39,6 @@ public class PostgresqlDbContext : DbContext
             var dbPort = Environment.GetEnvironmentVariable("TS_DB_PORT") ?? "5432";
             var dbUser = Environment.GetEnvironmentVariable("TS_DB_USER") ?? "postgres";
             var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "postgres";
-            Console.WriteLine($"JWT_ISSUER: {Environment.GetEnvironmentVariable("JWT_ISSUER")}");
-            Console.WriteLine($"JWT_AUDIENCE: {Environment.GetEnvironmentVariable("JWT_AUDIENCE")}");
-            Console.WriteLine($"JWT_SECRET: {Environment.GetEnvironmentVariable("JWT_SECRET")}");
-
 
             var connectionString =
                 $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};SearchPath=public";

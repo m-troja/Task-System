@@ -14,7 +14,11 @@ public class RoleServiceTests
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        return new PostgresqlDbContext(options);
+        var db = new PostgresqlDbContext(options);
+        db.Users.RemoveRange(db.Users);
+        db.Roles.RemoveRange(db.Roles);
+        db.SaveChanges();
+        return db;
     }
 
     [Fact]

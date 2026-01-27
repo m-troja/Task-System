@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Threading.Tasks;
 using Task_System.Data;
 using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
@@ -12,28 +11,40 @@ namespace Task_System.Tests.Service;
 
 public class ActivityServiceTests
 {
-    private PostgresqlDbContext GetInMemoryDb(string dbName = null)
+    private static PostgresqlDbContext GetInMemoryDb()
     {
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-        return new PostgresqlDbContext(options);
+
+        var db = new PostgresqlDbContext(options);
+
+        db.Activities.RemoveRange(db.Activities);
+        db.SaveChanges();
+
+        return db;
+    }
+
+    private static ActivityService CreateService(PostgresqlDbContext db)
+    {
+        var logger = new Mock<ILogger<ActivityService>>();
+        return new ActivityService(db, logger.Object);
     }
 
     [Fact]
-    public async Task CreateActivityPropertyUpdatedAsync_ShouldCreateAndReturnActivity()
+    public async Task CreateActivityPropertyCreatedAsync_ShouldCreateAndPersistActivity()
     {
         // Arrange
         var db = GetInMemoryDb();
         var mockLogger = new Mock<ILogger<ActivityService>>();
         var service = new ActivityService(db, mockLogger.Object);
 
-        var issueId = 1;
-        var oldValue = "Old";
-        var newValue = "New";
-        var type = ActivityType.UPDATED_ASSIGNEE;
+        var type = ActivityType.CREATED_COMMENT;
+        var issueId = 42;
 
         // Act
+        string oldValue = "Old Value";
+        string newValue = "New Value";
         var activity = await service.CreateActivityPropertyUpdatedAsync(type, oldValue, newValue, issueId);
 
         // Assert
@@ -47,26 +58,32 @@ public class ActivityServiceTests
         Assert.NotNull(dbActivity);
     }
 
+
     [Fact]
-    public async Task CreateActivityPropertyCreatedAsync_ShouldCreateAndReturnActivity()
+    public async Task CreateActivityPropertyUpdatedAsync_ShouldCreateAndPersistActivity()
     {
-        // Arrange
-        var db = GetInMemoryDb();
-        var mockLogger = new Mock<ILogger<ActivityService>>();
-        var service = new ActivityService(db, mockLogger.Object);
+        // arrange
+        await using var db = GetInMemoryDb();
+        var service = CreateService(db);
 
-        // Act
-        var activity = await service.CreateActivityPropertyCreatedAsync(ActivityType.CREATED_ISSUE, 1);
+        var type = ActivityType.UPDATED_STATUS;
+        var oldValue = "OPEN";
+        var newValue = "CLOSED";
+        var issueId = 99;
 
-        // Assert
-        Assert.NotNull(activity);
-        Assert.Equal(ActivityType.CREATED_ISSUE, activity.Type);
-        Assert.Equal(1, activity.IssueId);
+        // act
+        var result = await service.CreateActivityPropertyUpdatedAsync(type, oldValue, newValue, issueId);
 
-        var dbActivity = await db.Activities.FirstOrDefaultAsync();
-        Assert.NotNull(dbActivity);
-        Assert.Equal(activity.Id, dbActivity.Id);
-        Assert.Single(await db.Activities.ToListAsync());
+        // assert
+        Assert.Equal(type, result.Type);
+        Assert.Equal(oldValue, result.OldValue);
+        Assert.Equal(newValue, result.NewValue);
+        Assert.Equal(issueId, result.IssueId);
+
+        var fromDb = await db.Activities
+            .OfType<ActivityPropertyUpdated>()
+            .SingleAsync();
+
+        Assert.Equal(result.Id, fromDb.Id);
     }
-
 }

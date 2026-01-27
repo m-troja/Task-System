@@ -141,17 +141,28 @@ public class UserService : IUserService
     public async Task<bool> SaveRefreshTokenAsync(RefreshToken refreshToken)
     {
         l.LogDebug($"Saving RefreshToken = {refreshToken}");
-        if (await GetUserByRefreshTokenAsync(refreshToken.Token) != null)
+        var existingToken = await _db.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken.Token);
+
+        if (existingToken != null)
         {
-            l.LogDebug($"A valid refreshToken for UserId = {refreshToken.UserId} exists - skipping saving.");
-            return false;
+            if (existingToken.Expires <= DateTime.UtcNow)
+            {
+                l.LogDebug($"Existing RefreshToken for UserId = {refreshToken.UserId} is expired - deleting it and adding new token.");
+                _db.RefreshTokens.Remove(existingToken);
+                return false;
+            }
+            else
+            {
+                l.LogDebug($"A valid refreshToken for UserId = {refreshToken.UserId} exists - skipping saving.");
+                return false;
+            }
+
         }
-        else
-        {
-            l.LogDebug($"No existing RefreshToken for UserId = {refreshToken.UserId}. Adding new token.");
-            _db.RefreshTokens.Add(refreshToken);
-            return true;
-        }
+        l.LogDebug($"No existing RefreshToken for UserId = {refreshToken.UserId}. Adding new token.");
+
+        _db.RefreshTokens.Add(refreshToken);
+        await _db.SaveChangesAsync();
+        return true;
     }
 
     private async Task<RefreshToken?> GetRefreshTokenAsync(int userId)

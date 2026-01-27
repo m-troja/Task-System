@@ -20,12 +20,16 @@ using Xunit;
 namespace Task_System.Tests.Service;
 public class AuthServiceTest
 {
-    private PostgresqlDbContext GetDb()
+    private static PostgresqlDbContext GetDb()
     {
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
+        var db = new PostgresqlDbContext(options);
+
+        db.Users.RemoveRange(db.Users);
+        db.SaveChanges();
+
         return new PostgresqlDbContext(options);
     }
     private ILogger<AuthService> Log()
@@ -38,7 +42,8 @@ public class AuthServiceTest
         Mock<IUserService> mu,
         Mock<IJwtGenerator> mjwt)
     {
-        return new AuthService(db, Log(), mjwt.Object, mu.Object);
+        var refreshTokenCnv = new RefreshTokenCnv();
+        return new AuthService(db, Log(), mjwt.Object, refreshTokenCnv);
     }
 
     [Fact]
@@ -82,7 +87,7 @@ public class AuthServiceTest
         await db.SaveChangesAsync();
 
         // when
-        var result = await service.ValidateRefreshTokenRequest(req);
+        var result = await service.ValidateRefreshTokenRequest(req.RefreshToken);
 
         // then
         Assert.True(result);
@@ -105,13 +110,9 @@ public class AuthServiceTest
         db.Users.Add(user2);
         await db.SaveChangesAsync();
 
-        var tokenForUser1 = new RefreshToken(req.RefreshToken, 1, DateTime.UtcNow.AddDays(2));
-        db.RefreshTokens.Add(tokenForUser1);
-        await db.SaveChangesAsync();
-
         // test invalid user id
         await Assert.ThrowsAsync<InvalidRefreshTokenException>( () => 
-            service.ValidateRefreshTokenRequest( new RefreshTokenRequest("token")));
+            service.ValidateRefreshTokenRequest("token"));
     }
 
     [Fact]
@@ -137,7 +138,7 @@ public class AuthServiceTest
 
         // test invalid user id
         await Assert.ThrowsAsync<TokenRevokedException>(() =>
-            service.ValidateRefreshTokenRequest(req));
+            service.ValidateRefreshTokenRequest(req.RefreshToken));
     }
 
     [Fact]
@@ -163,6 +164,6 @@ public class AuthServiceTest
 
         // test invalid user id
         await Assert.ThrowsAsync<TokenExpiredException>(() =>
-            service.ValidateRefreshTokenRequest(req));
+            service.ValidateRefreshTokenRequest(req.RefreshToken));
     }
 }
