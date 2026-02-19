@@ -121,7 +121,19 @@ try
     // Register services
     // -------------------
     builder.Services.AddDbContext<PostgresqlDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+    {
+        var dbName = Environment.GetEnvironmentVariable("TS_DB_NAME") ?? "task-system";
+        var dbHost = Environment.GetEnvironmentVariable("TS_DB_HOST") ?? "localhost";
+        var dbPort = Environment.GetEnvironmentVariable("TS_DB_PORT") ?? "5432";
+        var dbUser = Environment.GetEnvironmentVariable("TS_DB_USER") ?? "postgres";
+        var dbPassword = Environment.GetEnvironmentVariable("TS_DB_PASSWORD") ?? "postgres";
+
+        var connectionString =
+            $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword};SearchPath=public";
+
+        options.UseNpgsql(connectionString)
+               .UseSnakeCaseNamingConvention();
+    });
 
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IActivityService, ActivityService>();
