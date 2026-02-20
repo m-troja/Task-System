@@ -13,14 +13,22 @@ public class SlackNotificationService : ISlackNotificationService
     private readonly string _EventEndpoint = "/api/v1/task-system/event";
     private readonly String _ChatServerAddress = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? "localhost";
     private readonly String _ChatServerPort = Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? "6969";
-    private readonly string _ChatServerUri = "http://" +  Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") + ":" + Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") + "/api/v1/task-system/event";
     private readonly HttpClient _httpClient;
-    public SlackNotificationService(ILogger<SlackNotificationService> logger, IssueCnv _issueCnv, HttpClient _httpClient)
+    private readonly string _ChatServerUri;
 
+    public SlackNotificationService(
+        ILogger<SlackNotificationService> logger,
+        IssueCnv issueCnv,
+        HttpClient httpClient)
     {
-        this._httpClient = _httpClient;
+        this._httpClient = httpClient;
         this.logger = logger;
-        this._issueCnv = _issueCnv;
+        this._issueCnv = issueCnv;
+
+        var address = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? "localhost";
+        var port = Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? "6969";
+
+        _ChatServerUri = $"http://{address}:{port}/api/v1/task-system/event";
     }
     public async Task SendIssueCreatedNotificationAsync(Issue issue)
     {
@@ -66,8 +74,28 @@ public class SlackNotificationService : ISlackNotificationService
 
     private async Task sendEventToChatGpt(ChatGptDto chatEvent)
     {
-        logger.LogDebug("Sending event to ChatGPT: {event} at URI: {uri}", chatEvent, _ChatServerUri);
-        var response = await _httpClient.PostAsJsonAsync(_ChatServerUri, chatEvent, JsonOptions.Default);
-        logger.LogDebug("Sent event {event} to chat server. Response status: {StatusCode}", chatEvent.Event, response.StatusCode);
+        try
+        {
+            logger.LogInformation("Sending event to ChatGPT at {uri}", _ChatServerUri);
+
+            var response = await _httpClient.PostAsJsonAsync(
+                _ChatServerUri,
+                chatEvent,
+                JsonOptions.Default);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogError("Chat server returned {StatusCode}", response.StatusCode);
+            }
+            else
+            {
+                logger.LogInformation("Event {event} sent successfully", chatEvent.Event);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            logger.LogError(ex, "Error while sending event to ChatGPT");
+            throw; 
+        }
     }
 }
