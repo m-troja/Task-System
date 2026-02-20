@@ -13,6 +13,7 @@ public class SlackNotificationService : ISlackNotificationService
     private readonly string _EventEndpoint = "/api/v1/task-system/event";
     private readonly String _ChatServerAddress = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? "localhost";
     private readonly String _ChatServerPort = Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? "6969";
+    private readonly string _ChatServerUri = "http://" +  Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") + ":" + Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") + "/api/v1/task-system/event";
     private readonly HttpClient _httpClient;
     public SlackNotificationService(ILogger<SlackNotificationService> logger, IssueCnv _issueCnv, HttpClient _httpClient)
 
@@ -23,34 +24,50 @@ public class SlackNotificationService : ISlackNotificationService
     }
     public async Task SendIssueCreatedNotificationAsync(Issue issue)
     {
-        string uri = "http://" +  _ChatServerAddress + ":" + _ChatServerPort + _EventEndpoint;
         var issueDto = _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
         var chatEvent = new ChatGptDto(ChatGptEvent.ISSUE_CREATED, issueDto);
-
-
-        logger.LogDebug("SendIssueAssignedNotificationAsync URI: {uri}, issueDto: {dto}", uri, chatEvent);
-        var response = _httpClient.PostAsJsonAsync(uri, chatEvent, JsonOptions.Default);
-        logger.LogDebug("Sent issue assigned notification for issue {IssueId} to chat server. Response status: {StatusCode}", issue.Id, response.Result.StatusCode);
-
+        await sendEventToChatGpt(chatEvent);
     }
 
-    public Task SendIssueAssignedNotificationAsync(Issue issue)
+    public async Task SendIssueAssignedNotificationAsync(Issue issue)
     {
-        throw new NotImplementedException();
+        var issueDto = _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
+        var chatEvent = new ChatGptDto(ChatGptEvent.ISSUE_ASSIGNED, issueDto);
+        await sendEventToChatGpt(chatEvent);
     }
 
-    public Task SendIssueDueDateUpdatedNotificationAsync(Issue issue)
+    public async Task SendIssueDueDateUpdatedNotificationAsync(Issue issue)
     {
-        throw new NotImplementedException();
+        var issueDto = _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
+        var chatEvent = new ChatGptDto(ChatGptEvent.UPDATE_DUEDATE, issueDto);
+        await sendEventToChatGpt(chatEvent);
     }
 
-    public Task SendIssuePriorityChangedNotificationAsync(Issue issue)
+    public async Task SendIssuePriorityChangedNotificationAsync(Issue issue)
     {
-        throw new NotImplementedException();
+        var issueDto = _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
+        var chatEvent = new ChatGptDto(ChatGptEvent.UPDATE_PRIORITY, issueDto);
+        await sendEventToChatGpt(chatEvent);
     }
 
-    public Task SendIssueStatusChangedNotificationAsync(Issue issue)
+    public async Task SendIssueStatusChangedNotificationAsync(Issue issue)
     {
-        throw new NotImplementedException();
+        var issueDto = _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
+        var chatEvent = new ChatGptDto(ChatGptEvent.UPDATE_STATUS, issueDto);
+        await sendEventToChatGpt(chatEvent);
+    }
+
+    public async Task SendCommentAddedNotificationAsync(Issue issue)
+    {
+        var issueDto = _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
+        var chatEvent = new ChatGptDto(ChatGptEvent.COMMENT_CREATED, issueDto);
+        await sendEventToChatGpt(chatEvent);
+    }
+
+    private async Task sendEventToChatGpt(ChatGptDto chatEvent)
+    {
+        logger.LogDebug("Sending event to ChatGPT: {event} at URI: {uri}", chatEvent, _ChatServerUri);
+        var response = await _httpClient.PostAsJsonAsync(_ChatServerUri, chatEvent, JsonOptions.Default);
+        logger.LogDebug("Sent event {event} to chat server. Response status: {StatusCode}", chatEvent.Event, response.StatusCode);
     }
 }

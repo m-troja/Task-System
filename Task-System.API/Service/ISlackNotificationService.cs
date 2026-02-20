@@ -8,4 +8,5 @@ namespace Task_System.Service;
         Task SendIssueStatusChangedNotificationAsync(Issue issue);
         Task SendIssuePriorityChangedNotificationAsync(Issue issue);
         Task SendIssueDueDateUpdatedNotificationAsync(Issue issue);
+        Task SendCommentAddedNotificationAsync(Issue issue);
 }

@@ -20,7 +20,7 @@ public class CommentService : ICommentService
     private readonly IUserService _userService;
     private readonly CommentCnv _commentCnv;
     private readonly ILogger<CommentService> logger;
-
+    private readonly ISlackNotificationService _slackNotificationService;
     public async Task<CommentDto> CreateCommentAsync(CreateCommentRequest req)
     {
         var issue = await _issueService.GetIssueByIdAsync(req.IssueId);
@@ -32,6 +32,7 @@ public class CommentService : ICommentService
         };
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
+        await _slackNotificationService.SendCommentAddedNotificationAsync(issue);
         return _commentCnv.ConvertCommentToCommentDto(comment);
     }
     public async Task<CommentDto> EditCommentAsync(EditCommentRequest req)
@@ -54,13 +55,14 @@ public class CommentService : ICommentService
         return _commentCnv.ConvertCommentListToCommentDtoList(comments);
     }
 
-    public CommentService(PostgresqlDbContext db, IIssueService issueService, IUserService userService, CommentCnv commentCnv, ILogger<CommentService> logger)
+    public CommentService(PostgresqlDbContext db, IIssueService issueService, IUserService userService, CommentCnv commentCnv, ILogger<CommentService> logger, ISlackNotificationService slackNotificationService)
     {
         _db = db;
         _issueService = issueService;
         _userService = userService;
         _commentCnv = commentCnv;
         this.logger = logger;
+        _slackNotificationService = slackNotificationService;
     }
 
     public async Task DeleteAllCommentsByIssueId(int issueId)

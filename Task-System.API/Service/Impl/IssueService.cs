@@ -232,6 +232,7 @@ namespace Task_System.Service.Impl
             l.LogDebug($"Updated issue {updatedIssue.Id} in database");
 
             var activity = await _activityService.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_ASSIGNEE, (oldAssignee.Id).ToString(), (newAssignee.Id).ToString(), issue.Id);
+            await _slackNotificationService.SendIssueAssignedNotificationAsync(issue);
             return updatedIssue;
         }
         public async Task<Issue> AssignIssueBySlackAsync(AssignIssueRequestChatGpt req)
@@ -310,7 +311,7 @@ namespace Task_System.Service.Impl
             IssueDto issueDto = _issueCnv.ConvertIssueToIssueDto(UpdatedIssue);
             
             var activity = await _activityService.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_STATUS, ((int)oldStatus).ToString(), ((int)issue.Status).ToString(), issue.Id);
-
+            await _slackNotificationService.SendIssueStatusChangedNotificationAsync(issue);
             return issueDto;
         }
 
@@ -333,7 +334,7 @@ namespace Task_System.Service.Impl
                 oldPriority.HasValue ? ((int)oldPriority.Value).ToString() : "-1", 
                 ((int)issue.Priority).ToString(), 
                 issue.Id);
-
+            await _slackNotificationService.SendIssuePriorityChangedNotificationAsync(issue);
             return issueDto;
         }
 
@@ -400,6 +401,7 @@ namespace Task_System.Service.Impl
             issue.DueDate = dueDateUtc;
             l.LogDebug($"Set due date {issue.DueDate} for issue {issue.Id}");
             Issue updatedIssue = await UpdateIssueAsync(issue);
+            await _slackNotificationService.SendIssueDueDateUpdatedNotificationAsync(updatedIssue);
             return _issueCnv.ConvertIssueToIssueDto(updatedIssue);
         }
 
