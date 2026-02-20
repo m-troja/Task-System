@@ -149,6 +149,7 @@ try
     builder.Services.AddScoped<IPasswordService, PasswordService>();
     builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
     builder.Services.AddHttpClient<IChatGptService, ChatGptService>();
+    builder.Services.AddHttpClient<ISlackNotificationService, SlackNotificationService>();
     builder.Services.AddScoped<UserCnv>();
     builder.Services.AddScoped<TeamCnv>();
     builder.Services.AddScoped<CommentCnv>();
