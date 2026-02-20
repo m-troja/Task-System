@@ -12,7 +12,8 @@ public class CommentCnv
             comment.Content, 
             comment.AuthorId, 
             comment.CreatedAt,
-            comment.UpdatedAt
+            comment.UpdatedAt,
+            comment.Author.FirstName + " " + comment.Author.LastName
             );
     }
 
