@@ -134,7 +134,9 @@ namespace Task_System.Service.Impl
                 await transaction.RollbackAsync();
                 throw;
             }
+            l.LogDebug($"Issue creation transaction completed successfully for issue ID {issue.Id}");
             await _slackNotificationService.SendIssueCreatedNotificationAsync(issue);
+            l.LogDebug($"Sent issue created notification for issue ID {issue.Id}");
 
             return issue;
         }
@@ -232,7 +234,9 @@ namespace Task_System.Service.Impl
             l.LogDebug($"Updated issue {updatedIssue.Id} in database");
 
             var activity = await _activityService.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_ASSIGNEE, (oldAssignee.Id).ToString(), (newAssignee.Id).ToString(), issue.Id);
+            l.LogDebug($"Preparing to send issue assigned notification for issue {issue.Id} to ChatGPT");
             await _slackNotificationService.SendIssueAssignedNotificationAsync(issue);
+            l.LogDebug($"Sent issue assigned notification for issue {issue.Id} to ChatGPT");
             return updatedIssue;
         }
         public async Task<Issue> AssignIssueBySlackAsync(AssignIssueRequestChatGpt req)

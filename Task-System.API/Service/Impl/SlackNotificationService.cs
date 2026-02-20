@@ -1,8 +1,9 @@
-﻿using Task_System.Model.DTO;
+﻿using Serilog.Core;
+using System.Net.Http.Json;
+using Task_System.Model.DTO;
 using Task_System.Model.DTO.ChatGpt;
 using Task_System.Model.DTO.Cnv;
 using Task_System.Model.IssueFolder;
-using System.Net.Http.Json;
 using Task_System.Tools;
 namespace Task_System.Service.Impl;
 
@@ -27,11 +28,13 @@ public class SlackNotificationService : ISlackNotificationService
 
         var address = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? "localhost";
         var port = Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? "6969";
-
+        logger.LogDebug("Chat server address: {address}, port: {port}", address, port);
         _ChatServerUri = $"http://{address}:{port}/api/v1/task-system/event";
+        logger.LogDebug("Chat server URI set to {uri}", _ChatServerUri);
     }
     public async Task SendIssueCreatedNotificationAsync(Issue issue)
     {
+        logger.LogDebug("Preparing to send issue created notification for issue {issueId} to ChatGPT", issue.Id);
         var issueDto = _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
         var chatEvent = new ChatGptDto(ChatGptEvent.ISSUE_CREATED, issueDto);
         await sendEventToChatGpt(chatEvent);
@@ -39,6 +42,7 @@ public class SlackNotificationService : ISlackNotificationService
 
     public async Task SendIssueAssignedNotificationAsync(Issue issue)
     {
+        logger.LogDebug("Preparing to send issue assigned notification for issue {issueId} to ChatGPT", issue.Id);
         var issueDto = _issueCnv.ConvertIssueToIssueDtoChatGpt(issue);
         var chatEvent = new ChatGptDto(ChatGptEvent.ISSUE_ASSIGNED, issueDto);
         await sendEventToChatGpt(chatEvent);

@@ -28,14 +28,22 @@ public class TestController : ControllerBase
         foreach (System.Collections.DictionaryEntry envVar in Environment.GetEnvironmentVariables())
         {
             string key = envVar.Key.ToString() ?? "";
-            if (key.StartsWith("TS_"))
-            {
-                env = env + envVar.Key + " = " + envVar.Value + "\n";
-                l.LogDebug($"EnvVar: {envVar.Key} = {envVar.Value}");
-            }
+            env = env + envVar.Key + " = " + envVar.Value + "\n";
+            l.LogDebug($"EnvVar: {envVar.Key} = {envVar.Value}");
 
         }
         return Ok(env); 
+    }
+
+    [HttpGet("version")]
+    public ActionResult<String> version()
+    {
+        l.LogDebug("Test controller version entered");
+
+        //Env vars check
+        string version = "Task System API version 2.3.2";
+        return Ok(version);
+
     }
 
     [HttpGet("profile")]

@@ -87,7 +87,6 @@ public class AuthService : IAuthService
 
     }
 
-
     public AuthService(PostgresqlDbContext db, ILogger<AuthService> l, IJwtGenerator jwtGenerator, 
         RefreshTokenCnv refreshTokenCnv)
     {
