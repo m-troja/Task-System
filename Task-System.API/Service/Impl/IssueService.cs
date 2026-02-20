@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System.Formats.Asn1;
-using System.Text.Json;
+using System.Text;
 using Task_System.Data;
 using Task_System.Exception.IssueException;
 using Task_System.Exception.ProjectException;
@@ -10,7 +8,6 @@ using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
-using Task_System.Log;
 
 namespace Task_System.Service.Impl
 {
@@ -26,8 +23,10 @@ namespace Task_System.Service.Impl
         private readonly ILogger<IssueService> l;
         private readonly ITeamService _teamService;
         private readonly IActivityService _activityService;
+        private readonly ISlackNotificationService _slackNotificationService;
 
-        public IssueService(PostgresqlDbContext db, IUserService userService, CommentCnv commentCnv, IssueCnv issueCnv, IProjectService projectService, ILogger<IssueService> l, ITeamService teamService, IActivityService activityService)
+        public IssueService(PostgresqlDbContext db, IUserService userService, CommentCnv commentCnv, IssueCnv issueCnv, IProjectService projectService, ILogger<IssueService> l, ITeamService teamService, 
+            IActivityService activityService, ISlackNotificationService slackNotificationService)
         {
             _db = db;
             _userService = userService;
@@ -37,10 +36,13 @@ namespace Task_System.Service.Impl
             this.l = l;
             _teamService = teamService;
             _activityService = activityService;
+            _slackNotificationService = slackNotificationService;
         }
 
         public async Task<Issue> CreateIssueAsync(CreateIssueRequest req)
         {
+            await createSystemUserId();
+
             l.LogDebug($"Starting issue creation for authorId: {req.assigneeId}, projectId: {req.projectId}");
 
             User author = await _userService.GetByIdAsync(req.authorId);
@@ -132,6 +134,7 @@ namespace Task_System.Service.Impl
                 await transaction.RollbackAsync();
                 throw;
             }
+            await _slackNotificationService.SendIssueCreatedNotificationAsync(issue);
 
             return issue;
         }
@@ -446,5 +449,17 @@ namespace Task_System.Service.Impl
             l.LogInformation($"Deleted issue where Id={id}");
         }
 
+        private async Task createSystemUserId()
+        {
+            l.LogInformation("Creating system user!");
+            User? user;
+            if (await _db.Users.FirstOrDefaultAsync(u => u.Id == SystemUserId) == null)
+            {
+                user = new User { Id = -1, FirstName = "System User", LastName = "System User", Email = "system.user@tasksystem.com", Password = "Password", Salt = Encoding.UTF8.GetBytes("W W=èÔUÌ-§ÂNï^ÎX"), Disabled = true };
+                await _db.Users.AddAsync(user);
+                await _db.SaveChangesAsync();
+                l.LogInformation("Created system user");
+            }
+        }
     }
 }

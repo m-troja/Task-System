@@ -41,9 +41,9 @@ public class UserService : IUserService
     public async Task<User> CreateUserAsync(User user)
     {
         l.LogDebug("Creating user: " + user);
-        _db.Users.Add(user);
+        await _db.Users.AddAsync(user);
         await _db.SaveChangesAsync();
-        Console.WriteLine("User created successfully: " + user);
+        l.LogDebug("User created successfully: " + user);
 
         return user;
     }

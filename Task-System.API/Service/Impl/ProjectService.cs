@@ -1,18 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Text;
 using System.Text.RegularExpressions;
 using Task_System.Data;
 using Task_System.Exception.ProjectException;
+using Task_System.Log;
+using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
-using Task_System.Log;
 namespace Task_System.Service.Impl;
 
 public class ProjectService : IProjectService
 {
     private readonly PostgresqlDbContext _db ;
     private readonly ILogger<ProjectService> l;
+    private readonly int SystemProjectId = -1;
     public async Task<Project> GetProjectById(int id)
     {
+        await createSystemProject();
+
         Project? project = await _db.Projects
             .Where(p => p.Id == id)
             .Include(p => p.Issues)
@@ -20,6 +25,19 @@ public class ProjectService : IProjectService
             .FirstOrDefaultAsync();
         if (project == null) throw new ProjectNotFoundException($"Project id {id} was not found");
         return project;
+    }
+
+    private async Task createSystemProject()
+    {
+        l.LogInformation("Creating system project!");
+        Project? project;
+        if (await _db.Projects.FirstOrDefaultAsync(p => p.Id == SystemProjectId) == null)
+        {
+            project = new Project { Id = -1, Description = "Dummy project", ShortName = "DUMMY" };
+            await _db.Projects.AddAsync(project);
+            await _db.SaveChangesAsync();
+            l.LogInformation("Created system project");
+        }
     }
 
     public async Task<Project> GetProjectByName(string shortName)
