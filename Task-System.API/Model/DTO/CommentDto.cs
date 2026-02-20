@@ -6,7 +6,8 @@ public record CommentDto(
     string Content, 
     int AuthorId, 
     DateTime CreatedAt,
-    DateTime UpdatedAt
+    DateTime UpdatedAt,
+    string authorName
     )
 {
 }
