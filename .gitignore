@@ -1,0 +1,17 @@
+dev.env
+.git
+.vs
+bin
+obj
+publish
+appsettings.Development.json
+/Properties/PublishProfiles
+/log*
+*.user
+/Log
+Task_System/obj
+Task_System/packages
+Task_System/bin
+/Task_System.API/packages
+/Task_System.API/dev.env
+/Task_System.API/uploads/projects
