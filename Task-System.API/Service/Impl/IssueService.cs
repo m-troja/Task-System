@@ -436,7 +436,7 @@ namespace Task_System.Service.Impl
             List<Issue> issues = await _db.Issues
                 .Include(i => i.Key)
                 .Include(i => i.Project)
-                .Include(i => i.Comments)
+                .Include(i => i.Comments).ThenInclude(c => c.Author)
                 .ToListAsync();
             List<IssueDto> issueDtos = _issueCnv.ConvertIssueListToIssueDtoList(issues).ToList();
             l.LogDebug($"Fetched total {issueDtos.Count} issues from database");

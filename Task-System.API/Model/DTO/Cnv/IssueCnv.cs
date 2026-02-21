@@ -13,7 +13,7 @@ public class IssueCnv
 
     public IssueDto ConvertIssueToIssueDto(Issue Issue)
     {
-        ICollection<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(Issue.Comments);
+        ICollection<CommentDto> commentDtos = _commentCnv.EntityListToDtoList(Issue.Comments);
         TeamDto teamDto = Issue.Team is not null
             ? teamCnv.ConvertTeamToTeamDto(Issue.Team)
             : new TeamDto(-1, "", new List<int>(), new List<int>());
@@ -42,7 +42,7 @@ public class IssueCnv
         logger.LogDebug($"Converting {Issue} to IssueDtoChatGpt");
         logger.LogDebug($"Assignee is {Issue.Assignee}, Id {Issue.AssigneeId}");
         logger.LogDebug($"Author is {Issue.Author}, Id {Issue.AuthorId}");
-        ICollection<CommentDto> commentDtos = _commentCnv.ConvertCommentListToCommentDtoList(Issue.Comments);
+        ICollection<CommentDto> commentDtos = _commentCnv.EntityListToDtoList(Issue.Comments);
         
         var issueDto = new IssueDtoChatGpt(
             Issue.Id,

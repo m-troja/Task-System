@@ -28,16 +28,19 @@ public class CommentService : ICommentService
         var comment = new Comment(req.Content, user, issue)
         {
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            AuthorId = req.AuthorId,
+            IssueId = req.IssueId
         };
         _db.Comments.Add(comment);
         await _db.SaveChangesAsync();
         await _slackNotificationService.SendCommentAddedNotificationAsync(issue);
-        return _commentCnv.ConvertCommentToCommentDto(comment);
+        return _commentCnv.EntityToDto(comment);
     }
     public async Task<CommentDto> EditCommentAsync(EditCommentRequest req)
     {
         var comment = await _db.Comments.FirstOrDefaultAsync(c => c.Id == req.id);
+;
         if (comment == null)
         {
             throw new ContentNotFoundException($"Comment with Id={req.id} not found") ;
@@ -46,13 +49,15 @@ public class CommentService : ICommentService
         comment.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
 
-        return _commentCnv.ConvertCommentToCommentDto(comment);
+        return _commentCnv.EntityToDto(comment);
     }
     public async Task<IEnumerable<CommentDto>> GetCommentsByIssueIdAsync(int issueId)
     {
-        List<Comment> comments = await _db.Comments.Where(c => c.IssueId == issueId).ToListAsync();
+        List<Comment> comments = await _db.Comments.Where(c => c.IssueId == issueId)
+            .Include(c => c.Author)
+            .ToListAsync();
 
-        return _commentCnv.ConvertCommentListToCommentDtoList(comments);
+        return _commentCnv.EntityListToDtoList(comments);
     }
 
     public CommentService(PostgresqlDbContext db, IIssueService issueService, IUserService userService, CommentCnv commentCnv, ILogger<CommentService> logger, ISlackNotificationService slackNotificationService)
