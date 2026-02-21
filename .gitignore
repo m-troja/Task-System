@@ -1,0 +1,20 @@
+# IDE / Visual Studio
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Build / obj / bin
+bin/
+obj/
+
+# Test coverage / env
+*.env
+*.coverage
+*.cache
+
+Task_System.API/bin
+Task_System.API/obj
+Task_System.Tests/bin
+Task_System.Tests/obj
