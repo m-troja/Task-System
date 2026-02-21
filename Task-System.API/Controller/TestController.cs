@@ -41,7 +41,7 @@ public class TestController : ControllerBase
         l.LogDebug("Test controller version entered");
 
         //Env vars check
-        string version = "Task System API version 2.3.5";
+        string version = "Task System API version 2.3.6";
         return Ok(version);
 
     }
