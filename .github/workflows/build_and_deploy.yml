@@ -25,7 +25,7 @@ jobs:
       - name: Build
         run: dotnet build Task_System.API/Task_System.API.csproj --configuration Release /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
       - name: Show build output
-        run: ls -R Task-System.API/bin/Release/
+        run: ls -R Task_System.API/bin/Release/
       - name: Install SSH keys
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
