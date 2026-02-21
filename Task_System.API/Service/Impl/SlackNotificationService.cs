@@ -30,7 +30,7 @@ public class SlackNotificationService : ISlackNotificationService
         var address = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? "localhost";
         var port = Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? "6969";
         logger.LogDebug("Chat server address: {address}, port: {port}", address, port);
-        _ChatServerUri = $"http://{address}:{port}/api/v1/Task_System/event";
+        _ChatServerUri = $"http://{address}:{port}/api/v1/task-system/event";
         logger.LogDebug("Chat server URI set to {uri}", _ChatServerUri);
     }
     public async Task SendIssueCreatedNotificationAsync(Issue issue)
@@ -100,7 +100,6 @@ public class SlackNotificationService : ISlackNotificationService
         catch (System.Exception ex)
         {
             logger.LogError(ex, "Error while sending event to ChatGPT");
-            //throw new GptConnectionException("Error connecting to ChatGPT server"); 
         }
     }
 }
