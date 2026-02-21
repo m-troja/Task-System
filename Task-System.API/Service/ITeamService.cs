@@ -10,7 +10,6 @@ public interface ITeamService
     Task<List<Team>> GetAllTeamsAsync();
     Task<Team> AddTeamAsync(CreateTeamRequest req);
 
-    Task<Team> GetTeamByName(string name);
     Task<List<IssueDto>> GetIssuesByTeamId(int teamId);
     Task<List<UserDto>> GetUsersByTeamId(int teamId);
     Task<Team> AddUserIntoTeam(int teamId, int userId);

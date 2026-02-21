@@ -17,26 +17,33 @@ namespace Task_System.Tests.Controller;
 
 public class ProjectControllerTest
 {
-    private ProjectController CreateController(Mock<IProjectService> psMock)
+    private readonly Mock<IProjectService> _projectMock = new ();
+    private readonly CommentCnv _commentCnv;
+    private readonly ProjectCnv _projectCnv;
+    private readonly IssueCnv _issueCnv;
+    private readonly TeamCnv _teamCnv;
+      
+    public ProjectControllerTest()
     {
-        var issueCnvLogger = new LoggerFactory().CreateLogger<IssueCnv>();
-        var commentCnv = new CommentCnv();
+        var loggerFactory = LoggerFactory.Create(builder => { } );
 
-        var mi = new Mock<IIssueService>();
-        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
-        var teamCnv = new TeamCnv(teamCnvLogger);
-        var issueCnv = new IssueCnv(commentCnv, issueCnvLogger, teamCnv);
-        var projectCnv = new ProjectCnv(issueCnv);
-        var projectControllerLogger = new LoggerFactory().CreateLogger<ProjectController>();
-        return new ProjectController(psMock.Object, projectCnv, projectControllerLogger);
+        _commentCnv = new CommentCnv(loggerFactory.CreateLogger<CommentCnv>());
+        _teamCnv = new TeamCnv(loggerFactory.CreateLogger<TeamCnv>());
+        _issueCnv = new IssueCnv(_commentCnv, loggerFactory.CreateLogger<IssueCnv>(), _teamCnv);
+        _projectCnv = new ProjectCnv(_issueCnv);
+    }
+
+    private ProjectController CreateController()
+    {
+        return new ProjectController(
+            _projectMock.Object, _projectCnv, LoggerFactory.Create(b => { }).CreateLogger<ProjectController>() );
     }
 
     [Fact]
     public async Task GetProjectById_ShouldReturnProjectDto_WhenProjectExists()
     {
         // given
-        var ps = new Mock<IProjectService>();
-        var controller = CreateController(ps);
+        var controller = CreateController();
 
         var project = new Project
         {
@@ -47,7 +54,7 @@ public class ProjectControllerTest
             Issues = BuildListOfIssues()
         };
 
-        ps.Setup(s => s.GetProjectById(10))
+        _projectMock.Setup(s => s.GetProjectById(10))
           .ReturnsAsync(project);
 
         // when
@@ -67,8 +74,7 @@ public class ProjectControllerTest
     public async Task GetAllProjects_ShouldReturnProjectDtoList_WhenProjectsExist()
     {
         // given
-        var ps = new Mock<IProjectService>();
-        var controller = CreateController(ps);
+        var controller = CreateController();
 
         var projects = new List<Project>
         {
@@ -90,7 +96,7 @@ public class ProjectControllerTest
             }
         };
 
-        ps.Setup(s => s.GetAllProjectsAsync())
+        _projectMock.Setup(s => s.GetAllProjectsAsync())
           .ReturnsAsync(projects);
 
         // when
@@ -109,8 +115,7 @@ public class ProjectControllerTest
     public async Task CreateProject_ShouldReturnCreatedProject()
     {
         // given
-        var ps = new Mock<IProjectService>();
-        var controller = CreateController(ps);
+        var controller = CreateController();
 
         var request = new CreateProjectRequest("NEW", "Description");
         var project = new Project
@@ -128,7 +133,7 @@ public class ProjectControllerTest
             CreatedAt = DateTime.Parse("2025-01-01")
         };
 
-        ps.Setup(s => s.CreateProject(request))
+        _projectMock.Setup(s => s.CreateProject(request))
           .ReturnsAsync(project);
 
         // when

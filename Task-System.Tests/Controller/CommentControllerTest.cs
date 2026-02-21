@@ -1,14 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Task_System.Controller;
 using Task_System.Model.DTO;
-using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Request;
 using Task_System.Service;
 using Xunit;
@@ -39,8 +33,8 @@ public class CommentControllerTest
 
         var expectedComments = new List<CommentDto>
         {
-            new CommentDto(1, 1, "Content1", 1, DateTime.Parse("2025-11-01"),  DateTime.Parse("2025-11-01")),
-            new CommentDto(2, 1, "Content2", 1, DateTime.Parse("2025-11-02"), DateTime.Parse("2025-11-01"))
+            GetCommentDto(1), 
+            GetCommentDto(2)
         };
 
         mc.Setup(s => s.GetCommentsByIssueIdAsync(issueId))
@@ -103,7 +97,7 @@ public class CommentControllerTest
         var mc = new Mock<ICommentService>();
         var controller = new CommentController(mc.Object, GetLogger());
         var createRequest = new CreateCommentRequest("Content", 1, 1);
-        var expectedDto = new CommentDto(1, 1, "Content1", 1, DateTime.Parse("2025-11-01"),  DateTime.Parse("2025-11-01"));
+        var expectedDto = GetCommentDto(1);
 
         mc.Setup(s => s.CreateCommentAsync(createRequest))
           .ReturnsAsync(expectedDto)
@@ -115,5 +109,16 @@ public class CommentControllerTest
         // then
         var ok = Assert.IsType<OkObjectResult>(result.Result);
         mc.Verify(s => s.CreateCommentAsync(createRequest), Times.Once);
+    }
+
+    //private Comment GetComment(int id)
+    //{
+    //    return new Comment(id, "content" + " " + id.ToString, 1, 1, DateTime.Parse("20260-02-01"), DateTime.Parse("20260-02-01"),
+    //        );
+    //}
+
+    private CommentDto GetCommentDto(int id)
+    {
+        return new CommentDto(id, 1, "content" + " " + id.ToString(), 1, DateTime.Parse("2026-02-01"), DateTime.Parse("2026-02-01"), "FirstName LastName");
     }
 }

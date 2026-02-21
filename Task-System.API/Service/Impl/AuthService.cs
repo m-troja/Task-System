@@ -19,7 +19,7 @@ public class AuthService : IAuthService
     public AccessToken GetAccessTokenByUserId(int userId)
     {
         var AccessToken =  _jwtGenerator.GenerateAccessToken(userId);
-        l.LogDebug($"Generated access token for user {userId}: {AccessToken}");
+        l.LogDebug($"Generated access token for user {userId}");
         return AccessToken;     
     }
 
@@ -48,15 +48,8 @@ public class AuthService : IAuthService
 
     public async Task<Boolean> ValidateRefreshTokenRequest(string refreshToken)
     {
-        //var userById = await _db.Users.FirstAsync(u => u.Id == req.UserId);
-        //if (userById == null)
-        //{
-        //    l.LogDebug($"User with id {req.UserId} not found");
-        //    throw new UserNotFoundException("User not found");
-        //}
         var userByRefreshToken = await _db.Users.FirstOrDefaultAsync( u => u.RefreshTokens.Any(rt => rt.Token == refreshToken));
         var refreshTokenFromDb = _db.RefreshTokens.FirstOrDefault(rt => rt.Token == refreshToken);
-        //if (userByRefreshToken == null || refreshToken == null || refreshToken.UserId != userByRefreshToken.Id || refreshToken.UserId != req.UserId)
         if (userByRefreshToken == null || refreshTokenFromDb == null || refreshTokenFromDb.UserId != userByRefreshToken.Id )
             {
             l.LogDebug("Refresh token or user not found");
@@ -86,7 +79,6 @@ public class AuthService : IAuthService
         );
 
     }
-
     public AuthService(PostgresqlDbContext db, ILogger<AuthService> l, IJwtGenerator jwtGenerator, 
         RefreshTokenCnv refreshTokenCnv)
     {

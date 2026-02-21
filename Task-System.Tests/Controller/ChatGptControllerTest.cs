@@ -3,49 +3,55 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Task_System.Controller;
-using Task_System.Data;
 using Task_System.Model.DTO;
 using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
 using Task_System.Service;
-using Task_System.Service.Impl;
 using Xunit;
 
 namespace Task_System.Tests.Controller;
 public class ChatGptControllerTest
 {
+    private readonly Mock<IUserService> _userMock = new();
+    private readonly Mock<IIssueService> _issueMock = new();
 
-    public ILogger<ChatGptController> GetLogger() =>
-        new LoggerFactory().CreateLogger<ChatGptController>();
+    private readonly CommentCnv _commentCnv;
+    private readonly IssueCnv _issueCnv;
+    private readonly TeamCnv _teamCnv;
 
-    private ChatGptController CreateController(
-        Mock<IUserService> mu,
-        Mock<IIssueService> mi)
+    private ChatGptController CreateController()
     {
-        var issuesCnvLogger = new LoggerFactory().CreateLogger<IssueCnv>();
-        var commentCnv = new CommentCnv();
-        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
-        var teamCnv = new TeamCnv(teamCnvLogger);
-        var issueCnv = new IssueCnv(commentCnv, issuesCnvLogger, teamCnv);
-        return new ChatGptController(mu.Object, GetLogger(), mi.Object, issueCnv);
+       return new ChatGptController(
+           _userMock.Object,
+            LoggerFactory.Create(b => { }).CreateLogger<ChatGptController>(),
+            _issueMock.Object,
+            _issueCnv
+        );
     }
+    public ChatGptControllerTest()
+    {
+        var loggerFactory = LoggerFactory.Create(b => { });
 
+        _commentCnv = new CommentCnv(loggerFactory.CreateLogger<CommentCnv>());
+        _teamCnv = new TeamCnv(loggerFactory.CreateLogger<TeamCnv>());
+        _issueCnv = new IssueCnv(
+            _commentCnv,
+            loggerFactory.CreateLogger<IssueCnv>(),
+            _teamCnv
+        );
+    }
     [Fact]
     public async Task GetUserBySlackUserId_ShouldReturnUserDto_WhenUserExists()
     {
         // given
-        var mu = new Mock<IUserService>();
-        var mi = new Mock<IIssueService>();
-        var controller = CreateController(mu, mi);
+        var controller = CreateController();
 
         var slackUserId = "U12345678";
         var expectedUserDto = BuildUserDto(slackUserId);
-        mu.Setup(service => service.GetUserBySlackUserIdAsync(slackUserId))
+        _userMock.Setup(service => service.GetUserBySlackUserIdAsync(slackUserId))
             .ReturnsAsync(expectedUserDto);
         
         // when
@@ -59,12 +65,10 @@ public class ChatGptControllerTest
     public async Task CreateIssueBySlack_ShouldCreateIssue()
     {
         // given
-        var mu = new Mock<IUserService>();
-        var mi = new Mock<IIssueService>();
-        var controller = CreateController(mu, mi);
+        var controller = CreateController();
         var req = BuildSlackCreateIssueRequest();
         var expectedIssueDto = BuildIssueDtoChatGpt(req);
-        mi.Setup(service => service.CreateIssueBySlackAsync(req)).ReturnsAsync(expectedIssueDto);
+        _issueMock.Setup(service => service.CreateIssueBySlackAsync(req)).ReturnsAsync(expectedIssueDto);
 
         // when
         var result = await controller.CreateIssueBySlack(req);
@@ -77,19 +81,12 @@ public class ChatGptControllerTest
     public async Task AssignIssueByChatGpt_ShouldReturnAssignedDto()
     {
         // given
-        var mu = new Mock<IUserService>();
-        var mi = new Mock<IIssueService>();
-        var issuesCnvLogger = new LoggerFactory().CreateLogger<IssueCnv>();
-        var commentCnv = new CommentCnv();
-        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
-        var teamCnv = new TeamCnv(teamCnvLogger);
-        var issueCnv = new IssueCnv(commentCnv, issuesCnvLogger, teamCnv);
-        var controller = CreateController(mu, mi);
+        var controller = CreateController();
         var req = new AssignIssueRequestChatGpt("PROJ-1", "U12345678");
         var expectedIssue = BuildIssue(req);
-        var expectedConvertedIssue = issueCnv.ConvertIssueToIssueDtoChatGpt(expectedIssue);
+        var expectedConvertedIssue = _issueCnv.ConvertIssueToIssueDtoChatGpt(expectedIssue);
 
-        mi.Setup(service => service.AssignIssueBySlackAsync(req)).ReturnsAsync(expectedIssue);
+        _issueMock.Setup(service => service.AssignIssueBySlackAsync(req)).ReturnsAsync(expectedIssue);
 
         // when
         var result = await controller.AssignIssueByChatGpt(req);

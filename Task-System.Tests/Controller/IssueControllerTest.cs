@@ -20,6 +20,7 @@ namespace Task_System.Tests.Controller;
 public class IssueControllerTest
 {
     private readonly Mock<IIssueService> mi;
+    private CommentCnv commentCnv;
     public ILogger<IssueController> GetLogger() =>
         new LoggerFactory().CreateLogger<IssueController>();
 
@@ -28,8 +29,8 @@ public class IssueControllerTest
         ILogger<IssueCnv> mockIssueService = new LoggerFactory().CreateLogger<IssueCnv>();
         var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
         var teamCnv = new TeamCnv(teamCnvLogger);
-
-        var commentCnv = new CommentCnv();
+        var commentLogger = new LoggerFactory().CreateLogger<CommentCnv>();
+        var commentCnv = new CommentCnv(commentLogger);
         var issueCnv = new IssueCnv(commentCnv, mockIssueService, teamCnv);
         return new IssueController(mi.Object, GetLogger(), issueCnv);
     }

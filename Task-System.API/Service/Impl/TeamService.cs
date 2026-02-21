@@ -55,20 +55,6 @@ public class TeamService : ITeamService
         return team;
     }
 
-    public async Task<Team> GetTeamByName(string name)
-    {
-        ValidateTeamName(name);
-        var team = await _db.Teams
-            .Include(t => t.Users)
-            .FirstOrDefaultAsync(t => t.Name == name);
-        if (team == null)
-        {
-            l.LogDebug($"Team with name {name} was not found");
-            throw new KeyNotFoundException($"Team with name {name} was not found");
-        }
-        return team;
-    }
-
     public async Task<Team> AddTeamAsync(CreateTeamRequest req)
     {
         ValidateTeamName(req.Name);
@@ -89,7 +75,13 @@ public class TeamService : ITeamService
     public async Task<List<IssueDto>> GetIssuesByTeamId(int teamId)
     {
         var team = await GetTeamByIdAsync(teamId);
-        var issues = team.Issues?.ToList() ?? new List<Issue>();
+        var issues = await _db.Issues.Where(i => i.TeamId == teamId)
+            .Include(i => i.Comments).ThenInclude(c => c.Author)
+            .Include(i => i.Team)
+            .Include(i => i.Key)
+            .Include(i => i.Project)
+            .Include(i => i.Comments)
+            .ToListAsync();
         l.LogDebug($"Found {issues.Count} issues in team with id {teamId}");
         return _issueCnv.ConvertIssueListToIssueDtoList(issues);
     }

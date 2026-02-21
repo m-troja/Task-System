@@ -17,6 +17,28 @@ namespace Task_System.Tests.Service;
 
 public class IssueServiceTests
 {
+    private readonly Mock<IUserService> _userMock = new();
+    private readonly Mock<IProjectService> _projectMock = new();
+    private readonly Mock<ITeamService> _teamMock = new();
+    private readonly Mock<IActivityService> _activityMock = new();
+    private readonly Mock<ISlackNotificationService> _slackMock = new();
+
+    private readonly CommentCnv _commentCnv;
+    private readonly TeamCnv _teamCnv;
+    private readonly IssueCnv _issueCnv;
+
+    public IssueServiceTests()
+    {
+        var loggerFactory = LoggerFactory.Create(b => { });
+
+        _commentCnv = new CommentCnv(loggerFactory.CreateLogger<CommentCnv>());
+        _teamCnv = new TeamCnv(loggerFactory.CreateLogger<TeamCnv>());
+        _issueCnv = new IssueCnv(
+            _commentCnv,
+            loggerFactory.CreateLogger<IssueCnv>(),
+            _teamCnv
+        );
+    }
     private PostgresqlDbContext GetDb()
     {
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
@@ -37,23 +59,18 @@ public class IssueServiceTests
         return new LoggerFactory().CreateLogger<IssueService>();
     }
 
-    private IssueService CreateService(
-        PostgresqlDbContext db,
-        Mock<IUserService> mu,
-        Mock<IProjectService> mp,
-        Mock<ITeamService> mt,
-        Mock<IActivityService> ma)
+    private IssueService CreateService(PostgresqlDbContext db)
     {
-        var loggerIssueCnv = new LoggerFactory().CreateLogger<IssueCnv>();
-        var commentCnv = new CommentCnv();
-        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
-        var teamCnv = new TeamCnv(teamCnvLogger);
-        var issueCnv = new IssueCnv(commentCnv, loggerIssueCnv, teamCnv);
-        var logger = new LoggerFactory().CreateLogger<IssueCnv>();
-
         return new IssueService(
-            db, mu.Object, commentCnv, issueCnv,
-            mp.Object, Log(), mt.Object, ma.Object
+            db,
+            _userMock.Object,
+            _commentCnv,
+            _issueCnv,
+            _projectMock.Object,
+            LoggerFactory.Create(b => { }).CreateLogger<IssueService>(),
+            _teamMock.Object,
+            _activityMock.Object,
+            _slackMock.Object
         );
     }
 
@@ -80,11 +97,7 @@ public class IssueServiceTests
     public async Task CreateIssueAsync_ShouldCreateIssue()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "UA") { Id = 10 };
         db.Users.Add(user);
@@ -94,10 +107,8 @@ public class IssueServiceTests
         db.Projects.Add(project);
         await db.SaveChangesAsync();
 
-        mu.Setup(x => x.GetByIdAsync(10)).ReturnsAsync(user);
-        mp.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
-
-        var service = CreateService(db, mu, mp, mt, ma);
+        _userMock.Setup(x => x.GetByIdAsync(10)).ReturnsAsync(user);
+        _projectMock.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
 
         var req = new CreateIssueRequest("Hello", "desc", "NORMAL", 10, 10, null, 100);
 
@@ -112,11 +123,7 @@ public class IssueServiceTests
     public async Task GetIssueByIdAsync_ShouldReturnIssue()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "UA") { Id = 10 };
         db.Users.Add(user);
@@ -129,9 +136,7 @@ public class IssueServiceTests
         var issue = new Issue { Title = "X", Author = user, ProjectId = 100, Project = project };
         var key = await AddIssueWithKey(db, issue, project);
 
-        mp.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
-
-        var service = CreateService(db, mu, mp, mt, ma);
+        _projectMock.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
 
         var result = await service.GetIssueByIdAsync(issue.Id);
 
@@ -143,17 +148,7 @@ public class IssueServiceTests
     public async Task AssignIssueAsync_ShouldChangeAssignee()
     {
         var db = GetDb();
-        var mockUser = new Mock<IUserService>();
-        var mockProject = new Mock<IProjectService>();
-        var mockTeam = new Mock<ITeamService>();
-        var mockActivity = new Mock<IActivityService>();
-
-        var mi = new Mock<IIssueService>();
-        var commentCnv = new CommentCnv();
-        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
-        var teamCnv = new TeamCnv(teamCnvLogger);
-        var loggerIssueCnv = new LoggerFactory().CreateLogger<IssueCnv>(); 
-        var issueCnv = new IssueCnv(commentCnv, loggerIssueCnv, teamCnv);
+        var service = CreateService(db);
 
         var user1 = new User("Author", "U1") { Id = 10 };
         var user2 = new User("NewAssignee", "U2") { Id = 20 };
@@ -161,14 +156,14 @@ public class IssueServiceTests
         db.Users.Add(user2);
         await db.SaveChangesAsync();
 
-        mockUser.Setup(x => x.GetByIdAsync(20)).ReturnsAsync(user2);
-        mockUser.Setup(x => x.GetByIdAsync(10)).ReturnsAsync(user1);
+        _userMock.Setup(x => x.GetByIdAsync(20)).ReturnsAsync(user2);
+        _userMock.Setup(x => x.GetByIdAsync(10)).ReturnsAsync(user1);
 
         var project = new Project("PROJ", "Test Project") { Id = 200 };
         db.Projects.Add(project);
         await db.SaveChangesAsync();
         
-        mockProject.Setup(x => x.GetProjectById(200)).ReturnsAsync(project);
+        _projectMock.Setup(x => x.GetProjectById(200)).ReturnsAsync(project);
 
         var issue = new Issue
         {
@@ -193,12 +188,6 @@ public class IssueServiceTests
         db.Issues.Update(issue);
         await db.SaveChangesAsync();
 
-
-        var service = new IssueService(
-            db, mockUser.Object, commentCnv, issueCnv,
-            mockProject.Object, Log(), mockTeam.Object, mockActivity.Object
-        );
-
         var req = new AssignIssueRequest(1, 20);
         var updated = await service.AssignIssueAsync(req);
 
@@ -209,11 +198,7 @@ public class IssueServiceTests
     public async Task GetIssueDtoByIdAsync_ShouldReturnDto()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "UA") { Id = 10 };
         db.Users.Add(user);
@@ -226,9 +211,7 @@ public class IssueServiceTests
         var issue = new Issue { Title = "X", Author = user, ProjectId = 100, Project = project };
         var key = await AddIssueWithKey(db, issue, project);
 
-        mp.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
-
-        var service = CreateService(db, mu, mp, mt, ma);
+        _projectMock.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
 
         var dto = await service.GetIssueDtoByIdAsync(issue.Id);
 
@@ -240,11 +223,7 @@ public class IssueServiceTests
     public async Task AssignIssueBySlackAsync_ShouldAssignCorrectUser()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var author = new User("A", "U1") { Id = 10 };
         var user2 = new User("B", "U2") { Id = 20 };
@@ -253,10 +232,10 @@ public class IssueServiceTests
         db.Users.Add(user2);
         await db.SaveChangesAsync();
 
-        mu.Setup(x => x.GetIdBySlackUserId("U2")).ReturnsAsync(20);
-        mu.Setup(x => x.GetByIdAsync(20)).ReturnsAsync(user2);
-        mu.Setup(x => x.GetByIdAsync(10)).ReturnsAsync(author);
-        ma.Setup(x => x.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_ASSIGNEE, "10", "20", 1)).ReturnsAsync(new ActivityPropertyUpdated("1", "2", 1, ActivityType.UPDATED_ASSIGNEE));
+        _userMock.Setup(x => x.GetIdBySlackUserId("U2")).ReturnsAsync(20);
+        _userMock.Setup(x => x.GetByIdAsync(20)).ReturnsAsync(user2);
+        _userMock.Setup(x => x.GetByIdAsync(10)).ReturnsAsync(author);
+        _activityMock.Setup(x => x.CreateActivityPropertyUpdatedAsync(ActivityType.UPDATED_ASSIGNEE, "10", "20", 1)).ReturnsAsync(new ActivityPropertyUpdated("1", "2", 1, ActivityType.UPDATED_ASSIGNEE));
 
         var project = new Project("PR", "Test") { Id = 100 };
         db.Projects.Add(project);
@@ -264,8 +243,6 @@ public class IssueServiceTests
 
         var issue = new Issue { Id = 1, IdInsideProject = 1, Title = "Test Title", Author = author, Assignee = author, AssigneeId = 10, Project = project, ProjectId = 100 };
         var key = await AddIssueWithKey(db, issue, project);
-
-        var service = CreateService(db, mu, mp, mt, ma);
 
         var req = new AssignIssueRequestChatGpt(key.KeyString, "U2");
 
@@ -278,11 +255,7 @@ public class IssueServiceTests
     public async Task RenameIssueAsync_ShouldUpdateTitle()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "U1") { Id = 10 };
         db.Users.Add(user);
@@ -295,8 +268,6 @@ public class IssueServiceTests
         var issue = new Issue { Title = "Old", Author = user, Project = project, ProjectId = 100 };
         var key = await AddIssueWithKey(db, issue, project);
 
-        var service = CreateService(db, mu, mp, mt, ma);
-
         var req = new RenameIssueRequest(issue.Id, "NewTitle");
 
         var dto = await service.RenameIssueAsync(req);
@@ -308,11 +279,7 @@ public class IssueServiceTests
     public async Task ChangeIssueStatusAsync_ShouldUpdateStatus()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "U1") { Id = 10 };
         db.Users.Add(user);
@@ -325,8 +292,6 @@ public class IssueServiceTests
         var issue = new Issue { Title = "Test", Status = IssueStatus.NEW, Author = user, Project = project, ProjectId = 100 };
         await AddIssueWithKey(db, issue, project);
 
-        var service = CreateService(db, mu, mp, mt, ma);
-
         var req = new ChangeIssueStatusRequest(issue.Id, "IN_PROGRESS");
 
         var dto = await service.ChangeIssueStatusAsync(req);
@@ -338,11 +303,7 @@ public class IssueServiceTests
     public async Task ChangeIssuePriorityAsync_ShouldUpdatePriority()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "U1") { Id = 10 };
         db.Users.Add(user);
@@ -355,8 +316,6 @@ public class IssueServiceTests
         var issue = new Issue { Title = "Test",  Priority = IssuePriority.NORMAL, Author = user, Project = project, ProjectId = 100 };
         await AddIssueWithKey(db, issue, project);
 
-        var service = CreateService(db, mu, mp, mt, ma);
-
         var req = new ChangeIssuePriorityRequest(issue.Id, "HIGH");
 
         var dto = await service.ChangeIssuePriorityAsync(req);
@@ -368,11 +327,7 @@ public class IssueServiceTests
     public async Task AssignTeamAsync_ShouldSetTeam()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "U1") { Id = 10 };
         db.Users.Add(user);
@@ -386,12 +341,10 @@ public class IssueServiceTests
         db.Teams.Add(team);
         await db.SaveChangesAsync();
 
-        mt.Setup(x => x.GetTeamByIdAsync(50)).ReturnsAsync(team);
+        _teamMock.Setup(x => x.GetTeamByIdAsync(50)).ReturnsAsync(team);
 
         var issue = new Issue { Title = "Test", Author = user, Project = project, ProjectId = 100 };
         await AddIssueWithKey(db, issue, project);
-
-        var service = CreateService(db, mu, mp, mt, ma);
 
         var req = new AssignTeamRequest(issue.Id, 50);
 
@@ -404,11 +357,7 @@ public class IssueServiceTests
     public async Task UpdateDueDateAsync_ShouldSetDueDate()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "U1") { Id = 10 };
         db.Users.Add(user);
@@ -421,8 +370,6 @@ public class IssueServiceTests
         var issue = new Issue { Title = "Test",  Author = user, Project = project, ProjectId = 100 };
         await AddIssueWithKey(db, issue, project);
 
-        var service = CreateService(db, mu, mp, mt, ma);
-
         var date = DateTime.UtcNow.AddDays(2);
         var dto = await service.UpdateDueDateAsync(new UpdateDueDateRequest(issue.Id, date));
 
@@ -433,11 +380,7 @@ public class IssueServiceTests
     public async Task GetAllIssues_ShouldReturnAll()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "U1") { Id = 10 };
         db.Users.Add(user);
@@ -457,8 +400,6 @@ public class IssueServiceTests
             project
         );
 
-        var service = CreateService(db, mu, mp, mt, ma);
-
         var issues = await service.GetAllIssues();
 
         Assert.Equal(2, issues.Count());
@@ -468,11 +409,7 @@ public class IssueServiceTests
     public async Task GetIssueIdFromKey_ShouldReturnCorrectId()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "U1") { Id = 10 };
         db.Users.Add(user);
@@ -485,8 +422,6 @@ public class IssueServiceTests
         var issue = new Issue { Title = "Test",  IdInsideProject = 7, Author = user, Project = project, ProjectId = 100 };
         var key = await AddIssueWithKey(db, issue, project);
 
-        var service = CreateService(db, mu, mp, mt, ma);
-
         var id = await service.GetIssueIdFromKey(key.KeyString);
 
         Assert.Equal(issue.Id, id);
@@ -496,11 +431,7 @@ public class IssueServiceTests
     public async Task GetAllIssuesByProjectId_ShouldReturnIssuesForProject()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "U1") { Id = 10 };
         db.Users.Add(user);
@@ -510,11 +441,9 @@ public class IssueServiceTests
         db.Projects.Add(project);
         await db.SaveChangesAsync();
 
-        mp.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
+        _projectMock.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
 
         await AddIssueWithKey(db, new Issue { Title = "1", Author = user, Project = project, ProjectId = 100 }, project);
-
-        var service = CreateService(db, mu, mp, mt, ma);
 
         var result = await service.GetAllIssuesByProjectId(100);
 
@@ -525,25 +454,19 @@ public class IssueServiceTests
     public async Task GetAllIssuesByUserId_ShouldReturnIssuesForUser()
     {
         var db = GetDb();
-
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
+        var service = CreateService(db);
 
         var user = new User("A", "U1") { Id = 10 };
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        mu.Setup(x => x.GetByIdAsync(10)).ReturnsAsync(user);
+        _userMock.Setup(x => x.GetByIdAsync(10)).ReturnsAsync(user);
 
         var project = new Project("PR", "Test") { Id = 100 };
         db.Projects.Add(project);
         await db.SaveChangesAsync();
 
         await AddIssueWithKey(db, new Issue { Title = "Test",  Assignee = user, AssigneeId = 10, Author = user, Project = project, ProjectId = 100 }, project);
-
-        var service = CreateService(db, mu, mp, mt, ma);
 
         var result = await service.GetAllIssuesByUserId(10);
 
@@ -554,14 +477,10 @@ public class IssueServiceTests
     public async Task CreateIssueBySlackAsync_ShouldCreateIssue()
     {
         var db = GetDb();
+        var service = CreateService(db);
 
-        var mu = new Mock<IUserService>();
-        var mp = new Mock<IProjectService>();
-        var mt = new Mock<ITeamService>();
-        var ma = new Mock<IActivityService>();
-
-        mu.Setup(x => x.GetIdBySlackUserId("AU")).ReturnsAsync(10);
-        mu.Setup(x => x.GetIdBySlackUserId("BU")).ReturnsAsync(20);
+        _userMock.Setup(x => x.GetIdBySlackUserId("AU")).ReturnsAsync(10);
+        _userMock.Setup(x => x.GetIdBySlackUserId("BU")).ReturnsAsync(20);
 
         var userA = new User("A", "AU") { Id = 10 };
         var userB = new User("B", "BU") { Id = 20 };
@@ -572,9 +491,7 @@ public class IssueServiceTests
         db.Projects.Add(project);
         await db.SaveChangesAsync();
 
-        mp.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
-
-        var service = CreateService(db, mu, mp, mt, ma);
+        _projectMock.Setup(x => x.GetProjectById(100)).ReturnsAsync(project);
 
         var req = new SlackCreateIssueRequest(
             "Title",

@@ -25,7 +25,7 @@ public class AuthController : ControllerBase
     [HttpPost("regenerate-tokens")]
     public async Task<ActionResult<TokenResponseDto>> RegenerateTokensByRefreshToken([FromBody] RefreshTokenRequest req)
     {
-        l.LogDebug($"Received request to regenerate tokens with refresh token {req.RefreshToken}");
+        l.LogDebug($"Controller POST regenerate-tokens: {req.RefreshToken}");
 
         Boolean validated = false;
         try

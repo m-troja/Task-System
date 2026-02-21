@@ -11,6 +11,7 @@ using Task_System.Model.DTO.Cnv;
 using Task_System.Model.Entity;
 using Task_System.Model.IssueFolder;
 using Task_System.Model.Request;
+using Task_System.Service;
 using Task_System.Service.Impl;
 using Xunit;
 
@@ -18,6 +19,28 @@ namespace Task_System.Tests.Service;
 
 public class TeamServiceTests
 {
+    private readonly Mock<IUserService> _userMock = new();
+    private readonly Mock<IProjectService> _projectMock = new();
+    private readonly Mock<ITeamService> _teamMock = new();
+    private readonly Mock<IActivityService> _activityMock = new();
+    private readonly Mock<ISlackNotificationService> _slackMock = new();
+
+    private readonly CommentCnv _commentCnv;
+    private readonly TeamCnv _teamCnv;
+    private readonly IssueCnv _issueCnv;
+
+    public TeamServiceTests()
+    {
+        var loggerFactory = LoggerFactory.Create(b => { });
+        _commentCnv = new CommentCnv(loggerFactory.CreateLogger<CommentCnv>());
+        _teamCnv = new TeamCnv(loggerFactory.CreateLogger<TeamCnv>());
+        _issueCnv = new IssueCnv(
+            _commentCnv,
+            loggerFactory.CreateLogger<IssueCnv>(),
+            _teamCnv
+        );
+
+    }
     private PostgresqlDbContext GetDb()
     {
         var options = new DbContextOptionsBuilder<PostgresqlDbContext>()
@@ -34,15 +57,7 @@ public class TeamServiceTests
 
     private TeamService CreateService(PostgresqlDbContext db)
     {
-        var mockLogger = new Mock<ILogger<TeamService>>();
-        var issuesCnvLogger = new LoggerFactory().CreateLogger<IssueCnv>();
-        var commentCnv = new CommentCnv();
-        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
-        var teamCnv = new TeamCnv(teamCnvLogger);
-        var loggerIssueCnv = new LoggerFactory().CreateLogger<IssueCnv>();
-        var issueCnv = new IssueCnv(commentCnv, loggerIssueCnv, teamCnv);
-        var userCnv = new UserCnv();
-        return new TeamService(db, mockLogger.Object, issueCnv, userCnv);
+        return new TeamService(db, LoggerFactory.Create(b => { }).CreateLogger<TeamService>(), _issueCnv, new UserCnv());
     }
 
     [Fact]
@@ -126,61 +141,42 @@ public class TeamServiceTests
     }
 
     [Fact]
-    public async Task GetTeamByName_ShouldReturnTeam_WhenExists()
-    {
-        var db = GetDb();
-        var team = new Team("MyTeam");
-        db.Teams.Add(team);
-        await db.SaveChangesAsync();
-
-        var service = CreateService(db);
-
-        var result = await service.GetTeamByName("MyTeam");
-
-        Assert.Equal(team.Name, result.Name);
-    }
-
-    [Fact]
-    public async Task GetTeamByName_ShouldThrow_WhenNotFound()
-    {
-        var db = GetDb();
-        var service = CreateService(db);
-
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => service.GetTeamByName("NoTeam"));
-    }
-
-    [Fact]
     public async Task GetIssuesByTeamId_ShouldReturnIssues()
     {
-        var commentCnv = new CommentCnv();
-        var teamCnvLogger = new LoggerFactory().CreateLogger<TeamCnv>();
-        var teamCnv = new TeamCnv(teamCnvLogger);
-        var loggerIssueCnv = new LoggerFactory().CreateLogger<IssueCnv>();
-        var issueCnv = new IssueCnv(commentCnv, loggerIssueCnv, teamCnv);
-
         // Arrange
         var db = GetDb();
         var team = new Team("Team1");
+        db.Teams.Add(team);
+        await db.SaveChangesAsync();
+        
+        var project = new Project { Description = "Project1",ShortName = "TEST" };
+        db.Projects.Add(project);
+        await db.SaveChangesAsync();
+        
         var issue = new Issue
         {
             Title = "Issue1",
-            Key = new Key { KeyString = "ISSUE-1" },
+            Key = new Key { KeyString = "TEST-0" },
             Status = IssueStatus.NEW,
             Priority = IssuePriority.NORMAL,
             CreatedAt = DateTime.UtcNow,
-            ProjectId = 1
+            Project = project,
+            ProjectId = project.Id,
+            Team = team,
+            TeamId = team.Id
         };
-        team.Issues.Add(issue);
-        db.Teams.Add(team);
+
+        db.Issues.Add(issue);
         await db.SaveChangesAsync();
 
-        var mockLogger = new Mock<ILogger<TeamService>>();
-        var service = new TeamService(
-            db,
-            mockLogger.Object,
-            new IssueCnv(commentCnv, loggerIssueCnv, teamCnv),
-            new UserCnv()
-        );
+        var key = new Key(project, issue);
+        issue.Key = key;
+
+        db.Keys.Add(key);
+        await db.SaveChangesAsync();
+
+
+        var service = CreateService(db);
 
         // Act
         var result = await service.GetIssuesByTeamId(team.Id);
@@ -188,7 +184,7 @@ public class TeamServiceTests
         // Assert
         Assert.Single(result);
         Assert.Equal("Issue1", result[0].Title);
-        Assert.Equal("ISSUE-1", result[0].Key);
+        Assert.Equal("TEST-0", result[0].Key);
     }
 
 
@@ -198,12 +194,17 @@ public class TeamServiceTests
         // Arrange
         var db = GetDb();
         var team = new Team("Team1");
-        var user = new User("John", "Doe", "john@example.com", "pw", new byte[16], new Role("USER"));
-        team.Users.Add(user);
         db.Teams.Add(team);
         await db.SaveChangesAsync();
+
+        var user = new User("John", "Doe", "john@example.com", "pw", new byte[16], new Role("USER"));
+        var Teams = new List<Team> { team };
+        user.Teams = Teams;
+
+        db.Users.Add(user);
         
-        var mockLogger = new Mock<ILogger<TeamService>>();
+        await db.SaveChangesAsync();
+
         var service = CreateService(db);
 
         // Act
